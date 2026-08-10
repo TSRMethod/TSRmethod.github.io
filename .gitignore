@@ -12,10 +12,13 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# Editor and AI-assistant tooling.
+# The project is tool-neutral: `npm run dev` is the documented workflow and no
+# assistant-specific config is tracked here.
 .vscode/*
 !.vscode/extensions.json
 .idea
+.claude/
 .DS_Store
 *.suo
 *.ntvs*
