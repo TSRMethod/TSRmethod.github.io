@@ -153,6 +153,26 @@ appear from their names to be CSV files.
 
 ---
 
+### 12. TSR — HPC job script has no legacy source
+
+`src/content/methods/tsr.md`
+
+**Observed.** The original TSR page had no Slurm section. The job script now
+on the new page was written for this rebuild, following the pattern of the
+`sbatch` scripts on the Amino Acid TSR and Nucleotide–Protein TSR pages
+(`-p workq`, one node, 64 tasks, 72 hours, clone → venv → `pip install` → run)
+with TSR-Package's own repository URL substituted.
+
+The uncertainty is stated on the page itself, in the notes beneath the script,
+rather than only here.
+
+**Question.** Is this the right way to run TSR-Package on the cluster? In
+particular: the partition, the resource request, and whether
+`generate_keys.py` is the intended entry point. If TSR-Package is not
+typically run through Slurm, the section should be removed instead.
+
+---
+
 ## Data quality
 
 Not scientific questions, but content that must not be migrated as-is.

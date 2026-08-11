@@ -34,6 +34,46 @@ repositories:
       Python package for downloading PDB files and generating TSR keys and
       triplets.
     language: Python
+
+slurm:
+  intro: >-
+    Generating keys for a large set of structures is best run as a batch job.
+    The script below clones the package, builds an environment and runs the
+    key generation in one job.
+  script:
+    filename: tsr_keys.sbatch
+    code: |
+      #!/bin/bash
+      #SBATCH -p workq
+      #SBATCH -N 1
+      #SBATCH -n 64
+      #SBATCH -t 72:00:00
+      #SBATCH -A your_allocation
+      #SBATCH -J tsr_keys
+      #SBATCH -o output_tsr_keys.out
+      #SBATCH -e error_tsr_keys.err
+
+      git clone https://github.com/pooryakhajouie/TSR-Package.git
+      cd TSR-Package
+
+      python3 -m venv tsrenv
+      source tsrenv/bin/activate
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      pip install .
+
+      python3 generate_keys.py
+  submit:
+    code: sbatch tsr_keys.sbatch
+  resources: >-
+    Requests one node with 64 tasks for up to 72 hours on the `workq`
+    partition. Replace `your_allocation` with your own project allocation, and
+    scale the wall time to the size of your dataset.
+  notes: >-
+    **Needs verification.** This job script follows the pattern used by the
+    other TSR packages rather than one published on the original site for
+    TSR-Package specifically. Confirm the partition, allocation and entry
+    point against your cluster before relying on it.
 ---
 
 ## Overview

@@ -1,0 +1,21 @@
+.callout {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-light);
+}
+
+.callout[data-tone='review'] {
+  border-left-color: var(--color-warning-border);
+  background-color: var(--color-warning-bg);
+}
+
+.title {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}

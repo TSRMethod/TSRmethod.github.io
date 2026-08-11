@@ -1,6 +1,8 @@
 import { matchRoutes } from 'react-router-dom'
 import Home from '../pages/Home/Home'
 import NotFound from '../pages/NotFound/NotFound'
+import MethodPage from '../components/method/MethodPage'
+import { publishedMethods } from '../content'
 
 /*
  * The route table, as data.
@@ -15,20 +17,26 @@ import NotFound from '../pages/NotFound/NotFound'
  * component, and a module that exports both a component and plain values
  * breaks React Fast Refresh.
  *
- * Planned additions:
+ * Method routes are GENERATED from the content registry. Adding a published
+ * Markdown file to src/content/methods therefore creates its route and, in
+ * turn, its navigation entry — no code change, and no way for the two to
+ * disagree. Draft content is absent from `publishedMethods`, so an unreviewed
+ * page has no route at all and cannot be reached by typing its address.
  *
- *   Stage 4  { path: '/tsr' }              MethodPage for the core TSR entry
- *   Stage 7  { path: '/methods/:slug' }    every published method
- *   Stage 7  { path: '/analysis/:slug' }   key analysis & visualisation
+ * Still to be hand-built:
  *   Stage 7  /publications, /people
  *   Stage 8  /software, /contact
  *   Stage 7  legacy path redirects (e.g. /aa-grouping -> /methods/...)
- *
- * Adding a route here is all that is needed for the matching navigation entry
- * to appear, provided its content is also published.
  */
+
+const methodRoutes = publishedMethods.map((method) => ({
+  path: method.path,
+  element: <MethodPage slug={method.slug} />,
+}))
+
 export const routeConfig = [
   { path: '/', element: <Home /> },
+  ...methodRoutes,
   { path: '*', element: <NotFound /> },
 ]
 

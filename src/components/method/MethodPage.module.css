@@ -1,0 +1,108 @@
+.page {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.header {
+  max-width: var(--content-measure);
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  margin-bottom: var(--space-3);
+}
+
+.summary {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.paper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  font-weight: 600;
+}
+
+.paperMeta {
+  font-weight: 400;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.figure {
+  margin-top: var(--space-5);
+}
+
+.figure img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.figure figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/*
+ * Single column on small screens; sidebar plus content on desktop.
+ *
+ * `minmax(0, …)` on the content column is what allows wide code blocks and
+ * tables to scroll inside themselves. Without it a grid item's automatic
+ * minimum size is its content width, and a long line would stretch the whole
+ * page — the horizontal-overflow bug the previous site papered over.
+ */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+@media (min-width: 1024px) {
+  .body {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+}
+
+.content {
+  min-width: 0;
+  /* Keep prose readable while letting tables and code use the full column. */
+  max-width: 76ch;
+}
+
+.section {
+  margin-top: var(--space-7);
+}
+
+.sectionHeading {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.repositories {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.references {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.references li {
+  margin-bottom: var(--space-2);
+}
