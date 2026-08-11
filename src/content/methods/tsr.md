@@ -4,7 +4,7 @@ title: Triangular Spatial Relationship (TSR)
 shortTitle: TSR Method
 summary: An alignment-free method for comparing 3D protein structures,
   representing each structure as a set of unique integer "keys" derived from
-  triangles formed by its Cα atoms. CMS test
+  triangles formed by its Cα atoms.
 status: published
 category: core
 group: core
