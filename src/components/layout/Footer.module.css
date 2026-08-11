@@ -1,0 +1,64 @@
+.footer {
+  margin-top: var(--space-8);
+  padding: var(--space-7) var(--space-4) var(--space-5);
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.inner {
+  display: grid;
+  /* auto-fit + minmax keeps columns from overflowing narrow screens. */
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: var(--space-6);
+  max-width: var(--layout-max);
+  margin-inline: auto;
+}
+
+.column {
+  min-width: 0;
+}
+
+.heading {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.links a {
+  color: var(--color-text);
+  text-decoration: none;
+  /* Long email addresses and URLs must not push the grid wider. */
+  overflow-wrap: anywhere;
+}
+
+.links a:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.legal {
+  max-width: var(--layout-max);
+  margin: var(--space-6) auto 0;
+  padding-top: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+}

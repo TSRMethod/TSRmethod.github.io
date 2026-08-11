@@ -1,0 +1,70 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  max-width: var(--layout-max);
+  min-height: var(--header-height);
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-4);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* min-width:0 lets the name truncate instead of pushing the nav off-screen. */
+  min-width: 0;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.brandMark {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-md);
+}
+
+.brandName {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * On small phones the wordmark is hidden so the menu toggle always fits.
+ * It is hidden visually but NOT removed: the coloured "TSR" tile is
+ * decorative, so without this the home link would have no accessible name.
+ */
+@media (max-width: 400px) {
+  .brandName {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

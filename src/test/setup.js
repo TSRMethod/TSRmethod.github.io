@@ -6,7 +6,8 @@
  */
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
+import { installMatchMedia, resetViewport } from './viewport'
 
 /*
  * jsdom has no layout engine, so `window.scrollTo` is unimplemented and logs a
@@ -15,6 +16,11 @@ import { afterEach, vi } from 'vitest'
  */
 window.scrollTo = vi.fn()
 
+beforeEach(() => {
+  installMatchMedia()
+})
+
 afterEach(() => {
   cleanup()
+  resetViewport()
 })
