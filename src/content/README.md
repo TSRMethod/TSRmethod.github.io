@@ -59,8 +59,45 @@ A file has two parts: a block of settings at the top between `---` lines
 
 ### `status`: publishing a page
 
+**A file with no `status` is a draft.** This is what makes CMS-created pages
+safe: Pages CMS writes only the editorial fields, so a new method arrives with
+no `status`, no `category` and no `group`, and is therefore unpublished and
+unrouted until a maintainer places it.
+
 `status: draft` keeps a page **completely off the website** — not in the menu,
 and not reachable by typing the address.
+
+#### Publishing a draft (maintainer task)
+
+1. Read the page and satisfy yourself the science is right.
+2. Set `category` (`core`, `method` or `analysis`) — this decides the URL.
+3. Set `group` to one of the values in `src/app/navigation.js` — this decides
+   the menu section. Adding a *new* group is a code change.
+4. Optionally set `order`.
+5. Set `status: published`.
+6. Run `npm test`. Publication is strictly validated: a published page missing
+   a category, group, summary, body, or alt text on its figure fails the
+   build. Nothing goes live half-configured.
+
+The route and the navigation entry then appear on their own — there is no list
+of pages to update.
+
+#### What a draft may omit
+
+| Field | Draft | Published |
+| --- | --- | --- |
+| `title` | required | required |
+| `slug` | derived from filename | derived, or must match if written |
+| `summary` | optional | required |
+| body | may be empty | required |
+| `status` | absent means draft | required to be `published` |
+| `category`, `group` | optional | **required** |
+| `order` | optional | optional |
+| `figure.alt` (if a figure is set) | optional | **required** |
+
+Structural mistakes — a `figure` with no `src`, a repository with no `url`, a
+`slurm` block with no script — fail at any status. Those are errors, not
+absences.
 
 This is a *scientific* sign-off, not a technical one. It means "the content on
 this page has not been approved". Two pages are currently draft because their

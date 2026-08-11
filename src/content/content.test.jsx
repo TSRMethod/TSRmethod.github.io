@@ -90,8 +90,10 @@ describe('method validation', () => {
     )
   })
 
-  it('rejects a file with no body', () => {
-    expect(() => build(VALID, '   ')).toThrow(/no body content/)
+  it('rejects a published file with no body', () => {
+    // Drafts may be empty; a published page may not. See
+    // draft-creation.test.jsx for the draft side of this rule.
+    expect(() => build(VALID, '   ')).toThrow(/needs body content/)
   })
 
   it('requires alt text on a figure', () => {

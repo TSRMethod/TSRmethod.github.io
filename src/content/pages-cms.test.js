@@ -78,13 +78,39 @@ describe('the architecture boundary', () => {
     expect(status.readonly).toBeUndefined()
   })
 
-  it('does not let an editor create, rename or delete a method page', () => {
-    // Each of those actions would decide a URL, a menu group and a status.
+  it('lets an editor create a method draft, but not rename or delete one', () => {
+    /*
+     * Create is allowed: writing up a new method is editorial work, and a new
+     * file is a draft with no route until a maintainer places it.
+     *
+     * Rename is not: the filename decides the URL, so renaming would silently
+     * move a published page. Delete is not: scientific content should not be
+     * lost by a misclick.
+     */
     expect(entries.methods.operations).toEqual({
-      create: false,
+      create: true,
       rename: false,
       delete: false,
     })
+  })
+
+  it('generates the filename from the title, with no filename box', () => {
+    const { filename, view } = entries.methods
+
+    // {primary} is view.primary, and Pages CMS slugifies the substituted
+    // value, so a title of "VCNN-TSR" produces vcnn-tsr.md.
+    expect(view.primary).toBe('title')
+    expect(filename.template).toBe('{primary}.md')
+    // The editor never sees or edits a raw filename.
+    expect(filename.field).toBe(false)
+  })
+
+  it('requires nothing of the editor that would place or publish a page', () => {
+    const required = entries.methods.fields
+      .filter((f) => f.required)
+      .map((f) => f.name)
+
+    expect(required).toEqual(['title', 'summary'])
   })
 
   it('preserves keys that are not declared in the schema', () => {

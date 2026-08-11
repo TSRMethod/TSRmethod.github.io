@@ -61,9 +61,41 @@ Things worth knowing:
 
 You will notice some things you cannot change — the page's web address, which
 menu it sits under, and whether it is published. Those are deliberately not
-editable here; see section 10.
+editable here; see section 11.
 
-## 5. Changing a figure
+## 5. Creating a new method draft
+
+You can write up a brand new method yourself. You do not need a developer to
+start one.
+
+1. Click **Method & tutorial pages**.
+2. Click **Add**.
+3. Fill in the **Title** — for example `VCNN-TSR`. The web address is worked
+   out from the title for you; there is nothing else to name.
+4. Fill in the **Summary**, then write the page in the **Page content** box.
+5. Add anything else you have: a figure, the paper details, the code
+   repository, HPC instructions.
+6. Click **Save**.
+
+You can come back and keep editing it as often as you like.
+
+> ### Creating a method does not publish it
+>
+> A new method is saved as a **draft**. It will not appear on the website, it
+> will not appear in any menu, and it cannot be reached by anyone who tries
+> the address.
+>
+> This is deliberate. It gives you somewhere to write up and revise the
+> science without it going public before anyone has checked it.
+>
+> When the page is ready, tell the maintainer. They will review it, decide
+> where it belongs in the site's menus, and make it public. At that point it
+> appears on the website automatically.
+
+You do not need to do anything to mark a page as a draft — a new page simply
+starts that way.
+
+## 6. Changing a figure
 
 In the page form, find **Main illustration**.
 
@@ -76,13 +108,14 @@ In the page form, find **Main illustration**.
    > Triangles constructed between Cα atoms of a protein backbone, each
    > labelled with its computed integer key.
 
-   The website will refuse to build without it, so this is not optional.
+   A page cannot be made public without it, so please do not skip it. (A
+   draft you are still working on will tolerate a missing description.)
 3. The **Caption** is optional and is shown under the picture.
 
 Uploaded images are stored together in one place, so they are easy to find
 again later.
 
-## 6. Adding or editing a publication
+## 7. Adding or editing a publication
 
 1. Click **Publications**.
 2. To change one, click it. To add one, click **Add**.
@@ -96,7 +129,7 @@ again later.
      `https://` in front. The link is built for you.
 4. Click **Save**.
 
-## 7. Updating a group member
+## 8. Updating a group member
 
 1. Click **People**.
 2. Click the person, or **Add** for someone new.
@@ -110,7 +143,7 @@ again later.
      placeholder would be published.
 4. Click **Save**.
 
-## 8. Saving
+## 9. Saving
 
 Click **Save**. That is the whole process — there is no separate "publish"
 step.
@@ -118,7 +151,7 @@ step.
 Your change is recorded straight away. The website itself is rebuilt
 automatically afterwards.
 
-## 9. How long until it appears
+## 10. How long until it appears
 
 **Deployment is not switched on yet.** Once it is, expect roughly **one to two
 minutes** between saving and the change appearing on
@@ -129,7 +162,7 @@ problem with the change — see the last section.
 
 Refresh the page in your browser if you still see the old version.
 
-## 10. What you should not try to change here
+## 11. What you should not try to change here
 
 Some things are hidden from the editor on purpose, because changing them would
 break the site's addresses, its menus, or its scientific review process:
@@ -149,7 +182,7 @@ after the science has been checked.
 If you need one of these changed, ask — it is a small job, it is just not a
 safe one to do by accident.
 
-## 11. If something goes wrong
+## 12. If something goes wrong
 
 The site checks every change before publishing it. If a change would break the
 site, **the site does not break** — the previous version stays online and the

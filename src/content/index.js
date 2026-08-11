@@ -51,20 +51,33 @@ function requireOneOf(data, field, allowed, source) {
   return value
 }
 
-function validateFigure(figure, source) {
+function validateFigure(figure, source, { requireAlt = true } = {}) {
   if (!figure) return null
+  // A figure with no image is a mistake at any status.
   if (!figure.src) throw new ContentError(source, 'figure needs a "src"')
+
   /*
-   * Alt text is mandatory, not optional politeness. The previous site shipped
-   * figures with copy-pasted alt text describing the wrong method.
+   * Alt text is mandatory to publish, not optional politeness — the previous
+   * site shipped figures whose alt text described a different method.
+   *
+   * It is only enforced at publication so that an editor who uploads an image
+   * and saves a draft before writing the description does not break the build
+   * for the whole site. The CMS marks the field required, so they are
+   * prompted for it either way.
    */
-  if (!figure.alt || !figure.alt.trim()) {
+  if (requireAlt && !figure.alt?.trim()) {
     throw new ContentError(
       source,
-      'figure needs "alt" text describing what the image shows',
+      'figure needs "alt" text describing what the image shows before this ' +
+        'page can be published',
     )
   }
-  return { src: figure.src, alt: figure.alt.trim(), caption: figure.caption ?? null }
+
+  return {
+    src: figure.src,
+    alt: figure.alt?.trim() ?? '',
+    caption: figure.caption ?? null,
+  }
 }
 
 function validateRepositories(repositories, source) {
@@ -140,13 +153,40 @@ function validateSlurm(slurm, source) {
   }
 }
 
+/*
+ * Builds one method entry.
+ *
+ * Validation is deliberately asymmetric:
+ *
+ *   DRAFTS are tolerant. A method created through the CMS arrives with the
+ *   editorial fields only — no slug, status, category, group or order,
+ *   because those are developer-controlled and hidden from the editor. It may
+ *   also be saved half-finished. A draft must never break the build: it is
+ *   not routed and not linked, so an incomplete one harms nobody, whereas a
+ *   hard failure would block every subsequent deployment of the whole site.
+ *
+ *   PUBLISHED entries are strict. Everything needed to route, place and
+ *   render the page must be present, or the build fails. This is what stops a
+ *   page going live half-configured.
+ *
+ * Structural mistakes (a figure with no `src`, a repository with no `url`)
+ * always fail, draft or not — those are errors rather than absences.
+ */
 function buildMethod(source, raw) {
   const { data, body } = parseFrontmatter(raw, source)
 
-  const slug = requireString(data, 'slug', source)
   const filenameSlug = source.replace(/^.*\//, '').replace(/\.md$/, '')
 
-  if (slug !== filenameSlug) {
+  /*
+   * The filename is the source of truth for the slug. Pages CMS names a new
+   * file by slugifying the title, so a CMS-created draft has no `slug` key at
+   * all and we derive it. When a developer has written one explicitly, it
+   * must still agree — a disagreement means the URL is not predictable from
+   * the file, which is the mistake the check exists to catch.
+   */
+  const slug = data.slug ? String(data.slug).trim() : filenameSlug
+
+  if (data.slug && slug !== filenameSlug) {
     throw new ContentError(
       source,
       `slug "${slug}" does not match the filename "${filenameSlug}.md". ` +
@@ -154,26 +194,63 @@ function buildMethod(source, raw) {
     )
   }
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
-    throw new ContentError(source, `slug "${slug}" must be lowercase-with-hyphens`)
-  }
-  if (body.trim() === '') {
-    throw new ContentError(source, 'the file has frontmatter but no body content')
+    throw new ContentError(
+      source,
+      `slug "${slug}" must be lowercase-with-hyphens`,
+    )
   }
 
-  const category = requireOneOf(data, 'category', CATEGORIES, source)
+  /* No status means not yet reviewed, so: draft. */
+  const status = data.status
+    ? requireOneOf(data, 'status', STATUSES, source)
+    : 'draft'
+  const isPublished = status === 'published'
+
+  /* Only a published page needs to know where it lives. */
+  const category = data.category
+    ? requireOneOf(data, 'category', CATEGORIES, source)
+    : null
+  const group = data.group ? String(data.group).trim() : null
+
+  if (isPublished) {
+    if (!category) {
+      throw new ContentError(
+        source,
+        'a published method needs a "category" (core, method or analysis) — ' +
+          'it decides the page URL',
+      )
+    }
+    if (!group) {
+      throw new ContentError(
+        source,
+        'a published method needs a "group" — it decides which navigation ' +
+          'section the page appears under',
+      )
+    }
+    requireString(data, 'summary', source)
+    if (body.trim() === '') {
+      throw new ContentError(
+        source,
+        'a published method needs body content',
+      )
+    }
+  }
 
   return {
     slug,
     source,
+    // A title is always required: Pages CMS derives the filename from it, so
+    // a file cannot meaningfully exist without one.
     title: requireString(data, 'title', source),
     shortTitle: data.shortTitle?.trim() || null,
-    summary: requireString(data, 'summary', source),
-    status: requireOneOf(data, 'status', STATUSES, source),
+    summary: typeof data.summary === 'string' ? data.summary.trim() : '',
+    status,
     category,
-    group: requireString(data, 'group', source),
+    group,
     order: Number.isFinite(data.order) ? data.order : 999,
-    path: `${ROUTE_PREFIX[category]}/${slug}`,
-    figure: validateFigure(data.figure, source),
+    // Null until a category is assigned, so a draft has no URL to expose.
+    path: category ? `${ROUTE_PREFIX[category]}/${slug}` : null,
+    figure: validateFigure(data.figure, source, { requireAlt: isPublished }),
     paper: validatePaper(data.paper, source),
     repositories: validateRepositories(data.repositories, source),
     slurm: validateSlurm(data.slurm, source),
