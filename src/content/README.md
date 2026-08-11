@@ -287,6 +287,102 @@ Common causes:
 
 ---
 
+## The CMS (`.pages.yml`)
+
+Content is edited through [Pages CMS](https://pagescms.org) at
+<https://app.pagescms.org>. The editor-facing instructions are in
+[`docs/CONTENT-EDITOR-GUIDE.md`](../../docs/CONTENT-EDITOR-GUIDE.md); this
+section is about the configuration.
+
+`.pages.yml` in the repository root defines what the CMS shows. It is the
+safety boundary between content and architecture, so treat changes to it with
+the same care as changes to routing.
+
+### Three rules
+
+**1. `settings.content.merge: true` must stay.** Pages CMS otherwise rewrites a
+file from its schema alone and *deletes every key it was not told about*.
+Without this, the first CMS save of a method page would strip `slug`,
+`category`, `group`, `order` and `status`, breaking the route and un-publishing
+the page. This is the single most dangerous default in the tool.
+
+**2. Architectural fields are `hidden: true`, not omitted.** A hidden field is
+still part of the schema, so its value is read and written back untouched,
+while never appearing in the editor. Omitting it instead would rely entirely on
+rule 1.
+
+**3. `status` is never editable.** It is what keeps unreviewed science off the
+site. Publishing is a maintainer action performed in the repository.
+
+`src/content/pages-cms.test.js` enforces all three, plus that every content
+path exists and that every key in the real content files is representable. If
+you change `.pages.yml`, run the tests.
+
+### Extending the schema for a new content type
+
+1. **Add the content first.** Create the folder and a representative file, and
+   teach `src/content/index.js` to load and validate it. The CMS describes
+   content that already works; it does not define it.
+
+2. **Add a `content` entry to `.pages.yml`.**
+
+   ```yaml
+   - name: datasets              # internal id
+     label: Datasets             # what the editor sees
+     type: collection            # folder of files; use `file` for a single one
+     path: src/content/datasets
+     format: json                # or yaml-frontmatter for Markdown pages
+     filename: '{fields.id}.json'
+     view:
+       primary: name             # column shown in the list
+       fields: [name, year]
+     fields: [...]
+   ```
+
+3. **Classify every field.** For each key ask: *would changing this alter a
+   URL, a menu, or whether something is published?* If yes it is architecture —
+   declare it `hidden: true`. If no, expose it with a `label` and a plain
+   `description` written for a non-programmer.
+
+4. **Decide the operations.** Collections that should grow (people,
+   publications) allow create and delete. Collections whose members are tied to
+   routes (methods) set `operations: { create: false, rename: false,
+   delete: false }`.
+
+5. **Extend the test.** Add the new entry to the cases in
+   `pages-cms.test.js` so its paths and fields stay verified.
+
+### Field types used here
+
+| Need | Type |
+| --- | --- |
+| Short single-line value | `string` |
+| Multi-line plain text (including shell scripts) | `text` |
+| A Markdown page body | `rich-text` with `options: { format: markdown }` |
+| Fixed set of choices | `select` |
+| Grouped sub-fields | `object` |
+| Repeatable records | add `list: true` |
+| Image from the media library | `image` |
+
+`rich-text` **must** specify `format: markdown`. Its other option is `html`,
+which would stop content files being Markdown, and the site does not render
+raw HTML inside Markdown.
+
+Shell scripts use `text`, not `code`: the `code` field's language list has no
+shell option, and a plain textarea preserves newlines just as well.
+
+### Media
+
+```yaml
+media:
+  input: public/images/uploads    # where files are committed
+  output: /images/uploads         # what gets written into content
+```
+
+Vite's `base` is `/`, so the absolute output path resolves both locally and on
+GitHub Pages. Uploads are kept in `public/images/uploads/` and separate from
+`public/images/methods/`, which developers curate.
+
 ## Notes for developers
 
 - Files are loaded by `src/content/index.js` using `import.meta.glob(...,

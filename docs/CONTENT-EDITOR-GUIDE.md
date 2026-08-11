@@ -1,0 +1,176 @@
+# Editing the TSR website
+
+A short guide to changing what the website says, without touching any code.
+
+You do this through **Pages CMS**, a web page that lets you edit the site's
+text and images in ordinary forms. You do not install anything.
+
+---
+
+## 1. Opening the editor
+
+Go to **<https://app.pagescms.org>** in your browser.
+
+Bookmark it — this is the only address you need.
+
+## 2. Signing in
+
+Click **Sign in with GitHub**.
+
+You will need a free GitHub account, and someone from the group needs to have
+given that account access to the website. If you get an error saying you have
+no repositories, that is what is missing — ask the maintainer (see the last
+section).
+
+The first time you sign in, GitHub will ask you to approve access. That is
+normal.
+
+## 3. Choosing the website
+
+After signing in you will see a list of projects. Choose:
+
+**TSRMethod / TSRmethod.github.io**
+
+You will then see the sections you can edit:
+
+- **Method & tutorial pages**
+- **People**
+- **Publications**
+- **Software**
+- **Site settings**
+
+## 4. Editing a tutorial
+
+1. Click **Method & tutorial pages**.
+2. Click the page you want to change.
+3. You will see a form. The large box at the bottom, **Page content**, is the
+   body of the page.
+4. Edit the text. There is a toolbar for headings, bold, lists, links, tables
+   and code blocks — much like a word processor.
+5. Click **Save**.
+
+Things worth knowing:
+
+- **Headings build the page menu.** The "On this page" list on the left of a
+  tutorial is generated from the headings you write. Add a heading and it
+  appears there automatically.
+- **Code examples** should use the code block button so they are shown in the
+  dark box with a "Copy" button, exactly as the existing ones are.
+- **Tables** are for things like parameter lists and file formats. They scroll
+  sideways on phones rather than squashing.
+
+You will notice some things you cannot change — the page's web address, which
+menu it sits under, and whether it is published. Those are deliberately not
+editable here; see section 10.
+
+## 5. Changing a figure
+
+In the page form, find **Main illustration**.
+
+1. Click the image box and either upload a new file or pick one already
+   uploaded.
+2. **Fill in the Alt text box.** This is a short sentence describing what the
+   picture shows, and it is what a blind reader hears in place of the image.
+   Describe the content, not the file. For example:
+
+   > Triangles constructed between Cα atoms of a protein backbone, each
+   > labelled with its computed integer key.
+
+   The website will refuse to build without it, so this is not optional.
+3. The **Caption** is optional and is shown under the picture.
+
+Uploaded images are stored together in one place, so they are easy to find
+again later.
+
+## 6. Adding or editing a publication
+
+1. Click **Publications**.
+2. To change one, click it. To add one, click **Add**.
+3. Fill in the fields. Notes:
+   - **Identifier** is used as the file name. Use lowercase letters and
+     hyphens, for example `kondra-2021-tsr-method`. Once a publication exists,
+     do not change it.
+   - **Authors** is a list — click "Add" for each author, one name per entry,
+     in the order they appear on the paper.
+   - **DOI** should be just the number, like `10.1002/prot.26215`, with no
+     `https://` in front. The link is built for you.
+4. Click **Save**.
+
+## 7. Updating a group member
+
+1. Click **People**.
+2. Click the person, or **Add** for someone new.
+3. Fill in name, role, affiliation, biography, and optionally a photo and
+   email address.
+   - **Identifier** works the same way as for publications, e.g. `jane-smith`.
+   - **Current or former member** moves someone between the two lists on the
+     People page.
+   - **Leave a field blank if you do not have it.** Do not type a placeholder
+     like "TBC" or "none" — a blank field is simply not shown, whereas a
+     placeholder would be published.
+4. Click **Save**.
+
+## 8. Saving
+
+Click **Save**. That is the whole process — there is no separate "publish"
+step.
+
+Your change is recorded straight away. The website itself is rebuilt
+automatically afterwards.
+
+## 9. How long until it appears
+
+**Deployment is not switched on yet.** Once it is, expect roughly **one to two
+minutes** between saving and the change appearing on
+<https://tsrmethod.github.io>.
+
+If it has been much longer than that, the automatic checks may have found a
+problem with the change — see the last section.
+
+Refresh the page in your browser if you still see the old version.
+
+## 10. What you should not try to change here
+
+Some things are hidden from the editor on purpose, because changing them would
+break the site's addresses, its menus, or its scientific review process:
+
+- a page's **web address**
+- which **menu** a page appears under
+- the **order** pages appear in the menu
+- whether a method is **published or still under review**
+- anything about how the site is built or deployed
+
+**Publishing a method page that is still under review is deliberately not
+possible from here.** Some pages are held back because their content has known
+problems that need an author's decision — these are listed in the project's
+`CONTENT-REVIEW.md`. Making one of them public is a job for the maintainer,
+after the science has been checked.
+
+If you need one of these changed, ask — it is a small job, it is just not a
+safe one to do by accident.
+
+## 11. If something goes wrong
+
+The site checks every change before publishing it. If a change would break the
+site, **the site does not break** — the previous version stays online and the
+update simply does not appear.
+
+The most common causes are:
+
+- an image added without alt text
+- a required box left empty
+
+If your change has not appeared after a few minutes, or you see an error
+message you do not understand, contact the site maintainer with:
+
+- what you were editing,
+- roughly when you saved it.
+
+Nothing you can do in the CMS will take the website down, so there is no need
+to worry about experimenting.
+
+---
+
+**Maintainer contact:** the current maintainer of
+`TSRMethod/TSRmethod.github.io`. Issues can also be raised at
+<https://github.com/TSRMethod/TSRmethod.github.io/issues>.

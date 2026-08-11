@@ -2,9 +2,6 @@ import { parseFrontmatter, ContentError } from '../lib/frontmatter'
 import { extractHeadings } from '../lib/toc'
 
 import siteData from './site.json'
-import peopleData from './people.json'
-import publicationsData from './publications.json'
-import repositoriesData from './repositories.json'
 
 /*
  * The content registry.
@@ -224,7 +221,57 @@ export function getPublishedMethodsByCategory(category) {
 /* Exposed for tests, so the validation rules can be exercised directly. */
 export { buildMethod, buildRegistry }
 
+/*
+ * Record collections: one JSON file per record, in a folder.
+ *
+ * A folder of files rather than one array file, because that is what Pages
+ * CMS calls a collection — it gives an editor a searchable list with "add"
+ * and "delete" buttons instead of one long nested form, and two people
+ * editing different records no longer touch the same file.
+ *
+ * Display order is the `order` field, then the record's title, so it does not
+ * depend on how the filesystem happens to list the directory.
+ */
+function loadCollection(files, label) {
+  return Object.entries(files)
+    .map(([source, record]) => {
+      const id = source.replace(/^.*\//, '').replace(/\.json$/, '')
+
+      if (record.id && record.id !== id) {
+        throw new ContentError(
+          source,
+          `id "${record.id}" does not match the filename "${id}.json"`,
+        )
+      }
+
+      return { ...record, id }
+    })
+    .sort(
+      (a, b) =>
+        (a.order ?? 999) - (b.order ?? 999) ||
+        String(a.name ?? a.title ?? '').localeCompare(
+          String(b.name ?? b.title ?? ''),
+        ),
+    )
+    .map((record) => {
+      if (!record.id) throw new ContentError(label, 'record has no id')
+      return record
+    })
+}
+
 export const site = siteData
-export const people = peopleData
-export const publications = publicationsData
-export const repositories = repositoriesData
+
+export const people = loadCollection(
+  import.meta.glob('./people/*.json', { import: 'default', eager: true }),
+  'people',
+)
+
+export const publications = loadCollection(
+  import.meta.glob('./publications/*.json', { import: 'default', eager: true }),
+  'publications',
+)
+
+export const repositories = loadCollection(
+  import.meta.glob('./repositories/*.json', { import: 'default', eager: true }),
+  'repositories',
+)
