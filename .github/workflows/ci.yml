@@ -1,0 +1,71 @@
+# Validation for every change, before it can reach main.
+#
+# This is the gate that protects the live site: a pull request cannot be
+# merged green unless lint, the test suite, content validation and the
+# production build all succeed. Content edits made through Pages CMS are
+# ordinary commits, so they pass through exactly the same checks.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      # Kept while the rebuild is in progress, so work on the development
+      # branch is validated before the release pull request is opened.
+      - refactor/site-foundation
+
+# Read-only: this workflow only inspects the code.
+permissions:
+  contents: read
+
+# One run per branch or pull request. Superseded runs are cancelled, which is
+# safe here because nothing is published.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          # Single source of truth for the Node version, shared with local
+          # development. See also the "engines" field in package.json.
+          node-version-file: .nvmrc
+          cache: npm
+
+      # `npm ci` rather than `npm install`: it installs exactly what
+      # package-lock.json specifies and fails if the two disagree.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # The build also validates content: every Markdown file is parsed and
+      # checked, so a malformed page fails here rather than reaching the site.
+      - name: Build
+        run: npm run build
+
+      - name: Check the SPA fallback was generated
+        run: |
+          # GitHub Pages serves 404.html for unknown paths. It must be a byte
+          # copy of index.html, otherwise deep links such as /tsr would break.
+          test -f dist/index.html
+          test -f dist/404.html
+          cmp dist/index.html dist/404.html
+          test -f dist/.nojekyll
+          echo "SPA fallback and .nojekyll present."

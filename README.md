@@ -20,7 +20,8 @@ so a wider range would only invite confusing failures.
 
 ```bash
 nvm use
-npm install
+npm ci      # clean install matching package-lock.json; use `npm install` only
+            # when you are deliberately changing dependencies
 ```
 
 ## Commands
@@ -77,14 +78,27 @@ and they leaked into every page.
 
 ## Deployment
 
+```
+branch  →  pull request  →  CI  →  merge to main  →  deploy workflow  →  live
+```
+
 GitHub Pages, from this repository (`TSRMethod/TSRmethod.github.io`), via
 GitHub Actions. Because this is the organisation root Pages site, Vite's `base`
 stays `/`.
 
+Nothing is published from a branch, and no deployment happens without lint,
+tests, content validation and a successful build passing first. **Content
+edits made through Pages CMS are ordinary commits and go through the same
+checks** — if one would break the site, the deployment fails and the live site
+stays as it was.
+
 Routing uses `BrowserRouter`. The build writes `dist/404.html` as a copy of
 `dist/index.html` so that GitHub Pages serves the app for deep links such as
-`/methods/mirror-image` — see the comment in
-[`vite.config.js`](vite.config.js) for how this works and its one tradeoff.
+`/tsr` — see the comment in [`vite.config.js`](vite.config.js) for how this
+works and its one tradeoff.
+
+Full details, including first-time Pages setup and how to verify a
+deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Rebuild in progress
 
