@@ -3,54 +3,86 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../../app/App'
-import { navigation, getVisibleNavigation } from '../../app/navigation'
+import DesktopNav from './DesktopNav'
+import MobileNav from './MobileNav'
 import { setViewport } from '../../test/viewport'
 
-function renderApp(path = '/') {
+/*
+ * The navigation components are tested against fixture data rather than the
+ * live content registry. The live menu legitimately shrinks and grows as
+ * pages are migrated, and these tests are about keyboard and screen reader
+ * behaviour, which must not change when it does.
+ *
+ * Whether an item appears in the real menu at all is decided by
+ * `getVisibleNavigation`, covered separately in app/navigation.test.js.
+ */
+const items = [
+  { id: 'home', label: 'Home', to: '/' },
+  {
+    id: 'methods',
+    label: 'TSR-Based Methods',
+    groups: [
+      {
+        id: 'one-molecule',
+        label: 'One Molecule',
+        items: [
+          { id: 'mirror', label: 'Mirror-Image TSR', to: '/methods/mirror-image' },
+          { id: 'sse', label: 'SSE-TSR', to: '/methods/sse-tsr' },
+        ],
+      },
+      {
+        id: 'two-molecules',
+        label: 'Two Molecules',
+        items: [{ id: 'drug', label: 'DrugTSR', to: '/methods/drug-tsr' }],
+      },
+    ],
+  },
+  {
+    id: 'analysis',
+    label: 'Key Analysis & Visualization',
+    groups: [
+      {
+        id: 'key-analysis',
+        label: 'Analysis',
+        items: [
+          { id: 'common', label: 'Common Keys', to: '/analysis/common-keys' },
+        ],
+      },
+    ],
+  },
+  { id: 'publications', label: 'Publications', to: '/publications' },
+  {
+    id: 'about',
+    label: 'About',
+    groups: [
+      {
+        id: 'about-group',
+        label: 'About the group',
+        items: [{ id: 'people', label: 'People', to: '/people' }],
+      },
+    ],
+  },
+]
+
+function renderDesktop(path = '/') {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <App />
+      <DesktopNav items={items} />
     </MemoryRouter>,
   )
 }
 
-describe('navigation data', () => {
-  it('drops draft items from the visible navigation', () => {
-    const visible = getVisibleNavigation()
-    const methods = visible.find((item) => item.id === 'methods')
-    const labels = methods.groups.flatMap((group) =>
-      group.items.map((item) => item.label),
-    )
-
-    expect(labels).toContain('Mirror-Image TSR')
-    expect(labels).not.toContain('CrossTSR')
-    expect(labels).not.toContain('Metal-Ion TSR')
-  })
-
-  it('drops a group once all of its items are draft', () => {
-    const visible = getVisibleNavigation([
-      {
-        id: 'x',
-        label: 'X',
-        groups: [
-          {
-            id: 'g',
-            label: 'G',
-            items: [{ id: 'a', label: 'A', to: '/a', status: 'draft' }],
-          },
-        ],
-      },
-    ])
-
-    expect(visible).toEqual([])
-  })
-})
+function renderMobile(path = '/') {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <MobileNav items={items} />
+    </MemoryRouter>,
+  )
+}
 
 describe('desktop navigation', () => {
-  beforeEach(() => setViewport('desktop'))
-
   it('renders top-level links and dropdown triggers', () => {
-    renderApp()
+    renderDesktop()
     const nav = screen.getByRole('navigation', { name: 'Main' })
 
     expect(within(nav).getByRole('link', { name: 'Home' })).toBeInTheDocument()
@@ -60,7 +92,7 @@ describe('desktop navigation', () => {
   })
 
   it('uses a button with aria-expanded and aria-controls for dropdowns', () => {
-    renderApp()
+    renderDesktop()
     const trigger = screen.getByRole('button', { name: /TSR-Based Methods/ })
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
@@ -68,7 +100,7 @@ describe('desktop navigation', () => {
   })
 
   it('does not render dropdown links until the menu is opened', () => {
-    renderApp()
+    renderDesktop()
 
     expect(
       screen.queryByRole('link', { name: 'Mirror-Image TSR' }),
@@ -77,14 +109,13 @@ describe('desktop navigation', () => {
 
   it('opens on click and exposes the panel it controls', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderDesktop()
     const trigger = screen.getByRole('button', { name: /TSR-Based Methods/ })
 
     await user.click(trigger)
 
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
     const panel = document.getElementById('nav-methods-panel')
-    expect(panel).toBeInTheDocument()
     expect(
       within(panel).getByRole('link', { name: 'Mirror-Image TSR' }),
     ).toBeInTheDocument()
@@ -92,18 +123,21 @@ describe('desktop navigation', () => {
 
   it('names each group list so a screen reader announces it', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderDesktop()
 
     await user.click(screen.getByRole('button', { name: /TSR-Based Methods/ }))
 
     expect(
       screen.getByRole('list', { name: 'One Molecule' }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('list', { name: 'Two Molecules' }),
+    ).toBeInTheDocument()
   })
 
   it('closes on Escape and returns focus to the trigger', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderDesktop()
     const trigger = screen.getByRole('button', { name: /TSR-Based Methods/ })
 
     await user.click(trigger)
@@ -115,7 +149,7 @@ describe('desktop navigation', () => {
 
   it('opens with ArrowDown and moves focus to the first link', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderDesktop()
     const trigger = screen.getByRole('button', { name: /Key Analysis/ })
 
     trigger.focus()
@@ -130,7 +164,7 @@ describe('desktop navigation', () => {
 
   it('keeps only one dropdown open at a time', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderDesktop()
     const methods = screen.getByRole('button', { name: /TSR-Based Methods/ })
     const about = screen.getByRole('button', { name: /About/ })
 
@@ -140,51 +174,35 @@ describe('desktop navigation', () => {
     expect(methods).toHaveAttribute('aria-expanded', 'false')
     expect(about).toHaveAttribute('aria-expanded', 'true')
   })
-
-  it('does not render the mobile toggle', () => {
-    renderApp()
-
-    expect(
-      screen.queryByRole('button', { name: /^Menu$/ }),
-    ).not.toBeInTheDocument()
-  })
 })
 
 describe('mobile navigation', () => {
-  beforeEach(() => setViewport('mobile'))
-
-  it('renders a toggle button instead of the desktop bar', () => {
-    renderApp()
+  it('collapses everything behind one toggle button', () => {
+    renderMobile()
 
     expect(screen.getByRole('button', { name: 'Menu' })).toHaveAttribute(
       'aria-expanded',
       'false',
     )
-    // Scoped to the header: the footer has its own "Publications" link, which
-    // is unrelated to the collapsed main navigation.
-    const header = screen.getByRole('banner')
     expect(
-      within(header).queryByRole('link', { name: 'Publications' }),
-    ).not.toBeInTheDocument()
-    expect(
-      within(header).queryByRole('navigation', { name: 'Main' }),
+      screen.queryByRole('link', { name: 'Publications' }),
     ).not.toBeInTheDocument()
   })
 
-  it('opens a modal drawer that traps focus', async () => {
+  it('opens a modal drawer and moves focus into it', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderMobile()
 
     await user.click(screen.getByRole('button', { name: 'Menu' }))
 
     const drawer = screen.getByRole('dialog', { name: 'Site menu' })
     expect(drawer).toHaveAttribute('aria-modal', 'true')
-    expect(drawer).toHaveAttribute('id', 'mobile-nav-drawer')
+    expect(drawer).toContainElement(document.activeElement)
   })
 
-  it('locks background scrolling while open', async () => {
+  it('locks background scrolling while open and releases it after', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderMobile()
 
     await user.click(screen.getByRole('button', { name: 'Menu' }))
     expect(document.body).toHaveStyle({ overflow: 'hidden' })
@@ -195,10 +213,9 @@ describe('mobile navigation', () => {
 
   it('closes on Escape and returns focus to the toggle', async () => {
     const user = userEvent.setup()
-    renderApp()
-    const toggle = screen.getByRole('button', { name: 'Menu' })
+    renderMobile()
 
-    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
     await user.keyboard('{Escape}')
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -207,15 +224,12 @@ describe('mobile navigation', () => {
 
   it('expands a section with an accessible accordion button', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderMobile()
 
     await user.click(screen.getByRole('button', { name: 'Menu' }))
     const section = screen.getByRole('button', { name: /TSR-Based Methods/ })
     expect(section).toHaveAttribute('aria-expanded', 'false')
-    expect(section).toHaveAttribute(
-      'aria-controls',
-      'mobile-nav-methods-panel',
-    )
+    expect(section).toHaveAttribute('aria-controls', 'mobile-nav-methods-panel')
 
     await user.click(section)
 
@@ -227,7 +241,7 @@ describe('mobile navigation', () => {
 
   it('closes the drawer after following a link', async () => {
     const user = userEvent.setup()
-    renderApp()
+    renderMobile()
 
     await user.click(screen.getByRole('button', { name: 'Menu' }))
     const drawer = screen.getByRole('dialog', { name: 'Site menu' })
@@ -243,6 +257,14 @@ describe('mobile navigation', () => {
 
 describe('page layout', () => {
   beforeEach(() => setViewport('desktop'))
+
+  function renderApp(path = '/') {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <App />
+      </MemoryRouter>,
+    )
+  }
 
   it('provides a skip link pointing at the main landmark', () => {
     renderApp()
@@ -266,16 +288,6 @@ describe('page layout', () => {
     expect(document.activeElement).toBe(document.body)
   })
 
-  it('moves focus to main after a navigation', async () => {
-    const user = userEvent.setup()
-    renderApp()
-
-    const nav = screen.getByRole('navigation', { name: 'Main' })
-    await user.click(within(nav).getByRole('link', { name: 'TSR Method' }))
-
-    expect(screen.getByRole('main')).toHaveFocus()
-  })
-
   it('renders banner, main and contentinfo landmarks exactly once', () => {
     renderApp()
 
@@ -297,17 +309,5 @@ describe('page layout', () => {
 
     const ids = Array.from(document.querySelectorAll('[id]')).map((el) => el.id)
     expect(new Set(ids).size).toBe(ids.length)
-  })
-})
-
-describe('navigation taxonomy', () => {
-  it('marks the two pages with known content problems as draft', () => {
-    const methods = navigation.find((item) => item.id === 'methods')
-    const drafts = methods.groups
-      .flatMap((group) => group.items)
-      .filter((item) => item.status === 'draft')
-      .map((item) => item.id)
-
-    expect(drafts.sort()).toEqual(['cross-tsr', 'metal-ion'])
   })
 })

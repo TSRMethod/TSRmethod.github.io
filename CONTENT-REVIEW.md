@@ -1,147 +1,175 @@
 # Content review queue
 
-Scientific and technical problems found in the previous website
-(`TSR-WEB`) while planning this rebuild.
+Observations from the previous website (`TSR-WEB`) that need a decision from
+someone who knows the science before the content is published here.
 
-**These are questions for the authors, not defects to be fixed by whoever is
-doing the web work.** Nothing here has been silently corrected. Content stays
-out of the new site, or is migrated with its problem noted, until someone who
-knows the science signs it off.
+**Nothing in this list has been silently corrected, and nothing here is a
+verdict.** Where a page looks inconsistent, that is recorded as a question,
+not a correction. Only an author can say which reading is right.
+
+Each entry separates:
+
+- **Observed** — what is literally in the legacy source. Verifiable by reading it.
+- **Question** — what needs an author's judgement.
 
 **Status key**
 
 | Status | Meaning |
 | --- | --- |
-| 🚫 Blocked | Marked `status: 'draft'` in `src/app/navigation.js`. Absent from navigation *and* routing. Do not publish. |
-| ⚠️ Verify | Will be migrated, but a specific claim needs checking against the paper or the Python package first. |
-| ✅ Resolved | Reviewer has confirmed or corrected it. Record who and when. |
+| 🚫 Blocked | `status: draft` in the content file. Absent from navigation *and* routing. |
+| ⚠️ Verify | Will be migrated, but a specific point needs checking against the paper or the package first. |
+| ✅ Resolved | An author has confirmed or corrected it. Record who and when. |
 
 ---
 
-## 🚫 Blocked — must not be published
+## 🚫 Blocked — not published pending review
 
-### 1. CrossTSR — overview is DrugTSR's text
+### 1. CrossTSR — overview text is duplicated from DrugTSR
 
 `TSR-WEB/src/tabs/CrossTSR.js`
 
-The abstract begins *"DrugTSR is our advanced method…"* and the whole overview
-is verbatim DrugTSR content. The page also links the DrugTSR paper
-(`10.1016/j.compbiolchem.2024.108117`), points at the generic `TSR-Package`
-repository, and has its illustration commented out.
+**Observed.** The abstract begins *"DrugTSR is our advanced method…"* and the
+body of the overview is identical to the text on the DrugTSR page. The page
+links the DrugTSR publication (`10.1016/j.compbiolchem.2024.108117`), points
+at the general `TSR-Package` repository, and its illustration is commented out
+in the source.
 
-Nothing on the page is demonstrably about CrossTSR.
-
-**Needed:** an original CrossTSR overview, the correct citation, the correct
-repository, and a tutorial that reflects the actual CrossTSR API.
+**Question.** What content should this page actually carry? Specifically: an
+overview describing CrossTSR itself, the correct citation, the correct
+repository, and a tutorial matching the real CrossTSR interface.
 
 ---
 
-### 2. Metal-Ion TSR — placeholder content
+### 2. Metal-Ion TSR — appears unfinished
 
 `TSR-WEB/src/tabs/MetalIon.js`
 
-- The abstract is generic TSR boilerplate with nothing metal-ion specific.
-- **Two `<section id="tutorial">` blocks, byte-for-byte identical**, both
-  containing a four-item placeholder list ("Install the required
-  dependencies", "Interpret the output…").
-- Source link is the literal placeholder `https://github.com/your-repo`.
-- The page was never reachable from the old navigation either.
+**Observed.**
 
-**Needed:** real content, or a decision to drop the page.
+- The abstract is general TSR text with no metal-ion-specific content.
+- There are two `<section id="tutorial">` blocks with identical contents, each
+  a four-item outline ("Install the required dependencies", "Interpret the
+  output…").
+- The source link is the literal string `https://github.com/your-repo`.
+- The page was not linked from the old navigation.
+
+**Question.** Is this page intended to exist? If so, what are its content and
+its repository?
 
 ---
 
 ## ⚠️ Verify before publishing
 
-### 3. SSE-TSR — citation appears to be the wrong paper
+### 3. SSE-TSR — citation may not match the page subject
 
-Cites `10.1016/j.compbiolchem.2021.107479`, which is the **amino acid
-grouping** paper. Also, the `learn-more` section is commented out in the source
-while the section navigation still links to it, so the anchor goes nowhere.
+**Observed.** The page cites `10.1016/j.compbiolchem.2021.107479`. That DOI is
+the amino-acid-grouping paper, which is also cited by the Amino Acid Grouping
+page. Separately, the `learn-more` section is commented out in the source
+while the section navigation still links to `#learn-more`, so that anchor has
+no target.
 
-**Question:** what is the correct SSE-TSR reference?
-
----
-
-### 4. Key to 2D Image — citation appears to be the wrong paper
-
-Cites `10.1016/j.compbiolchem.2024.108117` (DrugTSR). The 2D key-image work
-looks like it belongs to the Proteins 2021 paper
-(`10.1002/prot.26215`), whose abstract describes *a new visualization method
-where keys are organized according to evolutionary closeness and shown in a 2D
-image*.
-
-**Question:** which paper should this page cite?
+**Question.** Is this the intended reference for SSE-TSR, or should it cite a
+different paper?
 
 ---
 
-### 5. Clustering — three unrelated repositories, no explanation
+### 4. Key to 2D Image — citation may not match the page subject
 
-The page links `KrishnaRauniyar/Kinases-and-Phosphatases-Clustering`,
+**Observed.** The page cites `10.1016/j.compbiolchem.2024.108117`, the DrugTSR
+paper. The abstract of the Proteins 2021 paper (`10.1002/prot.26215`)
+describes *a new visualization method where keys are organized according to
+evolutionary closeness and shown in a 2D image*, which reads as related to
+this page's subject.
+
+**Question.** Which paper should this page cite? Possibly both.
+
+---
+
+### 5. Clustering — three repositories, relationship unstated
+
+**Observed.** The page links `KrishnaRauniyar/Kinases-and-Phosphatases-Clustering`,
 `KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE` and `dbxmcf/hsp70_actin` without
-saying how they relate.
+describing how they relate to each other or to the page.
 
-**Question:** which is canonical for this page, and what are the others for?
-
----
-
-### 6. DrugTSR — a copied explanation about `aa_grouping`
-
-Contains an explanation lifted from the amino-acid-grouping page that
-describes `aa_grouping` in a context where it does not apply.
+**Question.** Which is the canonical repository for this method, and what role
+do the others play?
 
 ---
 
-### 7. Size-Filtering TSR — API naming
+### 6. DrugTSR — passage about `aa_grouping`
 
-Examples pass `size_filter=500` to `TSR(...)`. Confirm the argument name and
-semantics against the current released package.
+**Observed.** The page contains an explanation of `aa_grouping` that also
+appears on the Amino Acid Grouping page.
 
----
-
-### 8. Amino Acid TSR — undefined example variables
-
-The tutorial references `pdb_ids` in places where it is never defined, so the
-snippets cannot be copy-pasted and run.
+**Question.** Does `aa_grouping` apply in the DrugTSR context as described, or
+was this passage carried over in error?
 
 ---
 
-### 9. Nucleotide–Protein TSR — mixed terminology
+### 7. Size-Filtering TSR — argument name
 
-Drug and nucleotide vocabulary are used interchangeably in places. Confirm
-which is intended in each passage.
+**Observed.** Examples pass `size_filter=500` to `TSR(...)`.
+
+**Question.** Does the current released package use this argument name and
+these semantics?
 
 ---
 
-### 10. Key to 2D Image — keys vs triplets workflow
+### 8. Amino Acid TSR — example variables
 
-One workflow generates *keys* but a later step expects *triplet* files.
+**Observed.** The tutorial references `pdb_ids` in snippets where it is not
+defined, so those snippets cannot be run as written.
 
-**Question:** is a step missing, or is the wrong `output_option` shown?
+**Question.** What should the examples define?
+
+---
+
+### 9. Nucleotide–Protein TSR — terminology
+
+**Observed.** Drug-related and nucleotide-related vocabulary are both used in
+describing the same workflow.
+
+**Question.** Which term is intended in each passage?
+
+---
+
+### 10. Key to 2D Image — keys and triplets in one workflow
+
+**Observed.** One workflow generates *keys*, and a later step in the same
+workflow reads *triplet* files.
+
+**Question.** Is an intermediate step missing, or should the earlier step use
+a different `output_option`?
 
 ---
 
 ### 11. Deep Neural Network — architecture and results descriptions
 
-- The stated number of output neurons is inconsistent with the stated number
-  of classes.
-- Some result files described as plots or matrices appear to be CSVs.
+**Observed.** The stated number of output neurons and the stated number of
+classes differ. Separately, some output files described as plots or matrices
+appear from their names to be CSV files.
+
+**Question.** What are the correct figures and file descriptions?
 
 ---
 
-## Data quality (not blocking, but do not migrate as-is)
+## Data quality
 
-**People** — nine members have empty `phone`/`email` values that the old page
-still rendered as bare `Phone:` / `Email:` labels with an empty `mailto:`
-link. Two former members carry obvious placeholders
-(`former.member1@louisiana.edu`, `(337) 123-4567`). The new People page must
-omit fields that are absent rather than render them empty, and no placeholder
-contact details may be carried over.
+Not scientific questions, but content that must not be migrated as-is.
 
-**Publications** — the list ends in 2024. Confirm whether 2025–2026 output is
-missing.
+**People.** Nine members have empty `phone`/`email` values that the old page
+rendered as bare `Phone:` / `Email:` labels with an empty `mailto:` link. Two
+former members carry values that appear to be placeholders
+(`former.member1@louisiana.edu`, `(337) 123-4567`). The new schema omits
+absent fields rather than rendering them empty; no placeholder contact details
+will be carried over. Needs someone to supply the real values, or confirm
+they should stay absent.
 
-**Footer / Report issues** — the old footer used `contact@ourlab.com` and the
-old "Problems" form displayed *"Thank you for your submission! We will be in
-touch"* after doing nothing but a `console.log`. Both are gone. Contact now
-comes from `src/app/siteConfig.js` and issue reporting links to GitHub Issues.
+**Publications.** The legacy list ends in 2024. Needs confirming whether
+2025–2026 output is missing.
+
+**Resolved already.** The old footer used `contact@ourlab.com`, and the old
+"Problems" page displayed *"Thank you for your submission! We will be in
+touch"* after only writing to the browser console. Neither has been carried
+over: contact comes from `src/content/site.json`, and issue reporting links to
+GitHub Issues.

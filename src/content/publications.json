@@ -1,0 +1,33 @@
+[
+  {
+    "id": "milon-2024-kinases-phosphatases",
+    "title": "Representing and Quantifying Conformational Changes of Kinases and Phosphatases Using the TSR-Based Algorithm",
+    "authors": [
+      "Tarikul I. Milon",
+      "Krishna Rauniyar",
+      "Sara Furman",
+      "Khairum H. Orthi",
+      "Yingchun Wang",
+      "Vijay Raghavan",
+      "Wu Xu"
+    ],
+    "venue": "Kinases and Phosphatases",
+    "year": 2024,
+    "doi": "10.3390/kinasesphosphatases2040021",
+    "abstract": "The main objective of this study is to provide structural insight into conformational changes. We also aim to link TSR-based structural descriptors to their functions. The 3D structures of 2527 kinases and 505 phosphatases are studied."
+  },
+  {
+    "id": "kondra-2021-tsr-method",
+    "title": "Development of a TSR-Based Method for Protein 3-D Structural Comparison With Its Applications to Protein Classification and Motif Discovery",
+    "authors": [
+      "Sarika Kondra",
+      "Titli Sarkar",
+      "Vijay Raghavan",
+      "Wu Xu"
+    ],
+    "venue": "Frontiers in Chemistry",
+    "year": 2021,
+    "doi": "10.3389/fchem.2020.602291",
+    "abstract": "We have developed a novel method where the 3-D structure of a protein is modeled using the concept of Triangular Spatial Relationship (TSR), where triangles are constructed with the Cα atoms of a protein as vertices."
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "tsr-package",
+    "name": "TSR-Package",
+    "url": "https://github.com/pooryakhajouie/TSR-Package",
+    "description": "Python package for downloading PDB files and generating TSR keys and triplets. Supports amino acid grouping, mirror images and size filtering.",
+    "language": "Python",
+    "category": "core",
+    "order": 1
+  },
+  {
+    "id": "tsr-nucleotide-package",
+    "name": "TSR_NUCLEOTIDE_PACKAGE",
+    "url": "https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE",
+    "description": "TSR key and triplet generation for nucleotide residues.",
+    "language": "Python",
+    "category": "method",
+    "order": 2
+  }
+]

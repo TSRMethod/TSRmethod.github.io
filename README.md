@@ -43,19 +43,20 @@ still planned. Directories marked *(planned)* have not been created yet.
 
 ```
 src/
-  app/          App shell, route table, site-wide configuration
+  app/          App shell, route table, navigation, site-wide configuration
   components/
+    layout/     Header, navigation, footer, page layout
     shared/     Small widely-used pieces (error boundary, scroll handling)
-    layout/     (planned) Header, navigation, footer, page layout
     method/     (planned) Reusable building blocks for method/tutorial pages
-  content/      (planned) Editable content — Markdown and JSON, no React
+  content/      Editable content — Markdown and JSON, no React. See its README.
+  lib/          Content plumbing (frontmatter parsing, heading extraction)
   pages/        One folder per top-level page
   hooks/        Reusable React hooks
   styles/       Design tokens, reset, global base styles
   test/         Test setup
 
 public/
-  images/       (planned) Content images, referenced from Markdown and JSON
+  images/       Content images, referenced from Markdown and JSON
 ```
 
 ### Two rules worth keeping
@@ -65,6 +66,8 @@ tutorials are Markdown; people, publications, repositories and site settings
 are JSON. React components decide *how* things look; content files decide
 *what* the site says. This is what will let a non-technical editor update the
 science through a CMS without touching code.
+[`src/content/README.md`](src/content/README.md) documents the format and is
+written for that editor, not for developers.
 
 **Styling goes through design tokens.** Colours, spacing and type sizes are
 defined once in `src/styles/tokens.css`. Component styles are CSS Modules

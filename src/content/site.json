@@ -1,0 +1,19 @@
+{
+  "name": "TSR Research Group",
+  "shortName": "TSR",
+  "description": "The Triangular Spatial Relationship (TSR) method: alignment-free comparison of 3D protein structures, TSR-derived methods, and open-source Python tools.",
+  "tagline": "Alignment-free comparison of 3D protein structures.",
+  "email": "tsrresearchgroup@gmail.com",
+  "affiliations": [
+    {
+      "id": "ull",
+      "name": "University of Louisiana at Lafayette",
+      "url": "https://www.louisiana.edu/"
+    },
+    {
+      "id": "loni",
+      "name": "Louisiana Optical Network Infrastructure (LONI)",
+      "url": "https://loni.org/"
+    }
+  ]
+}
