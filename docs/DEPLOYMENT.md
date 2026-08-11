@@ -81,10 +81,25 @@ hack.
 
 ## First-time setup (once, by a maintainer)
 
-1. Merge the release pull request into `main`.
-2. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-   Without this the deploy workflow runs but publishes nothing.
-3. Watch the run in the Actions tab.
+> ### The Pages source must be changed before this works
+>
+> GitHub Pages is **already enabled** on this repository, but with the older
+> **"Deploy from a branch"** source pointing at `main`. That publishes the
+> repository root as-is, with no build step. It is why
+> <https://tsrmethod.github.io/> currently returns a blank page: it is serving
+> the unbuilt `index.html`, whose `<script src="/src/main.jsx">` does not
+> exist as a served file.
+>
+> Merging without changing this will **not** fix the site. The branch builder
+> would publish the raw source again, and `actions/deploy-pages` fails when
+> the source is not set to GitHub Actions.
+
+1. **Settings → Pages → Build and deployment → Source: _GitHub Actions_.**
+   This is the step that switches publishing from the raw branch to the
+   workflow in this repository. It can be done before or after the merge.
+2. Merge the release pull request into `main`.
+3. Watch the run in the Actions tab. The `deploy` job prints the live URL.
+4. Run through the verification list below.
 
 ## Verifying a deployment
 
