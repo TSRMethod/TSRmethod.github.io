@@ -18,4 +18,16 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    /*
+     * Test files and build configuration run under Node, not in the browser,
+     * so they may use Node globals and APIs. Application code under src/ may
+     * not — keeping that boundary is the point of listing these explicitly
+     * rather than enabling Node globals everywhere.
+     */
+    files: ['**/*.test.{js,jsx}', 'src/test/**/*.js', 'vite.config.js'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+  },
 ])

@@ -1,0 +1,9 @@
+{
+  "id": "tsr-package",
+  "name": "TSR-Package",
+  "url": "https://github.com/pooryakhajouie/TSR-Package",
+  "description": "Python package for downloading PDB files and generating TSR keys and triplets. Supports amino acid grouping, mirror images and size filtering.",
+  "language": "Python",
+  "category": "core",
+  "order": 1
+}

@@ -1,0 +1,17 @@
+{
+  "id": "milon-2024-kinases-phosphatases",
+  "title": "Representing and Quantifying Conformational Changes of Kinases and Phosphatases Using the TSR-Based Algorithm",
+  "authors": [
+    "Tarikul I. Milon",
+    "Krishna Rauniyar",
+    "Sara Furman",
+    "Khairum H. Orthi",
+    "Yingchun Wang",
+    "Vijay Raghavan",
+    "Wu Xu"
+  ],
+  "venue": "Kinases and Phosphatases",
+  "year": 2024,
+  "doi": "10.3390/kinasesphosphatases2040021",
+  "abstract": "The main objective of this study is to provide structural insight into conformational changes. We also aim to link TSR-based structural descriptors to their functions. The 3D structures of 2527 kinases and 505 phosphatases are studied."
+}

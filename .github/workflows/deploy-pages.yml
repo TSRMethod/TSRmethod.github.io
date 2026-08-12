@@ -1,0 +1,88 @@
+# Publish the site to GitHub Pages.
+#
+# Deploys only from `main`, and only after the same checks CI runs. There is
+# deliberately no path that reaches the deploy step without lint, tests,
+# content validation and a successful build — so a bad commit, including one
+# made through Pages CMS, fails here and the previously deployed site stays
+# online untouched.
+#
+# This repository is the organisation root Pages site, served at
+# https://tsrmethod.github.io/, so Vite's `base` stays "/".
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Lets a maintainer re-run a deployment without pushing a commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read # check out the source
+  pages: write # publish to Pages
+  id-token: write # OIDC token deploy-pages exchanges for permission
+
+# Only one deployment at a time. `cancel-in-progress: false` is deliberate and
+# follows GitHub's own guidance: queued runs may be skipped, but a deployment
+# that has already started is allowed to finish, so production is never left
+# half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Validate and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Check the SPA fallback was generated
+        run: |
+          test -f dist/index.html
+          test -f dist/404.html
+          cmp dist/index.html dist/404.html
+          test -f dist/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload the built site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy
+    # Only runs if every check in `build` passed.
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

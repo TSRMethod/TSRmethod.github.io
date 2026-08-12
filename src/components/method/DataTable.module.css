@@ -1,0 +1,41 @@
+.scroll {
+  /* The table scrolls inside this box; the page itself never widens. */
+  overflow-x: auto;
+  margin: var(--space-4) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.scroll:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table :global(th),
+.table :global(td) {
+  padding: var(--space-3);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table :global(th) {
+  font-weight: 700;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  white-space: nowrap;
+}
+
+.table :global(tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+.table :global(code) {
+  white-space: nowrap;
+}

@@ -1,0 +1,144 @@
+/*
+ * Mobile navigation. Only rendered below 1024px (see useMediaQuery).
+ *
+ * Widths use min(…, vw) rather than fixed pixels so the drawer cannot cause
+ * horizontal overflow on a 320px phone.
+ */
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* Comfortable 44px touch target. */
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.toggle:hover {
+  background-color: var(--color-surface-raised);
+}
+
+.toggleIcon {
+  flex-shrink: 0;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background-color: rgba(31, 41, 51, 0.5);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  width: min(20rem, 85vw);
+  padding: var(--space-6) var(--space-4) var(--space-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-md);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.link,
+.accordionTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-align: left;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.link:hover,
+.accordionTrigger:hover {
+  background-color: var(--color-surface-raised);
+}
+
+.linkActive {
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.chevron[data-open] {
+  transform: rotate(180deg);
+}
+
+/* ---- Accordion panel ---- */
+
+.panel {
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+.group + .group {
+  margin-top: var(--space-3);
+}
+
+.groupLabel {
+  display: block;
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.groupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* Indent with a rule rather than padding alone, so the nesting is visible. */
+  border-left: 2px solid var(--color-border);
+  margin-left: var(--space-3);
+}
+
+.panelLink {
+  display: block;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.panelLink:hover {
+  color: var(--color-primary-dark);
+  background-color: var(--color-primary-light);
+}
+
+.panelLink:global(.active) {
+  font-weight: 700;
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}

@@ -1,0 +1,25 @@
+/*
+ * A column that fills at least the viewport height so the footer sits at the
+ * bottom on short pages.
+ *
+ * `100dvh` (dynamic viewport height) rather than `100vh`, because on mobile
+ * browsers 100vh includes the retracting address bar and overshoots. Note this
+ * is a *minimum* height on a flex column — not a fixed 100vh page, which is
+ * the pattern that broke scrolling on the previous site.
+ */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.main {
+  flex: 1;
+}
+
+/* Programmatic focus on <main> should not draw a focus ring — the user did
+   not tab to it, and the ring around the whole page is alarming. */
+.main:focus {
+  outline: none;
+}

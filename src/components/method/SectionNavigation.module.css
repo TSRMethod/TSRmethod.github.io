@@ -1,0 +1,88 @@
+/* ---- Desktop: sticky sidebar ---- */
+
+.sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+  align-self: start;
+  /* Never taller than the viewport; scrolls internally if the page has many
+     sections. `align-self: start` is what stops it stretching to the height
+     of the content column. */
+  max-height: calc(100vh - var(--header-height) - var(--space-6));
+  overflow-y: auto;
+  padding-right: var(--space-3);
+}
+
+.heading {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+/* ---- Mobile: collapsed disclosure ---- */
+
+.details {
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.summary {
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  cursor: pointer;
+  /* Keep the native disclosure triangle: it is the affordance that tells a
+     user this opens, and it flips state without any JavaScript. */
+}
+
+.summary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+  border-radius: var(--radius-md);
+}
+
+.details[open] .summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.details .list {
+  padding: var(--space-2) var(--space-3);
+}
+
+/* ---- Shared list ---- */
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list li[data-depth='3'] {
+  padding-left: var(--space-4);
+}
+
+.link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.link:hover {
+  color: var(--color-primary-dark);
+  background-color: var(--color-surface-raised);
+}
+
+.link[aria-current='true'] {
+  font-weight: 600;
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}

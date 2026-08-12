@@ -1,0 +1,14 @@
+{
+  "id": "kondra-2021-tsr-method",
+  "title": "Development of a TSR-Based Method for Protein 3-D Structural Comparison With Its Applications to Protein Classification and Motif Discovery",
+  "authors": [
+    "Sarika Kondra",
+    "Titli Sarkar",
+    "Vijay Raghavan",
+    "Wu Xu"
+  ],
+  "venue": "Frontiers in Chemistry",
+  "year": 2021,
+  "doi": "10.3389/fchem.2020.602291",
+  "abstract": "We have developed a novel method where the 3-D structure of a protein is modeled using the concept of Triangular Spatial Relationship (TSR), where triangles are constructed with the Cα atoms of a protein as vertices."
+}

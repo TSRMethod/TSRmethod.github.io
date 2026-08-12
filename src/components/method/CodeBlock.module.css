@@ -1,0 +1,65 @@
+.wrapper {
+  margin: var(--space-4) 0;
+  border-radius: var(--radius-md);
+  overflow: hidden; /* clips the children to the rounded corners only */
+  background-color: var(--color-code-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-code-chrome);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: #c8c8c8;
+}
+
+.copy {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: #e8e8e8;
+  border: 1px solid #5a5a5a;
+  border-radius: var(--radius-sm);
+}
+
+.copy:hover {
+  color: #ffffff;
+  background-color: #4a4a4a;
+}
+
+.copy:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.pre {
+  margin: 0;
+  padding: var(--space-4);
+  overflow-x: auto;
+  color: var(--color-code-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  /* Preserve the script's own line breaks and indentation. */
+  white-space: pre;
+  tab-size: 2;
+}
+
+.pre:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.pre code {
+  font: inherit;
+  background: none;
+  padding: 0;
+}
