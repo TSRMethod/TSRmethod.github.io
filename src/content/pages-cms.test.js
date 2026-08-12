@@ -141,20 +141,27 @@ describe('the architecture boundary', () => {
 })
 
 describe('the schema can represent the real content', () => {
-  it('covers every frontmatter key used by the TSR page', () => {
-    const declared = new Set(fieldNames(entries.methods))
-    const raw = readFileSync(
-      resolve(root, 'src/content/methods/tsr.md'),
-      'utf8',
-    )
-    const frontmatter = parseYaml(raw.split('---')[1])
+  it.each(methods.map((m) => [m.slug, m.source]))(
+    'covers every frontmatter key used by %s',
+    (slug, source) => {
+      /*
+       * Checked for every method file, not just the first one. Each migrated
+       * page is a chance to introduce a field the CMS cannot show, which
+       * would leave an editor unable to change something they can see on the
+       * page.
+       */
+      const declared = new Set(fieldNames(entries.methods))
+      const path = resolve(root, source.replace(/^\.\//, 'src/content/'))
+      const frontmatter = parseYaml(readFileSync(path, 'utf8').split('---')[1])
 
-    for (const key of Object.keys(frontmatter)) {
-      expect(declared.has(key), `frontmatter key "${key}" is not in .pages.yml`).toBe(
-        true,
-      )
-    }
-  })
+      for (const key of Object.keys(frontmatter)) {
+        expect(
+          declared.has(key),
+          `${slug}: frontmatter key "${key}" is not in .pages.yml`,
+        ).toBe(true)
+      }
+    },
+  )
 
   it('edits the page body as markdown, not html', () => {
     const body = field(entries.methods, 'body')
