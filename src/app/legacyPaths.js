@@ -25,6 +25,12 @@ export const LEGACY_PATHS = {
   '/aminoacid': 'amino-acid',
   '/nucleotide': 'nucleotide',
   '/nucleotide-protein': 'nucleotide-protein',
+
+  // Key analysis and visualisation tools.
+  '/commonkeys': 'common-keys',
+  '/keytoimage': 'key-to-image',
+  '/clustering': 'clustering',
+  '/dnn': 'dnn',
 }
 
 export default LEGACY_PATHS

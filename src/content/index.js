@@ -26,11 +26,40 @@ const ROUTE_PREFIX = {
   analysis: '/analysis',
 }
 
-const rawFiles = import.meta.glob('./methods/*.md', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-})
+/*
+ * Content lives in two folders, but is ONE registry.
+ *
+ *   methods/   the TSR method and its derivatives
+ *   analysis/  downstream key analysis, visualisation and modelling tools
+ *
+ * The split is editorial, not technical: it gives Pages CMS two sensible
+ * lists instead of one long mixed one, and keeps a folder listing readable.
+ * Routing, validation, navigation and the publication gate are identical for
+ * both — a second route system would be duplication for naming's sake.
+ *
+ * `category` in the frontmatter still decides the URL. The folder must agree
+ * with it (checked in buildMethod), so a file cannot sit in one folder and
+ * claim to be the other.
+ */
+const rawFiles = {
+  ...import.meta.glob('./methods/*.md', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }),
+  ...import.meta.glob('./analysis/*.md', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }),
+}
+
+/** Which folder each category belongs in. */
+const CATEGORY_FOLDER = {
+  core: 'methods',
+  method: 'methods',
+  analysis: 'analysis',
+}
 
 function requireString(data, field, source) {
   const value = data[field]
@@ -231,6 +260,22 @@ function buildMethod(source, raw) {
     ? requireOneOf(data, 'category', CATEGORIES, source)
     : null
   const group = data.group ? String(data.group).trim() : null
+
+  /*
+   * The folder and the category must agree. Without this a file could sit in
+   * analysis/ while claiming `category: method`, and its URL would silently
+   * contradict where an editor found it.
+   */
+  if (category) {
+    const folder = source.replace(/^\.\//, '').split('/')[0]
+    const expected = CATEGORY_FOLDER[category]
+    if (folder !== expected) {
+      throw new ContentError(
+        source,
+        `category "${category}" belongs in ${expected}/, not ${folder}/`,
+      )
+    }
+  }
 
   if (isPublished) {
     if (!category) {

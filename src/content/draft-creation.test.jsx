@@ -176,9 +176,9 @@ Body.
 })
 
 describe('publication remains strict', () => {
-  const publish = (extra) =>
+  const publish = (extra, source = './methods/x.md') =>
     buildMethod(
-      './methods/x.md',
+      source,
       `---
 title: X
 summary: A summary.
@@ -249,7 +249,9 @@ Body.
   })
 
   it('succeeds once everything a published page needs is present', () => {
-    const method = publish('category: analysis\ngroup: key-analysis')
+    // Category and folder must agree, so an analysis page lives in analysis/.
+    const method = publish('category: analysis\ngroup: key-analysis',
+      './analysis/x.md')
 
     expect(method.status).toBe('published')
     expect(method.path).toBe('/analysis/x')

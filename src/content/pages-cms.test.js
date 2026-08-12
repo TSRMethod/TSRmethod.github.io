@@ -45,8 +45,9 @@ describe('.pages.yml is valid and matches the repository', () => {
     expect(config.media.input).toBe(`public${config.media.output}`)
   })
 
-  it('exposes exactly the four content areas', () => {
+  it('exposes exactly the expected content areas', () => {
     expect(Object.keys(entries).sort()).toEqual([
+      'analysis',
       'methods',
       'people',
       'publications',
