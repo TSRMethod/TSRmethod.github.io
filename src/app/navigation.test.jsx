@@ -138,8 +138,13 @@ describe('isRouteImplemented', () => {
   })
 
   it('rejects a path that only matches the catch-all', () => {
-    expect(isRouteImplemented('/methods/mirror-image')).toBe(false)
     expect(isRouteImplemented('/publications')).toBe(false)
+    expect(isRouteImplemented('/methods/not-a-real-method')).toBe(false)
+  })
+
+  it('accepts a migrated method and its legacy alias', () => {
+    expect(isRouteImplemented('/methods/mirror-image')).toBe(true)
+    expect(isRouteImplemented('/mirror-image')).toBe(true)
   })
 })
 

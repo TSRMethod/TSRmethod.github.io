@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import useDocumentTitle from '../../hooks/useDocumentTitle'
-import { getPublishedMethod } from '../../content'
+import { getPublishedMethod, formatCitation } from '../../content'
 import NotFound from '../../pages/NotFound/NotFound'
 import MarkdownContent from './MarkdownContent'
 import SectionNavigation from './SectionNavigation'
@@ -70,6 +70,8 @@ export default function MethodPage({ slug }) {
    */
   if (!method) return <NotFound />
 
+  const citation = formatCitation(method.paper)
+
   return (
     <article className={styles.page}>
       <header className={styles.header}>
@@ -85,12 +87,7 @@ export default function MethodPage({ slug }) {
                 a new tab)
               </span>
             </a>
-            {method.paper.journal && (
-              <span className={styles.paperMeta}>
-                {method.paper.journal}
-                {method.paper.year ? `, ${method.paper.year}` : ''}
-              </span>
-            )}
+            {citation && <span className={styles.paperMeta}>{citation}</span>}
           </p>
         )}
 

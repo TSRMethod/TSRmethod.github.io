@@ -151,6 +151,16 @@ content:
           - name: year
             label: Year
             type: number
+          - name: volume
+            label: Volume
+            type: string
+          - name: issue
+            label: Issue
+            type: string
+          - name: pages
+            label: Pages
+            type: string
+            description: 'For example: 694–703'
           - name: doi
             label: DOI
             type: string
@@ -343,6 +353,16 @@ content:
       - name: year
         label: Year
         type: number
+      - name: volume
+        label: Volume
+        type: string
+      - name: issue
+        label: Issue
+        type: string
+      - name: pages
+        label: Pages
+        type: string
+        description: 'For example: 694–703'
       - name: doi
         label: DOI
         type: string

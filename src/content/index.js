@@ -111,9 +111,29 @@ function validatePaper(paper, source) {
     authors: paper.authors ?? null,
     journal: paper.journal ?? null,
     year: paper.year ?? null,
+    // Optional bibliographic detail, shown after the journal when present.
+    volume: paper.volume ?? null,
+    issue: paper.issue ?? null,
+    pages: paper.pages ?? null,
     doi: paper.doi ?? null,
     url: paper.url ?? (paper.doi ? `https://doi.org/${paper.doi}` : null),
   }
+}
+
+/** "Journal, 2026, 23(2), 694–703" — omitting whatever is absent. */
+export function formatCitation(paper) {
+  if (!paper) return ''
+
+  const parts = []
+  if (paper.journal) parts.push(paper.journal)
+  if (paper.year) parts.push(String(paper.year))
+
+  if (paper.volume) {
+    parts.push(paper.issue ? `${paper.volume}(${paper.issue})` : `${paper.volume}`)
+  }
+  if (paper.pages) parts.push(paper.pages)
+
+  return parts.join(', ')
 }
 
 /*

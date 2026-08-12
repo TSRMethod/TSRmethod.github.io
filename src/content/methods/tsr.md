@@ -155,7 +155,7 @@ Once installed, you can retrieve PDB files and generate key and triplet files.
 ### Retrieve PDB files
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
+from tsr_package import PDB_DL
 
 # Retrieve PDB files for the specified PDB IDs
 pdb_ids = ["1GTA", "1GTB", "1LBE"]
@@ -168,7 +168,7 @@ also the default if no directory is given.
 ### Generate keys and triplets
 
 ```python
-from tsr_package.tsr.TSR import TSR
+from tsr_package import TSR
 
 # Define the directory where PDB files are stored
 data_dir = "Dataset"
@@ -190,13 +190,16 @@ Protein chains are case-sensitive and must match the chain IDs in the PDB file.
 | `data_dir` | `str` | — | Directory containing the downloaded PDB files. |
 | `input_files` | `list[str]` or `str` | — | List of PDB IDs, or the path to a CSV file. |
 | `chain` | `list[str]` | — | Chain ID for each input file. Case-sensitive. |
-| `output_option` | `str` | `"keys"` | One of `"keys"`, `"triplets"` or `"both"`. |
+| `output_option` | `str` | `"both"` | One of `"keys"`, `"triplets"` or `"both"`. |
+| `size_filter` | `int` | `10000` | Discards triangles whose MaxDist exceeds this value. See [Size-Filtering TSR](/methods/size-filtering). |
+| `aa_grouping` | `bool` | `False` | Groups amino acids by structural similarity. See [Amino Acid Grouping TSR](/methods/amino-acid-grouping). |
+| `mirror_image` | `bool` | `False` | Distinguishes a triangle from its reflection. See [Mirror-Image TSR](/methods/mirror-image). |
 
 
 ### Using a CSV file as input
 
 ```python
-from tsr_package.tsr.TSR import TSR
+from tsr_package import TSR
 
 # Define the directory and CSV file path
 data_dir = "Dataset"
@@ -222,8 +225,7 @@ corresponding chains:
 ### Retrieving PDB files and generating keys
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
-from tsr_package.tsr.TSR import TSR
+from tsr_package import PDB_DL, TSR
 
 # Step 1: retrieve PDB files
 data_dir = "Dataset"
@@ -238,8 +240,7 @@ TSR(data_dir, pdb_ids, chain=chain, output_option="keys")
 ### Using a CSV file for input
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
-from tsr_package.tsr.TSR import TSR
+from tsr_package import PDB_DL, TSR
 
 # Use CSV input for batch processing
 data_dir = "Dataset"
