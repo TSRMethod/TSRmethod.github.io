@@ -35,8 +35,10 @@ const GROUP_LABELS = {
     { id: 'nucleotide', label: 'Nucleotide' },
   ],
   analysis: [
+    // Tools that summarise or transform TSR keys...
     { id: 'key-analysis', label: 'Analysis' },
-    { id: 'key-visualisation', label: 'Visualisation' },
+    // ...and tools that cluster, plot or learn from them.
+    { id: 'key-visualization', label: 'Visualization & Modeling' },
   ],
 }
 

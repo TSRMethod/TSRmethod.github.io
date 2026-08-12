@@ -26,14 +26,35 @@ const HEADING = /^(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$/
  * because that text is what gets slugged.
  */
 function toPlainText(markdown) {
-  return markdown
+  /*
+   * Inline code is lifted out before anything else and put back at the end.
+   *
+   * Without that, a heading like `common_keys.csv` loses its underscores: the
+   * backticks are stripped first, and the emphasis rules then read the bare
+   * underscores as italic delimiters. rehype-slug, which parses properly,
+   * keeps them — so the section link pointed at an id that did not exist.
+   */
+  const codeSpans = []
+  // Delimited with a private-use character, which cannot occur in Markdown
+  // source, so a heading such as "Step 2 of 3" is never mistaken for one.
+  let text = markdown.replace(/`+([^`]*)`+/g, (_match, code) => {
+    codeSpans.push(code)
+    return `\uE000${codeSpans.length - 1}\uE000`
+  })
+
+  text = text
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images -> alt text
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links -> label
-    .replace(/`([^`]*)`/g, '$1') // inline code
     .replace(/(\*\*\*|___)(.*?)\1/g, '$2') // bold italic
     .replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
-    .replace(/(\*|_)(.*?)\1/g, '$2') // italic
+    .replace(/\*([^*]+)\*/g, '$1') // italic with asterisks
+    // Underscores only delimit emphasis between words, never inside one —
+    // `snake_case_name` is a single word, not emphasis.
+    .replace(/(^|[^\w])_([^_]+)_(?!\w)/g, '$1$2')
     .replace(/~~(.*?)~~/g, '$1') // strikethrough
+
+  return text
+    .replace(/\uE000(\d+)\uE000/g, (_match, index) => codeSpans[Number(index)])
     .trim()
 }
 

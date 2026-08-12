@@ -61,7 +61,7 @@ describe('method validation', () => {
     ).toBe('/tsr')
     expect(
       buildMethod(
-        './methods/common-keys.md',
+        './analysis/common-keys.md',
         file(
           VALID.replace('slug: example', 'slug: common-keys').replace(
             'category: method',
@@ -201,6 +201,32 @@ describe('heading extraction', () => {
     const headings = extractHeadings('## Using `TSR()` with **CSV** input\n')
 
     expect(headings[0].text).toBe('Using TSR() with CSV input')
+  })
+
+  it('keeps underscores inside inline code', () => {
+    /*
+     * Regression: the inline-markdown stripper used to treat `_` as an italic
+     * delimiter after removing the backticks, so `common_keys.csv` slugged as
+     * "commonkeyscsv" while rehype-slug produced "common_keyscsv". Every
+     * section link on that page pointed at nothing.
+     */
+    const headings = extractHeadings(
+      '### `common_keys.csv` and `common_keys_chain.csv`\n',
+    )
+
+    expect(headings[0].text).toBe('common_keys.csv and common_keys_chain.csv')
+    expect(headings[0].id).toBe('common_keyscsv-and-common_keys_chaincsv')
+  })
+
+  it('does not mistake a number in a heading for a code placeholder', () => {
+    const headings = extractHeadings('## Step 2 of 3 with `x_y`\n')
+    expect(headings[0].text).toBe('Step 2 of 3 with x_y')
+  })
+
+  it('leaves genuine underscore emphasis alone', () => {
+    expect(extractHeadings('## _emphasised_ word\n')[0].text).toBe(
+      'emphasised word',
+    )
   })
 
   it('disambiguates repeated headings the same way rehype-slug does', () => {
