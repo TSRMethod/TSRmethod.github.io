@@ -13,9 +13,9 @@ on:
   push:
     branches:
       - main
-      # Kept while the rebuild is in progress, so work on the development
-      # branch is validated before the release pull request is opened.
-      - refactor/site-foundation
+      # Content migration branches are validated as they are pushed, so a
+      # problem surfaces before the pull request is opened rather than after.
+      - 'content/**'
 
 # Read-only: this workflow only inspects the code.
 permissions:

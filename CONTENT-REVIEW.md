@@ -20,6 +20,29 @@ Each entry separates:
 | ⚠️ Verify | Will be migrated, but a specific point needs checking against the paper or the package first. |
 | ✅ Resolved | An author has confirmed or corrected it. Record who and when. |
 
+Item numbers are stable, so a resolved item keeps its number and its section
+rather than being renumbered or deleted.
+
+## Index
+
+| # | Item | Status |
+| --- | --- | --- |
+| 1 | CrossTSR — overview duplicated from DrugTSR | 🚫 Blocked |
+| 2 | Metal-Ion TSR — appears unfinished | 🚫 Blocked |
+| 3 | SSE-TSR — citation | ✅ Resolved |
+| 4 | Key to 2D Image — citation | ⚠️ Verify |
+| 5 | Clustering — three repositories | ⚠️ Verify |
+| 6 | DrugTSR — `aa_grouping` passage | ⚠️ Verify |
+| 7 | Size-Filtering — `size_filter` argument | ✅ Resolved |
+| 8 | Amino Acid TSR — example variables | ⚠️ Verify |
+| 9 | Nucleotide–Protein TSR — terminology | ⚠️ Verify |
+| 10 | Key to 2D Image — keys vs triplets | ⚠️ Verify |
+| 11 | Deep Neural Network — architecture and results | ⚠️ Verify |
+| 12 | TSR — HPC job script has no legacy source | ⚠️ Verify |
+| 13 | Size-Filtering — `retrieve_pdb_files` | ✅ Resolved |
+| 14 | Package import path | ✅ Resolved |
+| 15 | `output_option` default | ✅ Resolved |
+
 ---
 
 ## 🚫 Blocked — not published pending review
@@ -60,38 +83,34 @@ its repository?
 
 ## ⚠️ Verify before publishing
 
-### 3. SSE-TSR — no confirmed citation 🚫 **blocking publication**
+### 3. SSE-TSR — citation ✅ **resolved**
 
-**Observed.** The legacy page cited `10.1016/j.compbiolchem.2021.107479`, which
-is the amino-acid-grouping paper, also cited by the Amino Acid Grouping page.
-Its `learn-more` section was commented out in the source while the section
-navigation still linked to `#learn-more`, so that anchor went nowhere.
+**Was.** The legacy page cited `10.1016/j.compbiolchem.2021.107479`, the amino
+acid grouping paper, and the only version of this work available locally was
+an IEEEtran manuscript from November 2024 carrying no DOI. The page was held
+as a draft on that basis.
 
-A manuscript for this method exists locally at
-`~/Desktop/Integrating_Secondary_Structures_Information_into_Triangular_Spatial_Relationships__TSR__for_Advanced_Protein_Classification`:
+**Resolved.** The final publication has been independently verified:
 
-- Title: *Integrating Secondary Structures Information into Triangular Spatial
-  Relationships (TSR) for Advanced Protein Classification*
-- Authors: Poorya Khajouie, Titli Sarkar, Krishna Rauniyar, Li Chen, Wu Xu,
-  Vijay Raghavan
-- IEEEtran manuscript, dated November 2024, containing **no DOI**
+> **SSE-TSR: An Approach to Integrate Secondary Structure Elements into
+> Triangular Spatial Relationships for Protein Classification**
+> Poorya Khajouie, Titli Sarkar, Krishna Rauniyar, Li Chen, Wu Xu,
+> Vijay Raghavan
+> *IEEE Transactions on Computational Biology and Bioinformatics*, 2026,
+> 23(2), 694–703.
+> DOI: [10.1109/TCBBIO.2026.3654047](https://doi.org/10.1109/TCBBIO.2026.3654047)
 
-So there is no confirmed publication to cite, which is why the amino-acid
-DOI was probably reused.
+`src/content/methods/sse-tsr.md` now carries this citation and is
+`status: published`. The incorrect amino-acid DOI is gone, and a test asserts
+it cannot come back. The page is live at `/methods/sse-tsr`, appears under
+One Molecule, and its `/sse-tsr` legacy alias became active on its own.
 
-**Question.** Has this manuscript since been published? If so, what is the DOI
-or venue? If it is still unpublished, should the page cite it as a preprint,
-or carry no citation at all?
+The record is also in `src/content/publications/khajouie-2026-sse-tsr.json`.
 
-**Status.** `src/content/methods/sse-tsr.md` exists with the scientific text
-and tutorial migrated, and is held at `status: draft`. It has no route, no
-navigation entry, and its legacy alias `/sse-tsr` is deliberately inert.
-Publishing is a matter of adding the `paper:` block and flipping `status`.
-
-Two related legacy faults are already fixed and need no decision: the figure's
-alt text read "Size Filtering Illustration Illustration" and has been
-rewritten to describe the actual diagram, and the method is now named
-**SSE-TSR** consistently, matching the authors' own abstract.
+Two related legacy faults were fixed during migration and need no decision:
+the figure's alt text read "Size Filtering Illustration Illustration" and now
+describes the actual diagram, and the method is named **SSE-TSR** throughout,
+matching the authors' own title.
 
 ---
 
@@ -209,7 +228,7 @@ typically run through Slurm, the section should be removed instead.
 
 ---
 
-### 13. Size-Filtering TSR — a stale function name I replaced
+### 13. Size-Filtering TSR — a stale function name ✅ **resolved**
 
 `TSR-WEB/src/tabs/SizeFiltering.js`, second example
 
@@ -225,12 +244,19 @@ example across the legacy site, and the already-published TSR page, use
 than making the change silently: it is an API name, and the evidence is
 circumstantial even though it points one way.
 
-**Question.** Confirm `retrieve_pdb_files` is genuinely retired and no
-supported release still exposes it.
+**Resolved.** Confirmed against the current `pooryakhajouie/TSR-Package`
+source: the supported entry point is `PDB_DL`, re-exported from
+`tsr_package/__init__.py`. `retrieve_pdb_files` is not part of the current
+package API.
+
+This is not a claim that the function never existed — it plainly did, and
+still appears in stale build output and in an older installed copy. It is
+simply retired, and the legacy example calling it was already broken because
+it never imported the name.
 
 ---
 
-### 14. Import path — `tsr_package.tsr.X` versus `tsr_package.X`
+### 14. Import path ✅ **resolved**
 
 Affects every migrated tutorial, **including the already-published TSR page.**
 
@@ -242,28 +268,44 @@ PDB_DL`. The `tsr` name does appear in stale build output (`build/lib/tsr/`)
 and in the installed virtualenv (`tsrenv/.../tsr/`), suggesting the inner
 package was renamed at some point.
 
-**What I did.** Nothing. I kept the legacy form on all four new pages so they
-stay consistent with the published TSR page. Changing it would alter live
-content on the strength of a local working copy that may not match the
-released GitHub package.
+**Resolved** against the authoritative repository,
+`pooryakhajouie/TSR-Package`. Its `tsr_package/__init__.py` re-exports
+`.PDB_DL`, `.TSR`, `.SSE_TSR`, `.Cross_TSR` and `.Drug_TSR`, so the public API
+is a flat import from the package:
 
-**Question.** Which import path is correct for the version users install from
-`TSR-Package`? If it is `tsr_package.X`, all five method pages need updating
-together.
+```python
+from tsr_package import PDB_DL, TSR
+from tsr_package import SSETSR
+```
+
+The `tsr_package.tsr.X` form does not match the current layout. All five
+method pages were updated together — 23 import statements, with adjacent
+`PDB_DL`/`TSR` imports collapsed onto one line. This included the already
+published `/tsr` page, which carried the same stale form.
 
 ---
 
-### 15. `output_option` default
+### 15. `output_option` default ✅ **resolved**
 
 Affects the already-published TSR page.
 
 **Observed.** The parameter table on `/tsr` gives the default for
 `output_option` as `"keys"`. The source signature has `output_option='both'`.
 
-**What I did.** Nothing — `/tsr` is outside the scope of this migration group,
-and the new pages avoid restating the default.
+**Resolved.** The signature is authoritative:
 
-**Question.** Confirm `'both'` is correct, and the table should be amended.
+```python
+TSR(data_dir, input_files, chain=None, output_option='both',
+    output_subdir='lexicographic', aa_grouping=False,
+    mirror_image=False, size_filter=10000)
+```
+
+The default is `'both'`. The parameter table on `/tsr` has been corrected, and
+extended to document `size_filter` (default `10000`), `aa_grouping` and
+`mirror_image` alongside it, each linking to its own method page.
+
+Examples that explicitly pass `output_option="keys"` were left alone: an
+explicit argument in an example is not a statement about the default.
 
 ---
 

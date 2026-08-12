@@ -113,7 +113,7 @@ with one extra argument.
 ### Retrieve PDB files
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
+from tsr_package import PDB_DL
 
 # Retrieve PDB files for the specified PDB IDs
 pdb_ids = ["1GTA", "1GTB", "1LBE"]
@@ -126,7 +126,7 @@ also the default if no directory is given.
 ### Generate keys with size filtering
 
 ```python
-from tsr_package.tsr.TSR import TSR
+from tsr_package import TSR
 
 # Define the directory where PDB files are stored
 data_dir = "Dataset"
@@ -153,7 +153,7 @@ Protein chains are case-sensitive and must match the chain IDs in the PDB file.
 ### Using a CSV file as input
 
 ```python
-from tsr_package.tsr.TSR import TSR
+from tsr_package import TSR
 
 # Define the directory and CSV file path
 data_dir = "Dataset"
@@ -177,8 +177,7 @@ corresponding chains:
 ### Retrieving PDB files and generating keys
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
-from tsr_package.tsr.TSR import TSR
+from tsr_package import PDB_DL, TSR
 
 # Step 1: retrieve PDB files
 data_dir = "Dataset"
@@ -193,8 +192,7 @@ TSR(data_dir, input_files, chain=chain, output_option="keys", size_filter=500)
 ### Using a CSV file for input
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
-from tsr_package.tsr.TSR import TSR
+from tsr_package import PDB_DL, TSR
 
 # Use CSV input
 data_dir = "Dataset"

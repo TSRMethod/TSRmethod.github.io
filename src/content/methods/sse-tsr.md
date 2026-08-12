@@ -6,17 +6,7 @@ summary: >-
   Adds secondary structure information to TSR keys, sorting them into 18 groups
   according to the helix, strand and coil arrangement of each triangle.
 
-# DRAFT — not published, and therefore not routed and not in the navigation.
-#
-# Held back for one reason only: the citation. The legacy page linked
-# 10.1016/j.compbiolchem.2021.107479, which is the amino acid grouping paper.
-# A manuscript for this method exists but carries no DOI, so there is nothing
-# confirmed to cite. See item 3 in CONTENT-REVIEW.md.
-#
-# The scientific text and the tutorial below were migrated from the legacy page
-# and the tutorial matches the released package, so publishing should be a
-# matter of adding the correct `paper:` block and setting status to published.
-status: draft
+status: published
 category: method
 group: one-molecule
 order: 4
@@ -33,6 +23,20 @@ figure:
   caption: >-
     Proteins that are indistinguishable by key counts alone can be separated
     once secondary structure groups are taken into account.
+
+paper:
+  title: >-
+    SSE-TSR: An Approach to Integrate Secondary Structure Elements into
+    Triangular Spatial Relationships for Protein Classification
+  authors: >-
+    Poorya Khajouie, Titli Sarkar, Krishna Rauniyar, Li Chen, Wu Xu,
+    Vijay Raghavan
+  journal: IEEE Transactions on Computational Biology and Bioinformatics
+  year: 2026
+  volume: '23'
+  issue: '2'
+  pages: 694–703
+  doi: 10.1109/TCBBIO.2026.3654047
 
 repositories:
   - name: TSR-Package
@@ -99,7 +103,7 @@ SSE-TSR has its own entry point, `SSETSR()`, rather than an argument to
 ### Retrieve PDB files
 
 ```python
-from tsr_package.tsr.PDB_DL import PDB_DL
+from tsr_package import PDB_DL
 
 # Retrieve PDB files for the specified PDB IDs
 pdb_ids = ["1GTA", "1GTB", "1LBE"]
@@ -112,7 +116,7 @@ also the default if no directory is given.
 ### Generate keys with secondary structure information
 
 ```python
-from tsr_package.tsr.SSE_TSR import SSETSR
+from tsr_package import SSETSR
 
 # Define the directory where PDB files are stored
 data_dir = "Dataset"
@@ -133,7 +137,7 @@ Protein chains are case-sensitive and must match the chain IDs in the PDB file.
 ### Using a CSV file as input
 
 ```python
-from tsr_package.tsr.SSE_TSR import SSETSR
+from tsr_package import SSETSR
 
 # Define the directory and CSV file path
 data_dir = "Dataset"

@@ -274,8 +274,7 @@ describe('the real site is unaffected', () => {
     const drafts = methods.filter((entry) => entry.status === 'draft')
     const publishedSlugs = publishedMethods.map((entry) => entry.slug)
 
-    expect(drafts.length).toBeGreaterThan(0) // SSE-TSR, at the time of writing
-
+    // There may legitimately be none: every draft eventually gets published.
     for (const draft of drafts) {
       expect(publishedSlugs).not.toContain(draft.slug)
 

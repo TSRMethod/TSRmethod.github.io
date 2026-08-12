@@ -1,0 +1,19 @@
+{
+  "id": "khajouie-2026-sse-tsr",
+  "title": "SSE-TSR: An Approach to Integrate Secondary Structure Elements into Triangular Spatial Relationships for Protein Classification",
+  "authors": [
+    "Poorya Khajouie",
+    "Titli Sarkar",
+    "Krishna Rauniyar",
+    "Li Chen",
+    "Wu Xu",
+    "Vijay Raghavan"
+  ],
+  "venue": "IEEE Transactions on Computational Biology and Bioinformatics",
+  "year": 2026,
+  "volume": "23",
+  "issue": "2",
+  "pages": "694–703",
+  "doi": "10.1109/TCBBIO.2026.3654047",
+  "abstract": "The proposed method integrates secondary structure elements (SSEs) into TSR-based protein representations, allowing an enriched representation of protein structures by considering 18 different combinations of helix, strand, and coil arrangements."
+}
