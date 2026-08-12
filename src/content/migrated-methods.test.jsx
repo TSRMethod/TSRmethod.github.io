@@ -17,22 +17,32 @@ import { extractHeadings } from '../lib/toc'
 import { setViewport } from '../test/viewport'
 
 /*
- * The first group of TSR-derived methods migrated out of the legacy site.
+ * The TSR-derived methods migrated out of the legacy site.
  *
- * All four are published. SSE-TSR was initially held as a draft because the
- * legacy page cited the amino acid grouping paper; its own publication has
- * since been confirmed (IEEE TCBBIO, 2026) and it went live by adding the
- * citation and flipping `status` — no routing or navigation change.
+ * Stage 7A brought the four single-molecule methods; Stage 7B added DrugTSR
+ * and the amino-acid and nucleotide methods, which live in their own separate
+ * packages rather than in TSR-Package.
  *
- * The draft safety model is still exercised below, against a synthetic draft
- * rather than a real page, so it stays covered no matter what is published.
+ * SSE-TSR was initially held as a draft because the legacy page cited the
+ * amino acid grouping paper. Its own publication was later confirmed and it
+ * went live by adding the citation and flipping `status` — no routing or
+ * navigation change was needed.
+ *
+ * The draft safety model is exercised below against a synthetic draft rather
+ * than a real page, so it stays covered no matter what is published.
  */
 
 const PUBLISHED = [
+  // Stage 7A
   'mirror-image',
   'size-filtering',
   'amino-acid-grouping',
   'sse-tsr',
+  // Stage 7B
+  'drug-tsr',
+  'amino-acid',
+  'nucleotide',
+  'nucleotide-protein',
 ]
 
 function renderApp(path = '/') {
@@ -50,7 +60,7 @@ describe('the migrated methods parse', () => {
     expect(method).toBeDefined()
     expect(method.status).toBe('published')
     expect(method.category).toBe('method')
-    expect(method.group).toBe('one-molecule')
+    expect(method.group).toBeTruthy()
     expect(method.summary.length).toBeGreaterThan(30)
     expect(method.body.length).toBeGreaterThan(500)
   })
@@ -64,6 +74,71 @@ describe('the migrated methods parse', () => {
       '/methods/amino-acid-grouping',
     )
     expect(getPublishedMethod('sse-tsr').path).toBe('/methods/sse-tsr')
+    expect(getPublishedMethod('drug-tsr').path).toBe('/methods/drug-tsr')
+    expect(getPublishedMethod('amino-acid').path).toBe('/methods/amino-acid')
+    expect(getPublishedMethod('nucleotide').path).toBe('/methods/nucleotide')
+    expect(getPublishedMethod('nucleotide-protein').path).toBe(
+      '/methods/nucleotide-protein',
+    )
+  })
+
+  it('uses each method’s own authoritative package', () => {
+    /*
+     * The nucleotide and amino-acid methods are separate repositories, not
+     * part of TSR-Package. Collapsing them into the central package would
+     * make every install and import instruction on those pages wrong.
+     */
+    const repo = (slug) => getPublishedMethod(slug).repositories[0].url
+
+    expect(repo('drug-tsr')).toBe('https://github.com/pooryakhajouie/TSR-Package')
+    expect(repo('amino-acid')).toBe(
+      'https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE',
+    )
+    expect(repo('nucleotide')).toBe(
+      'https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE',
+    )
+    expect(repo('nucleotide-protein')).toBe(
+      'https://github.com/KrishnaRauniyar/Nucleotide-Protein',
+    )
+  })
+
+  it('imports each package by its own name, not always tsr_package', () => {
+    const body = (slug) => getPublishedMethod(slug).body
+
+    expect(body('drug-tsr')).toContain('from tsr_package import DrugTSR')
+    expect(body('amino-acid')).toContain(
+      'from aminoacid_tsr_package.AminoAcid import AminoAcidProteinTSR',
+    )
+    expect(body('nucleotide')).toContain(
+      'from nucleotide_tsr_package.Nucleotide import NucleotideTSR',
+    )
+    // Nucleotide–Protein is a pair of CLI scripts, so it has no import at all.
+    expect(body('nucleotide-protein')).toContain('python drug_protein_3A.py')
+    expect(body('nucleotide-protein')).not.toContain('import tsr_package')
+  })
+
+  it('does not repeat the aa_grouping mistake on DrugTSR', () => {
+    /*
+     * The legacy DrugTSR page carried a sentence about `aa_grouping` copied
+     * from the amino acid grouping page. DrugTSR() has no such parameter.
+     */
+    expect(getPublishedMethod('drug-tsr').body).not.toMatch(/aa_grouping/)
+  })
+
+  it('keeps the Slurm scripts of the three HPC workflows intact', () => {
+    for (const slug of ['amino-acid', 'nucleotide', 'nucleotide-protein']) {
+      const slurm = getPublishedMethod(slug).slurm
+      expect(slurm, `${slug} should have a slurm block`).toBeTruthy()
+      expect(slurm.script.code).toContain('#SBATCH -t 72:00:00')
+      expect(slurm.script.code.split('\n').length).toBeGreaterThan(10)
+      expect(slurm.submit.code).toMatch(/^sbatch /)
+    }
+
+    // The two-step workflow must stay chained, in order.
+    const cross = getPublishedMethod('nucleotide-protein').slurm.script.code
+    expect(cross.indexOf('drug_protein_3A.py')).toBeLessThan(
+      cross.indexOf('cross_key.py'),
+    )
   })
 
   it('cites the confirmed SSE-TSR publication, not the legacy one', () => {
@@ -108,16 +183,45 @@ describe('published methods are reachable', () => {
     ).toBeInTheDocument()
   })
 
-  it('lists all four under One Molecule in the navigation', () => {
-    const visible = getVisibleNavigation()
-    const menu = visible.find((item) => item.id === 'methods')
+  it('places every published method in the group its content declares', () => {
+    /*
+     * Derived from the registry rather than a hard-coded list, so migrating a
+     * further method does not silently make this assertion vacuous.
+     */
+    const menu = getVisibleNavigation().find((item) => item.id === 'methods')
+    expect(menu, 'the TSR-Based Methods menu should exist').toBeDefined()
 
-    expect(menu, 'the TSR-Based Methods menu should now exist').toBeDefined()
+    for (const group of menu.groups) {
+      const expected = publishedMethods
+        .filter((m) => m.category === 'method' && m.group === group.id)
+        .map((m) => m.slug)
+        .sort()
 
-    const group = menu.groups.find((g) => g.id === 'one-molecule')
-    expect(group.items.map((item) => item.id).sort()).toEqual(
-      [...PUBLISHED].sort(),
-    )
+      expect(group.items.map((item) => item.id).sort()).toEqual(expected)
+    }
+
+    // Every published `method` is in exactly one group, none dropped.
+    const shown = menu.groups.flatMap((g) => g.items.map((i) => i.id)).sort()
+    const all = publishedMethods
+      .filter((m) => m.category === 'method')
+      .map((m) => m.slug)
+      .sort()
+    expect(shown).toEqual(all)
+  })
+
+  it('keeps Amino Acid TSR and Amino Acid Grouping TSR distinct', () => {
+    /*
+     * Two different methods, two different packages, adjacent in the same
+     * menu group. A slug or path collision would silently merge them.
+     */
+    const a = getPublishedMethod('amino-acid')
+    const b = getPublishedMethod('amino-acid-grouping')
+
+    expect(a.path).toBe('/methods/amino-acid')
+    expect(b.path).toBe('/methods/amino-acid-grouping')
+    expect(a.path).not.toBe(b.path)
+    expect(a.repositories[0].url).not.toBe(b.repositories[0].url)
+    expect(a.paper.doi).not.toBe(b.paper.doi)
   })
 
   it('shows the dropdown in the rendered header', async () => {
@@ -192,6 +296,10 @@ describe('legacy aliases', () => {
     ['/size-filtering', 'Size-Filtering TSR'],
     ['/aa-grouping', 'Amino Acid Grouping TSR'],
     ['/sse-tsr', 'SSE-TSR'],
+    ['/drug-tsr', 'DrugTSR'],
+    ['/aminoacid', 'Amino Acid TSR'],
+    ['/nucleotide', 'Nucleotide TSR'],
+    ['/nucleotide-protein', 'Nucleotide–Protein TSR'],
   ])('%s redirects to the migrated page', (legacyPath, title) => {
     renderApp(legacyPath)
 
@@ -246,16 +354,33 @@ describe('content quality of every published method', () => {
     }
   })
 
-  it('cites a different paper on each published method', () => {
+  it('shares a DOI between methods only where that is intended', () => {
     /*
-     * The legacy site reused the amino-acid-grouping DOI on SSE-TSR. Any
-     * repeat of a DOI across two published methods is worth a second look.
+     * The legacy site reused the amino-acid-grouping DOI on SSE-TSR, so a
+     * repeated DOI is worth catching. But sharing can be legitimate: one
+     * Proteins 2025 paper covers both the nucleotide representation and the
+     * DNA–p53 interaction work, and is correctly cited by both pages.
+     *
+     * Anything shared must therefore be listed here deliberately.
      */
-    const dois = publishedMethods
-      .map((method) => method.paper?.doi)
-      .filter(Boolean)
+    const INTENTIONALLY_SHARED = {
+      '10.1002/prot.70005': ['nucleotide', 'nucleotide-protein'],
+    }
 
-    expect(new Set(dois).size).toBe(dois.length)
+    const bySlug = new Map()
+    for (const method of publishedMethods) {
+      if (!method.paper?.doi) continue
+      const slugs = bySlug.get(method.paper.doi) ?? []
+      bySlug.set(method.paper.doi, [...slugs, method.slug])
+    }
+
+    for (const [doi, slugs] of bySlug) {
+      if (slugs.length === 1) continue
+      expect(
+        INTENTIONALLY_SHARED[doi]?.slice().sort(),
+        `${doi} is cited by ${slugs.join(', ')} — intentional?`,
+      ).toEqual(slugs.slice().sort())
+    }
   })
 })
 

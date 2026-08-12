@@ -32,16 +32,20 @@ rather than being renumbered or deleted.
 | 3 | SSE-TSR — citation | ✅ Resolved |
 | 4 | Key to 2D Image — citation | ⚠️ Verify |
 | 5 | Clustering — three repositories | ⚠️ Verify |
-| 6 | DrugTSR — `aa_grouping` passage | ⚠️ Verify |
+| 6 | DrugTSR — `aa_grouping` passage | ✅ Resolved |
 | 7 | Size-Filtering — `size_filter` argument | ✅ Resolved |
-| 8 | Amino Acid TSR — example variables | ⚠️ Verify |
-| 9 | Nucleotide–Protein TSR — terminology | ⚠️ Verify |
+| 8 | Amino Acid TSR — example variables | ✅ Resolved |
+| 9 | Nucleotide–Protein TSR — terminology | ✅ Resolved |
 | 10 | Key to 2D Image — keys vs triplets | ⚠️ Verify |
 | 11 | Deep Neural Network — architecture and results | ⚠️ Verify |
 | 12 | TSR — HPC job script has no legacy source | ⚠️ Verify |
 | 13 | Size-Filtering — `retrieve_pdb_files` | ✅ Resolved |
 | 14 | Package import path | ✅ Resolved |
 | 15 | `output_option` default | ✅ Resolved |
+| 16 | DrugTSR — CSV column count | ✅ Resolved |
+| 17 | Amino Acid TSR — meaning of "Length" | ⚠️ Verify |
+| 18 | Amino Acid TSR — is this the right citation? | ⚠️ Verify |
+| 19 | Slurm placeholder script name | ⚠️ Verify |
 
 ---
 
@@ -137,13 +141,22 @@ do the others play?
 
 ---
 
-### 6. DrugTSR — passage about `aa_grouping`
+### 6. DrugTSR — passage about `aa_grouping` ✅ **resolved**
 
-**Observed.** The page contains an explanation of `aa_grouping` that also
+**Observed.** The legacy page ended its usage section with: *"With
+'aa_grouping' argument set to 'True', the Method will group amino acids
+together and assign a same label to each group of them."* The same sentence
 appears on the Amino Acid Grouping page.
 
-**Question.** Does `aa_grouping` apply in the DrugTSR context as described, or
-was this passage carried over in error?
+**Resolved.** `DrugTSR()` has no such parameter:
+
+```python
+def DrugTSR(data_dir, input_files, chain=None, drug_name=None, drug_id=None,
+            output_option='both', output_subdir='lexicographic'):
+```
+
+The sentence was carried over in error and is not migrated. A test asserts
+`aa_grouping` does not appear anywhere on the DrugTSR page.
 
 ---
 
@@ -170,21 +183,34 @@ author decision; recorded so the next person does not repeat the check.
 
 ---
 
-### 8. Amino Acid TSR — example variables
+### 8. Amino Acid TSR — example variables ✅ **resolved**
 
-**Observed.** The tutorial references `pdb_ids` in snippets where it is not
-defined, so those snippets cannot be run as written.
+**Observed.** The legacy tutorial referenced `pdb_ids` in snippets where it was
+never defined, so those snippets could not be run as written.
 
-**Question.** What should the examples define?
+**Resolved** against the package's own README
+(`KrishnaRauniyar/TSR_AMINOACID_PACKAGE`), which is the authoritative
+documentation and defines every variable it uses. The migrated examples follow
+the README, so each snippet is self-contained.
 
 ---
 
-### 9. Nucleotide–Protein TSR — terminology
+### 9. Nucleotide–Protein TSR — terminology ✅ **resolved**
 
-**Observed.** Drug-related and nucleotide-related vocabulary are both used in
-describing the same workflow.
+**Observed.** The legacy page used drug-related and nucleotide-related
+vocabulary interchangeably for the same workflow.
 
-**Question.** Which term is intended in each passage?
+**Resolved.** This comes from upstream, and is not a mistake on the website.
+In `KrishnaRauniyar/Nucleotide-Protein` the nucleotide occupies the "drug"
+position of a general drug–protein cross-key pipeline: the script is named
+`drug_protein_3A.py`, its output column is `drug`, and the repository README
+states *"The csv input file includes information for both Nucleotide (drug)
+and Protein."*
+
+The migrated page keeps the upstream names, because they are what a user types
+and sees, and adds a short note explaining that "drug" means the nucleotide
+here. Renaming them on the page would have made the documentation disagree
+with the tool.
 
 ---
 
@@ -306,6 +332,83 @@ extended to document `size_filter` (default `10000`), `aa_grouping` and
 
 Examples that explicitly pass `output_option="keys"` were left alone: an
 explicit argument in an example is not a statement about the default.
+
+---
+
+### 16. DrugTSR — CSV column count ✅ **resolved**
+
+**Observed.** The legacy page said the DrugTSR CSV *"should have two columns:
+one for the protein IDs and one for the corresponding chains"*, while the table
+immediately below it showed four: `protein`, `chain`, `drug_name`, `drug_id`.
+
+**Resolved.** Four is right. `DrugTSR()` takes `drug_name` and `drug_id` in
+addition to `chain`, so the CSV must identify the drug as well. The sentence
+was stale text copied from the core TSR page, whose CSV genuinely has two
+columns. The migrated page says four.
+
+---
+
+### 17. Amino Acid TSR — what "Length" means
+
+`TSR-WEB/src/tabs/AminoAcid.js`
+
+**Observed.** The page lists a required length per residue type — GLY 4, ALA 5,
+SER/CYS 6, VAL/PRO/THR 7, up to PTR 16 — introduced as *"specific sequence
+lengths"*. These numbers correspond to the count of non-hydrogen atoms in each
+residue rather than to any sequence length.
+
+**What I did.** Migrated the table verbatim with the neutral column heading
+"Expected length", without reinterpreting the term.
+
+**Question.** Should this column be labelled atom count? If so the surrounding
+sentence should be reworded too.
+
+---
+
+### 18. Amino Acid TSR — is this the right citation?
+
+**Observed.** The legacy page carried no citation at all. The closest verified
+publication by the group is:
+
+> **A Parallel Implementation for Large-Scale TSR-based 3D Structural
+> Comparisons of Protein and Amino Acid**
+> Feng Chen, Tarikul I. Milon, Poorya Khajouie, Antoinette Myers, Wu Xu
+> *Current Bioinformatics*, 2025, 20(6), 564–579.
+> DOI [10.2174/0115748936306625240724102438](https://doi.org/10.2174/0115748936306625240724102438)
+
+Its abstract states that *"3D structures of proteins and amino acids are
+represented by an integer vector in the TSR-based method"*, so amino-acid
+representation is genuinely within scope. Metadata verified through Crossref.
+
+**What I did.** Attached it as the page's reference and published the page,
+since its tutorial is fully verified against the package README.
+
+**Question.** Is this the intended primary citation? The paper's own
+contribution is the parallel implementation, so if a dedicated amino-acid
+representation paper exists it would be the better reference — or both could be
+listed.
+
+---
+
+### 19. Slurm — placeholder script name
+
+`amino-acid.md`, `nucleotide.md`
+
+**Observed.** The legacy job scripts ended with the literal line
+`python3 (actual path to python script)`, which is a parenthetical instruction
+rather than runnable shell.
+
+**What I did.** Replaced it with `python3 your_script.py`, which is valid shell
+and obviously a placeholder, and added a note saying the script should contain
+the `PDB_DL` and generation calls from the Usage section above.
+
+The group's real allocation, `-A loni_tsr_4`, was **kept** rather than
+genericised: it is the authentic value from the group's own scripts and this is
+the group's own documentation. The resource note tells outside readers to
+substitute their own.
+
+**Question.** Is there a canonical driver script in either package that should
+be named here instead?
 
 ---
 
