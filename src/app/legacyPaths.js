@@ -19,6 +19,12 @@ export const LEGACY_PATHS = {
   '/size-filtering': 'size-filtering',
   '/aa-grouping': 'amino-acid-grouping',
   '/sse-tsr': 'sse-tsr',
+  '/drug-tsr': 'drug-tsr',
+  // The legacy site had no hyphen here, and this is a different page from
+  // /aa-grouping — see the note at the top of amino-acid.md.
+  '/aminoacid': 'amino-acid',
+  '/nucleotide': 'nucleotide',
+  '/nucleotide-protein': 'nucleotide-protein',
 }
 
 export default LEGACY_PATHS
