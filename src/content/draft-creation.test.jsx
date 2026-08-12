@@ -264,10 +264,33 @@ describe('the real site is unaffected', () => {
     expect(isRouteImplemented('/tsr')).toBe(true)
   })
 
-  it('has no draft content in the repository right now', () => {
-    // If this ever fails it is not an error — it means a draft was added, and
-    // the assertions above are what keep it invisible.
-    expect(methods.filter((entry) => entry.status === 'draft')).toEqual([])
+  it('keeps every draft in the repository out of the published set', () => {
+    /*
+     * Drafts are expected to exist — SSE-TSR is one. What matters is that none
+     * of them reaches the published set, and so none of them can be routed or
+     * linked. This replaces an earlier assertion that no drafts existed at
+     * all, which stopped being true once real content started arriving.
+     */
+    const drafts = methods.filter((entry) => entry.status === 'draft')
+    const publishedSlugs = publishedMethods.map((entry) => entry.slug)
+
+    expect(drafts.length).toBeGreaterThan(0) // SSE-TSR, at the time of writing
+
+    for (const draft of drafts) {
+      expect(publishedSlugs).not.toContain(draft.slug)
+
+      /*
+       * A draft may well have a category and group already assigned by a
+       * maintainer, in which case it has a computed path. What must hold is
+       * that the path is not routable — placement is not publication.
+       */
+      if (draft.path) {
+        expect(
+          isRouteImplemented(draft.path),
+          `${draft.path} must not be routable while draft`,
+        ).toBe(false)
+      }
+    }
   })
 
   it('renders /tsr and shows it in the navigation', () => {

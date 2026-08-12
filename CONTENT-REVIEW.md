@@ -60,16 +60,38 @@ its repository?
 
 ## ⚠️ Verify before publishing
 
-### 3. SSE-TSR — citation may not match the page subject
+### 3. SSE-TSR — no confirmed citation 🚫 **blocking publication**
 
-**Observed.** The page cites `10.1016/j.compbiolchem.2021.107479`. That DOI is
-the amino-acid-grouping paper, which is also cited by the Amino Acid Grouping
-page. Separately, the `learn-more` section is commented out in the source
-while the section navigation still links to `#learn-more`, so that anchor has
-no target.
+**Observed.** The legacy page cited `10.1016/j.compbiolchem.2021.107479`, which
+is the amino-acid-grouping paper, also cited by the Amino Acid Grouping page.
+Its `learn-more` section was commented out in the source while the section
+navigation still linked to `#learn-more`, so that anchor went nowhere.
 
-**Question.** Is this the intended reference for SSE-TSR, or should it cite a
-different paper?
+A manuscript for this method exists locally at
+`~/Desktop/Integrating_Secondary_Structures_Information_into_Triangular_Spatial_Relationships__TSR__for_Advanced_Protein_Classification`:
+
+- Title: *Integrating Secondary Structures Information into Triangular Spatial
+  Relationships (TSR) for Advanced Protein Classification*
+- Authors: Poorya Khajouie, Titli Sarkar, Krishna Rauniyar, Li Chen, Wu Xu,
+  Vijay Raghavan
+- IEEEtran manuscript, dated November 2024, containing **no DOI**
+
+So there is no confirmed publication to cite, which is why the amino-acid
+DOI was probably reused.
+
+**Question.** Has this manuscript since been published? If so, what is the DOI
+or venue? If it is still unpublished, should the page cite it as a preprint,
+or carry no citation at all?
+
+**Status.** `src/content/methods/sse-tsr.md` exists with the scientific text
+and tutorial migrated, and is held at `status: draft`. It has no route, no
+navigation entry, and its legacy alias `/sse-tsr` is deliberately inert.
+Publishing is a matter of adding the `paper:` block and flipping `status`.
+
+Two related legacy faults are already fixed and need no decision: the figure's
+alt text read "Size Filtering Illustration Illustration" and has been
+rewritten to describe the actual diagram, and the method is now named
+**SSE-TSR** consistently, matching the authors' own abstract.
 
 ---
 
@@ -106,12 +128,26 @@ was this passage carried over in error?
 
 ---
 
-### 7. Size-Filtering TSR — argument name
+### 7. Size-Filtering TSR — argument name ✅ **resolved**
 
 **Observed.** Examples pass `size_filter=500` to `TSR(...)`.
 
-**Question.** Does the current released package use this argument name and
-these semantics?
+**Resolved** against the package source at `~/Desktop/tsr_package`
+(`tsr_package/TSR.py`, version 0.1.1 per `setup.py` — the same version the
+tutorials reference):
+
+```python
+def TSR(data_dir, input_files, chain=None, output_option='both',
+        output_subdir='lexicographic', aa_grouping=False,
+        mirror_image=False, size_filter=10000):
+```
+
+`size_filter` is real, and its default is `10000` — high enough that no
+filtering happens unless asked for. The same check confirms `mirror_image` and
+`aa_grouping`, so those two pages needed no assumption either.
+
+The migrated page documents the default as `10000`. Nothing here needs an
+author decision; recorded so the next person does not repeat the check.
 
 ---
 
@@ -170,6 +206,64 @@ rather than only here.
 particular: the partition, the resource request, and whether
 `generate_keys.py` is the intended entry point. If TSR-Package is not
 typically run through Slurm, the section should be removed instead.
+
+---
+
+### 13. Size-Filtering TSR — a stale function name I replaced
+
+`TSR-WEB/src/tabs/SizeFiltering.js`, second example
+
+**Observed.** The example imported `PDB_DL` and then called
+`retrieve_pdb_files(csv_file)`, a name it never imported — so the snippet could
+not run as written. `retrieve_pdb_files` appears in the package only under
+`build/lib/tsr/` and inside the old installed `tsrenv` copy, not in the current
+`tsr_package/` source, where the equivalent module is `PDB_DL.py`. Every other
+example across the legacy site, and the already-published TSR page, use
+`PDB_DL`.
+
+**What I did.** Migrated that line as `PDB_DL(csv_file)`. Recording it rather
+than making the change silently: it is an API name, and the evidence is
+circumstantial even though it points one way.
+
+**Question.** Confirm `retrieve_pdb_files` is genuinely retired and no
+supported release still exposes it.
+
+---
+
+### 14. Import path — `tsr_package.tsr.X` versus `tsr_package.X`
+
+Affects every migrated tutorial, **including the already-published TSR page.**
+
+**Observed.** All tutorials use `from tsr_package.tsr.PDB_DL import PDB_DL`,
+i.e. a `tsr` sub-package. The local source at `~/Desktop/tsr_package` has no
+such sub-package: modules sit directly in `tsr_package/`, and `setup.py` uses
+`find_packages()`, which would make the import `from tsr_package.PDB_DL import
+PDB_DL`. The `tsr` name does appear in stale build output (`build/lib/tsr/`)
+and in the installed virtualenv (`tsrenv/.../tsr/`), suggesting the inner
+package was renamed at some point.
+
+**What I did.** Nothing. I kept the legacy form on all four new pages so they
+stay consistent with the published TSR page. Changing it would alter live
+content on the strength of a local working copy that may not match the
+released GitHub package.
+
+**Question.** Which import path is correct for the version users install from
+`TSR-Package`? If it is `tsr_package.X`, all five method pages need updating
+together.
+
+---
+
+### 15. `output_option` default
+
+Affects the already-published TSR page.
+
+**Observed.** The parameter table on `/tsr` gives the default for
+`output_option` as `"keys"`. The source signature has `output_option='both'`.
+
+**What I did.** Nothing — `/tsr` is outside the scope of this migration group,
+and the new pages avoid restating the default.
+
+**Question.** Confirm `'both'` is correct, and the table should be amended.
 
 ---
 

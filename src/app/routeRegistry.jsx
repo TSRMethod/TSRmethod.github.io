@@ -1,8 +1,9 @@
-import { matchRoutes } from 'react-router-dom'
+import { matchRoutes, Navigate } from 'react-router-dom'
 import Home from '../pages/Home/Home'
 import NotFound from '../pages/NotFound/NotFound'
 import MethodPage from '../components/method/MethodPage'
 import { publishedMethods } from '../content'
+import { LEGACY_PATHS } from './legacyPaths'
 
 /*
  * The route table, as data.
@@ -26,7 +27,6 @@ import { publishedMethods } from '../content'
  * Still to be hand-built:
  *   Stage 7  /publications, /people
  *   Stage 8  /software, /contact
- *   Stage 7  legacy path redirects (e.g. /aa-grouping -> /methods/...)
  */
 
 const methodRoutes = publishedMethods.map((method) => ({
@@ -34,9 +34,24 @@ const methodRoutes = publishedMethods.map((method) => ({
   element: <MethodPage slug={method.slug} />,
 }))
 
+/*
+ * A legacy alias is created only when its target is actually published.
+ *
+ * This matters: an alias must not become a back door to a draft. SSE-TSR is
+ * listed above and is deliberately absent from the route table, because its
+ * content is still draft — the entry starts working by itself on the day the
+ * page is published, and not before.
+ */
+const legacyRoutes = Object.entries(LEGACY_PATHS).flatMap(([from, slug]) => {
+  const target = publishedMethods.find((method) => method.slug === slug)
+  if (!target) return []
+  return [{ path: from, element: <Navigate to={target.path} replace /> }]
+})
+
 export const routeConfig = [
   { path: '/', element: <Home /> },
   ...methodRoutes,
+  ...legacyRoutes,
   { path: '*', element: <NotFound /> },
 ]
 
