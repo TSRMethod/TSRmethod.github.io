@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "lede": "We develop the Triangular Spatial Relationship (TSR) method: an alignment-free way of representing a 3D protein structure as a set of integer keys, so that structures can be compared, clustered and searched without superimposition. This site documents the method, the TSR-derived methods built on it, and the open-source Python packages that implement them.",
+    "primaryCta": "Read about the TSR method",
+    "secondaryCta": "Browse methods and tutorials"
+  },
+  "introduction": {
+    "heading": "How TSR represents a structure",
+    "body": "TSR takes the Cα atoms of a protein as the vertices of triangles. Every triangle is reduced to a single integer — its key — computed from the triangle's side lengths, its angles and the labels of its vertices. Identical triangles in different proteins receive the same key, so two structures can be compared by counting the keys they share, with no alignment step and no superimposition.",
+    "cta": "See the full method and tutorial",
+    "figure": {
+      "src": "/images/home/tsr-key-generation.webp",
+      "alt": "Five-step diagram of TSR key generation: a sample protein structure; all of its Cα atoms selected; a triangle constructed between three of them; the triangle's side lengths and angle measured; the key formula applied to those values; and the protein finally presented as a table of integer keys.",
+      "caption": "Generating TSR keys: from a structure, to triangles between its Cα atoms, to one integer per triangle."
+    }
+  },
+  "methods": {
+    "heading": "TSR-based methods",
+    "intro": "The core representation has been extended in several directions — grouping amino acids, discriminating mirror images, comparing structures of different sizes, adding secondary structure, and moving beyond a single protein to drugs, ligands and nucleotides. Each method has its own page with installation instructions and a worked tutorial."
+  },
+  "analysis": {
+    "heading": "Key analysis and visualisation",
+    "intro": "Once keys have been generated, a second family of tools summarises and interprets them: finding the keys shared across a set of structures, clustering structures by key similarity, and training models on key frequencies."
+  },
+  "software": {
+    "heading": "Open-source software",
+    "intro": "Every method on this site is implemented in a public repository. The packages are installed from source with pip; the method pages carry the exact commands and the expected input formats."
+  },
+  "publications": {
+    "heading": "Recent publications",
+    "intro": "Peer-reviewed work describing the method and its applications.",
+    "cta": "See all publications"
+  },
+  "group": {
+    "heading": "The research group",
+    "intro": "TSR is developed jointly by the Department of Chemistry and the School of Computing and Informatics at the University of Louisiana at Lafayette, bringing together faculty, doctoral researchers and undergraduate students from chemistry, biology and computer science.",
+    "cta": "Meet the group"
+  },
+  "contact": {
+    "heading": "Working with us",
+    "body": "We welcome questions about the method, about using the packages on your own structures, and about research collaboration. Problems with the software are best reported as issues on the relevant repository.",
+    "cta": "Email the group"
+  }
+}

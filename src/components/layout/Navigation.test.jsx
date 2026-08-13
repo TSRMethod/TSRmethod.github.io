@@ -299,8 +299,12 @@ describe('page layout', () => {
   it('shows the group email in the footer', () => {
     renderApp()
 
+    // Scoped to the footer: the home page's closing section shows the same
+    // address, and both come from the one value in site.json.
+    const footer = within(screen.getByRole('contentinfo'))
+
     expect(
-      screen.getByRole('link', { name: 'tsrresearchgroup@gmail.com' }),
+      footer.getByRole('link', { name: 'tsrresearchgroup@gmail.com' }),
     ).toHaveAttribute('href', 'mailto:tsrresearchgroup@gmail.com')
   })
 

@@ -34,9 +34,12 @@ After signing in you will see a list of projects. Choose:
 You will then see the sections you can edit:
 
 - **Method & tutorial pages**
+- **Key Analysis & Visualization**
 - **People**
 - **Publications**
 - **Software**
+- **Home page**
+- **Page introductions**
 - **Site settings**
 
 ## 4. Editing a tutorial
@@ -61,7 +64,7 @@ Things worth knowing:
 
 You will notice some things you cannot change — the page's web address, which
 menu it sits under, and whether it is published. Those are deliberately not
-editable here; see section 11.
+editable here; see section 12.
 
 ## 5. Creating a new method draft
 
@@ -143,7 +146,31 @@ again later.
      placeholder would be published.
 4. Click **Save**.
 
-## 9. Saving
+## 9. Changing the words on the home page
+
+1. Click **Home page**.
+2. Each section of the page is a group of fields — the opening section, what
+   TSR is, the methods, the software, the publications, the group and the
+   closing invitation.
+3. Rewrite whatever you like and click **Save**.
+
+Two things are worth knowing.
+
+**The lists look after themselves.** You will not find a place to list the
+methods, the tools, the packages, the papers or the people, because none of
+them are typed in here. They are read from the Method pages, the Software
+collection, Publications and People. Publish a method and it appears on the
+home page; add a paper and it becomes one of the three recent papers shown.
+
+**Do not leave a field empty.** Every field here is text that appears on the
+page, so a blank one would show as a gap or an unlabelled button. Emptying one
+stops the website rebuilding, and the live site stays as it was until it is
+filled in again.
+
+**Page introductions** works the same way, for the heading and opening
+paragraph of the Publications and People pages.
+
+## 10. Saving
 
 Click **Save**. That is the whole process — there is no separate "publish"
 step.
@@ -151,7 +178,7 @@ step.
 Your change is recorded straight away. The website itself is rebuilt
 automatically afterwards.
 
-## 10. How long until it appears
+## 11. How long until it appears
 
 **Deployment is not switched on yet.** Once it is, expect roughly **one to two
 minutes** between saving and the change appearing on
@@ -162,7 +189,7 @@ problem with the change — see the last section.
 
 Refresh the page in your browser if you still see the old version.
 
-## 11. What you should not try to change here
+## 12. What you should not try to change here
 
 Some things are hidden from the editor on purpose, because changing them would
 break the site's addresses, its menus, or its scientific review process:
@@ -182,7 +209,7 @@ after the science has been checked.
 If you need one of these changed, ask — it is a small job, it is just not a
 safe one to do by accident.
 
-## 12. If something goes wrong
+## 13. If something goes wrong
 
 The site checks every change before publishing it. If a change would break the
 site, **the site does not break** — the previous version stays online and the

@@ -1,0 +1,109 @@
+.page {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.header {
+  max-width: var(--content-measure);
+  margin-bottom: var(--space-7);
+}
+
+.intro {
+  margin-top: var(--space-3);
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+}
+
+.year + .year {
+  margin-top: var(--space-6);
+}
+
+/*
+ * The year sits above the papers it introduces on narrow screens and beside
+ * them from tablet up, where there is room for a margin column. `align-items:
+ * start` plus `position: sticky` keeps it in view while a long year scrolls.
+ */
+.year {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .year {
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .yearHeading {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
+  }
+}
+
+.yearHeading {
+  font-size: var(--text-xl);
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.publication + .publication {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.title {
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+  /* Long chemical and method names must break rather than widen the page. */
+  overflow-wrap: break-word;
+}
+
+.authors,
+.citation,
+.doi {
+  margin: 0 0 var(--space-2);
+  overflow-wrap: break-word;
+}
+
+.authors {
+  color: var(--color-text);
+}
+
+.citation {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.doi {
+  font-size: var(--text-sm);
+  margin-bottom: 0;
+}
+
+.abstract {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.abstract summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  padding-block: var(--space-1);
+}
+
+.abstract p {
+  margin: var(--space-2) 0 0;
+  max-width: var(--content-measure);
+}

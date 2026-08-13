@@ -138,8 +138,15 @@ describe('isRouteImplemented', () => {
   })
 
   it('rejects a path that only matches the catch-all', () => {
-    expect(isRouteImplemented('/publications')).toBe(false)
+    // /software is still to be built in Stage 8, so the navigation and the
+    // footer must both keep hiding it.
+    expect(isRouteImplemented('/software')).toBe(false)
     expect(isRouteImplemented('/methods/not-a-real-method')).toBe(false)
+  })
+
+  it('accepts the pages built in Stage 7D', () => {
+    expect(isRouteImplemented('/publications')).toBe(true)
+    expect(isRouteImplemented('/people')).toBe(true)
   })
 
   it('accepts a migrated method and its legacy alias', () => {

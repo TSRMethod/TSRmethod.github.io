@@ -127,5 +127,33 @@ export function getVisibleNavigation({
   })
 }
 
+/**
+ * Published content for one category, arranged into the same labelled groups
+ * the menu uses.
+ *
+ * The home page needs the whole method entry (title, summary) rather than the
+ * link shape above, but it must not invent a second taxonomy: if a method
+ * moves group, or a new group is added here, both the menu and the home page
+ * follow. Both gates still apply, so a draft or an unrouted page cannot appear.
+ *
+ * @param {'method' | 'analysis'} category  which set of group labels to use
+ * @returns {Array<{id: string, label: string, methods: Array}>} non-empty groups
+ */
+export function getContentGroups(
+  category,
+  { methods = publishedMethods, isAvailable = isRouteImplemented } = {},
+) {
+  const groups = category === 'analysis' ? GROUP_LABELS.analysis : GROUP_LABELS.methods
+
+  return groups
+    .map((group) => ({
+      ...group,
+      methods: methods.filter(
+        (method) => method.group === group.id && isAvailable(method.path),
+      ),
+    }))
+    .filter((group) => group.methods.length > 0)
+}
+
 /* Exposed so tests can assert against the intended shape. */
 export { SKELETON as navigationSkeleton }

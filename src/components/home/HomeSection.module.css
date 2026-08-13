@@ -1,0 +1,33 @@
+.section {
+  padding-block: var(--space-7);
+}
+
+.section[data-tone='muted'] {
+  background-color: var(--color-surface);
+  border-block: 1px solid var(--color-border);
+}
+
+.inner {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.header {
+  max-width: var(--content-measure);
+  margin-bottom: var(--space-5);
+}
+
+.heading {
+  margin: 0;
+}
+
+.intro {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+}
+
+.action {
+  margin: var(--space-5) 0 0;
+  font-weight: 600;
+}

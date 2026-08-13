@@ -568,6 +568,15 @@ content:
       - name: abstract
         label: Abstract
         type: text
+        description: >-
+          Optional. Shown behind an "Abstract" toggle on the publications page.
+          Leave it empty rather than pasting a placeholder.
+      - name: order
+        label: Sort position
+        type: number
+        description: >-
+          Optional. Only used to order papers published in the same year;
+          the list is always newest year first.
 
   # -------------------------------------------------------------------------
   # Software repositories
@@ -611,6 +620,230 @@ content:
         type: number
 
   # -------------------------------------------------------------------------
+  # Home page wording
+  # -------------------------------------------------------------------------
+  # What the home page SAYS. Not how it is built.
+  #
+  # There is deliberately no field here for a link target, a section order, a
+  # component name or a colour: the sections, their links and their layout are
+  # decided in React, and every list on the page (methods, tools, packages,
+  # papers, faculty) is read from the content collections above. An editor
+  # rewrites the prose and the button labels; they cannot point a button at a
+  # page that does not exist, reorder the page, or turn this into a page
+  # builder.
+  #
+  # Every field is required, because each one renders as visible text — an
+  # emptied heading or button label would appear on the site as a blank. The
+  # build fails instead, which means a bad save never reaches the live site.
+  - name: home
+    label: Home page
+    type: file
+    path: src/content/home.json
+    format: json
+    fields:
+      - name: hero
+        label: Opening section
+        type: object
+        fields:
+          - name: lede
+            label: Introduction
+            type: text
+            required: true
+            description: >-
+              The paragraph under the group name. Two or three sentences saying
+              what the group does.
+          - name: primaryCta
+            label: Main button label
+            type: string
+            required: true
+            description: Links to the TSR method page.
+          - name: secondaryCta
+            label: Second button label
+            type: string
+            required: true
+            description: Jumps to the list of methods further down the page.
+      - name: introduction
+        label: What TSR is
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: body
+            label: Explanation
+            type: text
+            required: true
+            description: >-
+              A short summary only. The full method and tutorial live on the
+              TSR method page, and this should not repeat them.
+          - name: cta
+            label: Link label
+            type: string
+            required: true
+            description: Links to the TSR method page.
+          - name: figure
+            label: Diagram
+            type: object
+            fields:
+              - name: src
+                label: Image
+                type: image
+              - name: alt
+                label: Alt text
+                type: text
+                description: >-
+                  What the diagram shows, in a sentence. This is what a screen
+                  reader reads in place of the picture, so describe the
+                  content rather than naming the file.
+              - name: caption
+                label: Caption
+                type: string
+      - name: methods
+        label: TSR-based methods section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+            description: >-
+              The methods themselves are listed automatically from the method
+              pages, so there is no list to maintain here.
+      - name: analysis
+        label: Key analysis section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+      - name: software
+        label: Software section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+            description: >-
+              The repositories are listed automatically from the Software
+              collection.
+      - name: publications
+        label: Publications section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+          - name: cta
+            label: Link label
+            type: string
+            required: true
+            description: >-
+              Links to the publications page. The three most recent papers are
+              chosen automatically by year.
+      - name: group
+        label: Research group section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+          - name: cta
+            label: Link label
+            type: string
+            required: true
+            description: Links to the people page.
+      - name: contact
+        label: Closing section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: body
+            label: Text
+            type: text
+            required: true
+          - name: cta
+            label: Button label
+            type: string
+            required: true
+            description: >-
+              Opens a new email to the group's public address, which is set in
+              Site settings.
+
+  # -------------------------------------------------------------------------
+  # Publications and People page wording
+  # -------------------------------------------------------------------------
+  # The headings and introductions of the two list pages. The lists themselves
+  # come from the Publications and People collections above.
+  - name: pages
+    label: Page introductions
+    type: file
+    path: src/content/pages.json
+    format: json
+    fields:
+      - name: publications
+        label: Publications page
+        type: object
+        fields:
+          - name: title
+            label: Page title
+            type: string
+            required: true
+            description: Also used for the browser tab.
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+      - name: people
+        label: People page
+        type: object
+        fields:
+          - name: title
+            label: Page title
+            type: string
+            required: true
+            description: Also used for the browser tab.
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+          - name: currentHeading
+            label: Heading for current members
+            type: string
+            required: true
+          - name: formerHeading
+            label: Heading for former members
+            type: string
+            required: true
+
+  # -------------------------------------------------------------------------
   # Site settings — editorial only
   # -------------------------------------------------------------------------
   # Technical configuration (GitHub organisation, repository URLs, issue
@@ -639,7 +872,8 @@ content:
         type: text
         required: true
         description: >-
-          One or two sentences. Used on the home page and by search engines.
+          One or two sentences, used by search engines and link previews. The
+          wording shown on the home page itself is under "Home page".
       - name: email
         label: Public contact email
         type: string
