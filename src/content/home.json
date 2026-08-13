@@ -9,7 +9,7 @@
     "body": "TSR takes the Cα atoms of a protein as the vertices of triangles. Every triangle is reduced to a single integer — its key — computed from the triangle's side lengths, its angles and the labels of its vertices. Identical triangles in different proteins receive the same key, so two structures can be compared by counting the keys they share, with no alignment step and no superimposition.",
     "cta": "See the full method and tutorial",
     "figure": {
-      "src": "/images/home/tsr-key-generation.webp",
+      "src": "/images/uploads/high-resolution-scientific-workflow-infographic-for-a-peer-reviewed-rev-image-9-2.png",
       "alt": "Five-step diagram of TSR key generation: a sample protein structure; all of its Cα atoms selected; a triangle constructed between three of them; the triangle's side lengths and angle measured; the key formula applied to those values; and the protein finally presented as a table of integer keys.",
       "caption": "Generating TSR keys: from a structure, to triangles between its Cα atoms, to one integer per triangle."
     }
