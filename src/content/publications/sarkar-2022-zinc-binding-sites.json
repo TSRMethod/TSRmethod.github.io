@@ -1,0 +1,17 @@
+{
+  "id": "sarkar-2022-zinc-binding-sites",
+  "title": "The specific applications of the TSR-based method in identifying Zn2+ binding sites of proteases and ACE/ACE2",
+  "authors": [
+    "Titli Sarkar",
+    "Camille R. Reaux",
+    "Jianxiong Li",
+    "Vijay V. Raghavan",
+    "Wu Xu"
+  ],
+  "venue": "Data in Brief",
+  "year": 2022,
+  "volume": "45",
+  "pages": "108629",
+  "doi": "10.1016/j.dib.2022.108629",
+  "abstract": "We have developed an alignment-free TSR (Triangular Spatial Relationship)-based computational method for protein structural comparison and motif identification and discovery. The dataset and data presented here include additional information that help readers become aware of specific applications of the TSR-based method in protein clustering."
+}

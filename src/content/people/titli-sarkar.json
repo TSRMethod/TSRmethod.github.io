@@ -1,0 +1,11 @@
+{
+  "id": "titli-sarkar",
+  "name": "Titli Sarkar",
+  "role": "Ph.D., Computer Science",
+  "affiliation": "University of Louisiana at Lafayette",
+  "group": "student",
+  "status": "former",
+  "order": 20,
+  "bio": "Received a BSc and an MSc-MTech in computer science and engineering from the University of Calcutta, and an MSc and PhD in computer science from the University of Louisiana at Lafayette in 2018 and 2021. Her research interests include computational and machine-learning-based methods for protein and small-molecule modelling for cancer research.",
+  "photo": "/images/people/titli-sarkar.webp"
+}

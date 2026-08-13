@@ -1,0 +1,21 @@
+{
+  "id": "sarkar-2023-mirror-image",
+  "title": "Introducing mirror-image discrimination capability to the TSR-based method for capturing stereo geometry and understanding hierarchical structure relationships of protein receptor family",
+  "authors": [
+    "Titli Sarkar",
+    "Yuwu Chen",
+    "Yu Wang",
+    "Yixin Chen",
+    "Feng Chen",
+    "Camille R. Reaux",
+    "Laura E. Moore",
+    "Vijay Raghavan",
+    "Wu Xu"
+  ],
+  "venue": "Computational Biology and Chemistry",
+  "year": 2023,
+  "volume": "103",
+  "pages": "107824",
+  "doi": "10.1016/j.compbiolchem.2023.107824",
+  "abstract": "Mirror-image discrimination capability is introduced into the Triangular Spatial Relationship (TSR)-based key generation formula to capture stereo geometry. Applying mirror images decreases structural similarity, which can be partially explained by the observation of a decrease in common keys. For a hierarchically organized structure dataset, applying mirror images enhances the opportunity to discover specific keys that exclusively belong to certain types of proteins."
+}

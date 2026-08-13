@@ -29,8 +29,11 @@ paper:
     comparing different sizes of protein structures
   authors: >-
     Sarika Kondra, Feng Chen, Yixin Chen, Yuwu Chen, Caleb J. Collette, Wu Xu
-  journal: Proteins
-  year: 2021
+  journal: 'Proteins: Structure, Function, and Bioinformatics'
+  year: 2022
+  volume: '90'
+  issue: '1'
+  pages: 239–257
   doi: 10.1002/prot.26215
 
 repositories:

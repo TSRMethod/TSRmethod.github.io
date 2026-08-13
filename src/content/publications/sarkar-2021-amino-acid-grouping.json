@@ -1,0 +1,18 @@
+{
+  "id": "sarkar-2021-amino-acid-grouping",
+  "title": "Exploring the effectiveness of the TSR-based protein 3-D structural comparison method for protein clustering, and structural motif identification and discovery of protein kinases, hydrolases, and SARS-CoV-2’s protein via the application of amino acid grouping",
+  "authors": [
+    "Titli Sarkar",
+    "Vijay V. Raghavan",
+    "Feng Chen",
+    "Andrew Riley",
+    "Sophia Zhou",
+    "Wu Xu"
+  ],
+  "venue": "Computational Biology and Chemistry",
+  "year": 2021,
+  "volume": "92",
+  "pages": "107479",
+  "doi": "10.1016/j.compbiolchem.2021.107479",
+  "abstract": "Exploring the effectiveness of the TSR-based method for protein clustering and structural motif identification via amino acid grouping. We have classified the keys into different categories for a better understanding of protein structure relations. Applying amino acid grouping to the TSR-based method modestly improves the accuracy of protein clustering in certain cases."
+}
