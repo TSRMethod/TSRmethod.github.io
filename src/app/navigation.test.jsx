@@ -138,15 +138,24 @@ describe('isRouteImplemented', () => {
   })
 
   it('rejects a path that only matches the catch-all', () => {
-    // /software is still to be built in Stage 8, so the navigation and the
-    // footer must both keep hiding it.
-    expect(isRouteImplemented('/software')).toBe(false)
     expect(isRouteImplemented('/methods/not-a-real-method')).toBe(false)
+    expect(isRouteImplemented('/nothing-here')).toBe(false)
   })
 
-  it('accepts the pages built in Stage 7D', () => {
-    expect(isRouteImplemented('/publications')).toBe(true)
-    expect(isRouteImplemented('/people')).toBe(true)
+  it('accepts every hand-built page', () => {
+    for (const path of ['/publications', '/people', '/software', '/contact']) {
+      expect(isRouteImplemented(path), path).toBe(true)
+    }
+  })
+
+  it('leaves the retired legacy pages unavailable', () => {
+    /*
+     * Deliberate, and explained in legacyPaths.js: /problems was a form that
+     * reported nothing and has no single successor, and /community was two
+     * affiliation logos that are now in the footer of every page.
+     */
+    expect(isRouteImplemented('/problems')).toBe(false)
+    expect(isRouteImplemented('/community')).toBe(false)
   })
 
   it('accepts a migrated method and its legacy alias', () => {

@@ -604,9 +604,17 @@ content:
         label: URL
         type: string
         required: true
+        description: >-
+          The repository's address on GitHub. Changing it here is all that is
+          needed to point an entry at a different repository — including moving
+          the main package to a new account or organisation later.
       - name: description
         label: Description
         type: text
+        description: >-
+          One or two sentences on what the code does. The software page is a
+          directory, not a manual — installation and usage stay on the method
+          pages.
       - name: language
         label: Language
         type: string
@@ -615,9 +623,30 @@ content:
         type: select
         options:
           values: [core, method, analysis, tooling]
+        description: >-
+          Which section of the software page the entry appears under: core is
+          the main TSR software, method is the specialised packages, analysis
+          is the tools that work on generated keys.
+      - name: kind
+        label: What it is
+        type: select
+        options:
+          values: [package, scripts]
+        description: >-
+          "package" for something a user installs, "scripts" for research code
+          that is run where it sits. Shown on the entry, so nothing implies a
+          maintained release where there is not one.
+      - name: issuesUrl
+        label: Issue tracker
+        type: string
+        description: >-
+          Optional, and a commitment: setting it puts a "Report a problem" link
+          on the entry, so only fill it in for a repository whose issues
+          somebody actually reads.
       - name: order
         label: Sort position
         type: number
+        description: Lower numbers appear first within a section.
 
   # -------------------------------------------------------------------------
   # Home page wording
@@ -842,6 +871,78 @@ content:
             label: Heading for former members
             type: string
             required: true
+      - name: software
+        label: Software page
+        type: object
+        fields:
+          - name: title
+            label: Page title
+            type: string
+            required: true
+            description: Also used for the browser tab.
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+            description: >-
+              The repositories themselves come from the Software collection, so
+              there is no list to keep up to date here.
+          - name: note
+            label: Highlighted note
+            type: text
+            required: true
+            description: >-
+              The short caveat in the tinted box, currently explaining that the
+              code is spread across several repositories.
+      - name: contact
+        label: Contact page
+        type: object
+        fields:
+          - name: title
+            label: Page title
+            type: string
+            required: true
+            description: Also used for the browser tab.
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+          - name: emailHeading
+            label: Email section heading
+            type: string
+            required: true
+          - name: emailAction
+            label: Email button label
+            type: string
+            required: true
+            description: >-
+              Opens a new message to the group's public address, which is set
+              in Site settings. The address itself is not repeated here.
+          - name: collaborationHeading
+            label: Research section heading
+            type: string
+            required: true
+          - name: collaborationBody
+            label: Research section text
+            type: text
+            required: true
+          - name: softwareHeading
+            label: Software section heading
+            type: string
+            required: true
+          - name: softwareBody
+            label: Software section text
+            type: text
+            required: true
+            description: >-
+              Where to report a problem with the code. Individual repositories
+              are listed on the software page, not named here.
+          - name: affiliationHeading
+            label: Affiliation section heading
+            type: string
+            required: true
+            description: >-
+              The affiliations listed under it are the ones in Site settings.
 
   # -------------------------------------------------------------------------
   # Site settings — editorial only

@@ -1,0 +1,40 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.button {
+  font: inherit;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--color-primary);
+}
+
+/*
+ * The live region keeps its box whether or not it has anything to announce,
+ * so confirming a copy does not nudge the button sideways.
+ */
+.status {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  min-height: 1.5em;
+}
+
+.status[data-state='copied'] {
+  color: var(--color-primary-dark);
+}
+
+.status[data-state='failed'] {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}

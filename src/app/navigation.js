@@ -64,6 +64,22 @@ const SKELETON = [
     groups: GROUP_LABELS.analysis,
   },
   { id: 'publications', label: 'Publications', to: '/publications' },
+  /*
+   * Software stays inside About rather than becoming a seventh top-level item,
+   * and that is a measurement rather than a preference.
+   *
+   * Promoting it was tried first: a researcher after the code is arguably not
+   * looking under "About". But the bar is already 926px wide with six items,
+   * and the desktop navigation turns on at 1024px. Adding "Software" pushed
+   * the group's name out of the header — ellipsised at 1280px, and collapsed
+   * to nothing at 1024px, leaving the bare "TSR" mark. Trading the site's own
+   * name in the header for one menu position is a bad deal, and the only ways
+   * to buy the width back were shortening an established menu label or hiding
+   * the name deliberately.
+   *
+   * Software is reachable in three other places instead: the footer's Explore
+   * column, the home page's software section, and the contact page.
+   */
   {
     id: 'about',
     label: 'About',

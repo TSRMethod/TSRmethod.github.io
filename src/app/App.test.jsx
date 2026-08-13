@@ -47,6 +47,39 @@ describe('404 handling', () => {
       '/',
     )
   })
+
+  it('404s the retired /problems address, on purpose', () => {
+    /*
+     * The old page was a form that reported nothing — it logged to the console
+     * and then thanked the visitor. There is no single successor: a bug
+     * belongs on the repository that provides the tool, anything else belongs
+     * in an email, and /contact explains both. Redirecting there would be
+     * guessing which the visitor meant. See src/app/legacyPaths.js.
+     */
+    renderAt('/problems')
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: /page not found/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('404s /community, whose content is now in the footer', () => {
+    renderAt('/community')
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: /page not found/i }),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('legacy addresses that do have a successor', () => {
+  it('sends the old Source Code page to /software', () => {
+    renderAt('/source-code')
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Software' }),
+    ).toBeInTheDocument()
+  })
 })
 
 describe('siteConfig', () => {

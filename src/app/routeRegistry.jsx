@@ -3,9 +3,11 @@ import Home from '../pages/Home/Home'
 import NotFound from '../pages/NotFound/NotFound'
 import Publications from '../pages/Publications/Publications'
 import People from '../pages/People/People'
+import Software from '../pages/Software/Software'
+import Contact from '../pages/Contact/Contact'
 import MethodPage from '../components/method/MethodPage'
 import { publishedMethods } from '../content'
-import { LEGACY_PATHS } from './legacyPaths'
+import { LEGACY_PATHS, LEGACY_PAGE_PATHS } from './legacyPaths'
 
 /*
  * The route table, as data.
@@ -25,9 +27,6 @@ import { LEGACY_PATHS } from './legacyPaths'
  * turn, its navigation entry — no code change, and no way for the two to
  * disagree. Draft content is absent from `publishedMethods`, so an unreviewed
  * page has no route at all and cannot be reached by typing its address.
- *
- * Still to be hand-built:
- *   Stage 8  /software, /contact
  *
  * Adding a route here is the only thing needed to make its navigation and
  * footer links appear: both ask `isRouteImplemented` rather than carrying
@@ -53,12 +52,30 @@ const legacyRoutes = Object.entries(LEGACY_PATHS).flatMap(([from, slug]) => {
   return [{ path: from, element: <Navigate to={target.path} replace /> }]
 })
 
-export const routeConfig = [
+const pageRoutes = [
   { path: '/', element: <Home /> },
   { path: '/publications', element: <Publications /> },
   { path: '/people', element: <People /> },
+  { path: '/software', element: <Software /> },
+  { path: '/contact', element: <Contact /> },
+]
+
+/*
+ * Page aliases follow the same rule as the method ones: the redirect exists
+ * only if its destination does, so an alias can never point into nothing.
+ */
+const legacyPageRoutes = Object.entries(LEGACY_PAGE_PATHS).flatMap(
+  ([from, to]) => {
+    if (!pageRoutes.some((route) => route.path === to)) return []
+    return [{ path: from, element: <Navigate to={to} replace /> }]
+  },
+)
+
+export const routeConfig = [
+  ...pageRoutes,
   ...methodRoutes,
   ...legacyRoutes,
+  ...legacyPageRoutes,
   { path: '*', element: <NotFound /> },
 ]
 

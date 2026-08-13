@@ -49,7 +49,8 @@ src/
     home/       The home page's sections
   content/      Editable content — Markdown and JSON, no React. See its README.
   lib/          Content plumbing (frontmatter parsing, heading extraction)
-  pages/        One folder per top-level page — Home, Publications, People, 404
+  pages/        One folder per top-level page — Home, Publications, People,
+                Software, Contact, 404
   hooks/        Reusable React hooks
   styles/       Design tokens, reset, global base styles
   test/         Test setup
@@ -58,9 +59,11 @@ public/
   images/       Content images, referenced from Markdown and JSON
 ```
 
-`/software` and `/contact` are still to be built. Neither the navigation nor
-the footer links to them: both ask the router whether a path resolves before
-showing it, so a page cannot be advertised before it exists.
+Every public page now exists: the home page, the method and analysis tutorials,
+`/publications`, `/people`, `/software` and `/contact`. The navigation and the
+footer still ask the router whether a path resolves before showing it, so a
+page can never be advertised before it is built — that is what let each of them
+appear on its own as it was added.
 
 ### Two rules worth keeping
 

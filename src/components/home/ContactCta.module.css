@@ -29,3 +29,9 @@
   color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
+
+.more {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

@@ -15,7 +15,8 @@ src/content/
   repositories/     one JSON file per software repository
   site.json         group name, description, contact address, affiliations
   home.json         the wording on the home page
-  pages.json        the wording at the top of the publications and people pages
+  pages.json        the wording on the publications, people, software and
+                    contact pages
   README.md         this file
 ```
 
@@ -249,15 +250,18 @@ anywhere else.
 
 ### `home.json` and `pages.json`
 
-The words on the home page, and the heading and introduction at the top of the
-publications and people pages.
+The words on the home page, and the headings and prose on the publications,
+people, software and contact pages.
 
 These files hold **what the pages say, and nothing about how they are built.**
 There is no field for a link target, a section order or a layout, because those
 are decided in code — and every list on the home page (the methods, the tools,
 the packages, the recent papers, the faculty) is read from the folders above,
 so there is no list to keep up to date here. Publish a method and it appears on
-the home page by itself.
+the home page by itself; add a repository and it appears on the software page.
+
+The contact page holds no email address either — it reads the one in
+`site.json`, which is also what the footer and the home page use.
 
 Every field in these two files is required, because each one is visible text on
 the page. Clearing one fails the build rather than putting a blank heading or
@@ -327,6 +331,8 @@ line is assembled from whichever are present without leaving stray commas.
 
 ### `repositories/`
 
+One file per repository. These are what the software page lists.
+
 ```json
 {
   "id": "tsr-package",
@@ -335,9 +341,33 @@ line is assembled from whichever are present without leaving stray commas.
   "description": "…",
   "language": "Python",
   "category": "core",
+  "kind": "package",
+  "issuesUrl": "https://github.com/pooryakhajouie/TSR-Package/issues",
   "order": 1
 }
 ```
+
+`category` decides which section of the software page the entry appears under:
+`core` for the main TSR software, `method` for the specialised packages,
+`analysis` for tools that work on keys once they exist.
+
+`kind` is `package` for something a user installs, or `scripts` for research
+code that is run where it sits. It is printed on the entry, so that nothing on
+the page implies a maintained release where there is not one.
+
+`issuesUrl` is optional and is a commitment: filling it in puts a "Report a
+problem" link on the entry, so only set it for a repository whose issues
+somebody actually reads.
+
+**Which pages a repository documents is not stored here.** It is worked out by
+matching this `url` against the `repositories` block in each method page's
+frontmatter, so the two can never disagree, and a page that is still a draft
+never appears.
+
+**Moving a repository is one edit.** Change `url` and everything follows: the
+link, the `owner/name` shown on the card, and the match to its documentation.
+Nothing about any repository — no name, no account, no address — appears in the
+React components.
 
 ---
 
