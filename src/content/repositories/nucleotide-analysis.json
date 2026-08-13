@@ -1,0 +1,10 @@
+{
+  "id": "nucleotide-analysis",
+  "name": "Nucleotide_Analysis",
+  "url": "https://github.com/KrishnaRauniyar/Nucleotide_Analysis",
+  "description": "Downstream analysis of generated keys: the common-key scripts under common_keys_analysis/, and the deep neural network under dnn/ that classifies residue types from key frequencies.",
+  "language": "Python",
+  "category": "analysis",
+  "kind": "scripts",
+  "order": 1
+}

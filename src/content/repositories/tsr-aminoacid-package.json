@@ -1,0 +1,10 @@
+{
+  "id": "tsr-aminoacid-package",
+  "name": "TSR_AMINOACID_PACKAGE",
+  "url": "https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE",
+  "description": "Retrieves PDB files and generates key and triplet files for individual amino acids, rather than for a whole protein chain.",
+  "language": "Python",
+  "category": "method",
+  "kind": "package",
+  "order": 1
+}

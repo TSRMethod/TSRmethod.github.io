@@ -1,0 +1,10 @@
+{
+  "id": "hsp70-actin",
+  "name": "hsp70_actin",
+  "url": "https://github.com/dbxmcf/hsp70_actin",
+  "description": "Jaccard similarity over key frequency vectors — the middle step of the clustering workflow. Maintained separately from the research group's own repositories.",
+  "language": "Shell",
+  "category": "analysis",
+  "kind": "scripts",
+  "order": 3
+}

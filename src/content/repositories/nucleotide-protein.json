@@ -1,0 +1,10 @@
+{
+  "id": "nucleotide-protein",
+  "name": "Nucleotide-Protein",
+  "url": "https://github.com/KrishnaRauniyar/Nucleotide-Protein",
+  "description": "Generates cross keys between a nucleotide and the protein it contacts. Its scripts and output columns are named for drugs, because the nucleotide occupies the drug position of a general drug–protein pipeline.",
+  "language": "Python",
+  "category": "method",
+  "kind": "scripts",
+  "order": 3
+}

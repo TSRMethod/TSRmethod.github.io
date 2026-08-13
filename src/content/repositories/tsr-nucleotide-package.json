@@ -2,8 +2,9 @@
   "id": "tsr-nucleotide-package",
   "name": "TSR_NUCLEOTIDE_PACKAGE",
   "url": "https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE",
-  "description": "TSR key and triplet generation for nucleotide residues.",
+  "description": "Retrieves PDB files and generates key and triplet files for nucleotide residues.",
   "language": "Python",
   "category": "method",
+  "kind": "package",
   "order": 2
 }

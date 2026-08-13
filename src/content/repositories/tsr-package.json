@@ -2,8 +2,10 @@
   "id": "tsr-package",
   "name": "TSR-Package",
   "url": "https://github.com/pooryakhajouie/TSR-Package",
-  "description": "Python package for downloading PDB files and generating TSR keys and triplets. Supports amino acid grouping, mirror images and size filtering.",
+  "description": "Downloads PDB files and generates TSR keys and triplets for protein structures. Implements the core method together with amino acid grouping, mirror images, size filtering, secondary structure elements and drug–target cross keys.",
   "language": "Python",
   "category": "core",
+  "kind": "package",
+  "issuesUrl": "https://github.com/pooryakhajouie/TSR-Package/issues",
   "order": 1
 }
