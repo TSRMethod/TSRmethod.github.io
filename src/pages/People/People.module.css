@@ -1,0 +1,104 @@
+.page {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.header {
+  max-width: var(--content-measure);
+  margin-bottom: var(--space-7);
+}
+
+.intro {
+  margin-top: var(--space-3);
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+}
+
+.section + .section {
+  margin-top: var(--space-7);
+}
+
+.sectionHeading {
+  font-size: var(--text-xl);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/*
+ * `minmax(min(100%, 20rem), 1fr)` rather than a bare `minmax(20rem, 1fr)`.
+ *
+ * A fixed minimum cannot shrink below itself, so on a 320px screen a 20rem
+ * track overflows the viewport and the whole document scrolls sideways — the
+ * bug the previous site had with its 400px cards. `min(100%, …)` lets the
+ * track collapse to the container width when there is no room for the ideal
+ * size, so the grid becomes a single column instead of overflowing.
+ */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-5);
+}
+
+.person {
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.identity {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.photo {
+  flex: none;
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: cover;
+  /* Portraits are framed differently; favour the top of the frame so the crop
+     keeps faces rather than centring on a torso. */
+  object-position: top center;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+}
+
+/* `min-width: 0` lets a long name wrap instead of widening the flex row. */
+.naming {
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-1);
+  overflow-wrap: break-word;
+}
+
+.role {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.affiliation,
+.bio,
+.contact {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.bio {
+  margin-top: var(--space-4);
+}
+
+/* An address has no spaces to break at, so allow a break anywhere in it. */
+.contact {
+  overflow-wrap: anywhere;
+}

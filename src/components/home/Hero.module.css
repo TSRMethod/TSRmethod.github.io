@@ -1,0 +1,74 @@
+/*
+ * Restrained on purpose: a tinted band with type in it, not a full-viewport
+ * splash. The research content starts within the first screenful.
+ */
+.hero {
+  background-color: var(--color-primary-light);
+  border-bottom: 1px solid var(--color-border);
+  padding-block: var(--space-7);
+}
+
+.inner {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.heading {
+  margin: 0;
+  text-wrap: balance;
+}
+
+.lede {
+  max-width: var(--content-measure);
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/*
+ * Both actions are links, styled as buttons. They wrap onto separate lines
+ * rather than shrinking, so neither loses its label at 320px.
+ */
+.primary,
+.secondary {
+  display: inline-block;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid var(--color-primary);
+}
+
+.primary:hover {
+  background-color: var(--color-primary-dark);
+  color: #ffffff;
+}
+
+.secondary {
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border-strong);
+}
+
+.secondary:hover {
+  border-color: var(--color-primary);
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding-block: var(--space-8);
+  }
+}

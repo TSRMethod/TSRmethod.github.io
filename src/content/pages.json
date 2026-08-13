@@ -1,0 +1,12 @@
+{
+  "publications": {
+    "title": "Publications",
+    "intro": "Peer-reviewed work on the Triangular Spatial Relationship method and its applications, newest first. Each entry links to the publisher's record through its DOI."
+  },
+  "people": {
+    "title": "People",
+    "intro": "The TSR method is developed jointly by the Department of Chemistry and the School of Computing and Informatics at the University of Louisiana at Lafayette, with contributions from doctoral researchers and undergraduate students in chemistry, biology and computer science.",
+    "currentHeading": "Current members",
+    "formerHeading": "Former members"
+  }
+}

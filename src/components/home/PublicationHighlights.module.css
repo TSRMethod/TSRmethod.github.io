@@ -1,0 +1,37 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+}
+
+.publication {
+  min-width: 0;
+  padding: var(--space-4);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.title {
+  font-size: var(--text-base);
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+  overflow-wrap: break-word;
+}
+
+.authors,
+.citation,
+.doi {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  overflow-wrap: break-word;
+}
+
+.doi {
+  margin-bottom: 0;
+  font-size: var(--text-xs);
+}

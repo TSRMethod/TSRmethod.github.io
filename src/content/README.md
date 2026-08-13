@@ -9,10 +9,13 @@ Components decide how content looks. Files in this folder decide what it says.
 src/content/
   methods/          one Markdown file per method or tutorial page
     tsr.md
+  analysis/         the same, for key analysis and visualisation tools
+  people/           one JSON file per group member
+  publications/     one JSON file per paper
+  repositories/     one JSON file per software repository
   site.json         group name, description, contact address, affiliations
-  people.json       group members
-  publications.json papers
-  repositories.json software catalogue
+  home.json         the wording on the home page
+  pages.json        the wording at the top of the publications and people pages
   README.md         this file
 ```
 
@@ -244,7 +247,25 @@ affiliations shown in the footer.
 Changing `email` here changes it everywhere on the site — it is not repeated
 anywhere else.
 
-### `people.json`
+### `home.json` and `pages.json`
+
+The words on the home page, and the heading and introduction at the top of the
+publications and people pages.
+
+These files hold **what the pages say, and nothing about how they are built.**
+There is no field for a link target, a section order or a layout, because those
+are decided in code — and every list on the home page (the methods, the tools,
+the packages, the recent papers, the faculty) is read from the folders above,
+so there is no list to keep up to date here. Publish a method and it appears on
+the home page by itself.
+
+Every field in these two files is required, because each one is visible text on
+the page. Clearing one fails the build rather than putting a blank heading or
+an unlabelled button on the site.
+
+### `people/`
+
+One file per person, named after the `id`:
 
 ```json
 {
@@ -261,12 +282,19 @@ anywhere else.
 }
 ```
 
-`status` is `current` or `former`. **Leave a field out entirely if you do not
-have it.** Do not put in an empty string or a placeholder — the old site
-rendered "Phone:" followed by nothing for nine people, and empty `mailto:`
-links. Absent fields are simply not shown.
+`status` is `current` or `former`, and decides which half of the people page
+someone appears in. `group` is `faculty`, `postdoc`, `student`, `undergraduate`
+or `collaborator`; the home page shows the faculty, and takes who they are from
+this field.
 
-### `publications.json`
+**Leave a field out entirely if you do not have it.** Do not put in an empty
+string or a placeholder — the old site rendered "Phone:" followed by nothing
+for nine people, and empty `mailto:` links. An empty value is now an error that
+stops the build; an absent field is simply not shown.
+
+### `publications/`
+
+One file per paper, named after the `id`:
 
 ```json
 {
@@ -275,15 +303,29 @@ links. Absent fields are simply not shown.
   "authors": ["Sarika Kondra", "Titli Sarkar"],
   "venue": "Frontiers in Chemistry",
   "year": 2021,
+  "volume": "8",
+  "pages": "602291",
   "doi": "10.3389/fchem.2020.602291",
   "abstract": "…"
 }
 ```
 
-`authors` is a list, one name per entry. Give `doi` where there is one; the
-link is built from it automatically.
+`authors` is a list, **one name per entry** — not one long string. Give `doi`
+where there is one, as the bare identifier (`10.3389/…`, no `https://`); the
+link is built from it.
 
-### `repositories.json`
+`year` is the year of the version of record: the print or issue year where
+there is one, otherwise the year it appeared online. The publications page is
+grouped by that year, newest first, and the home page shows the three most
+recent — so adding a paper updates the home page with nothing else to do.
+
+One record per paper. A paper credited on two method pages still gets one
+record here, and a repeated DOI stops the build.
+
+`volume`, `issue`, `pages` and `abstract` are all optional, and the citation
+line is assembled from whichever are present without leaving stray commas.
+
+### `repositories/`
 
 ```json
 {

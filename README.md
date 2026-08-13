@@ -39,19 +39,17 @@ Run `npm run lint`, `npm test` and `npm run build` before committing.
 
 ## Project layout
 
-The site is mid-rebuild, so the tree below marks what exists today and what is
-still planned. Directories marked *(planned)* have not been created yet.
-
 ```
 src/
   app/          App shell, route table, navigation, site-wide configuration
   components/
     layout/     Header, navigation, footer, page layout
     shared/     Small widely-used pieces (error boundary, scroll handling)
-    method/     (planned) Reusable building blocks for method/tutorial pages
+    method/     Reusable building blocks for method/tutorial pages
+    home/       The home page's sections
   content/      Editable content — Markdown and JSON, no React. See its README.
   lib/          Content plumbing (frontmatter parsing, heading extraction)
-  pages/        One folder per top-level page
+  pages/        One folder per top-level page — Home, Publications, People, 404
   hooks/        Reusable React hooks
   styles/       Design tokens, reset, global base styles
   test/         Test setup
@@ -59,6 +57,10 @@ src/
 public/
   images/       Content images, referenced from Markdown and JSON
 ```
+
+`/software` and `/contact` are still to be built. Neither the navigation nor
+the footer links to them: both ask the router whether a path resolves before
+showing it, so a page cannot be advertised before it exists.
 
 ### Two rules worth keeping
 

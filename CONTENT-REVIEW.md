@@ -47,6 +47,13 @@ rather than being renumbered or deleted.
 | 18 | Amino Acid TSR — is this the right citation? | ⚠️ Verify |
 | 19 | Slurm placeholder script name | ⚠️ Verify |
 | 20 | DNN repository README lists PNGs as .csv | ⚠️ Verify |
+| 21 | Publication inventory — completeness | ⚠️ Verify |
+| 22 | Size-Filtering paper — 2021 or 2022? | ✅ Resolved |
+| 23 | Undergraduate members — are they still current? | ⚠️ Verify |
+| 24 | Former members — employment claims removed | ⚠️ Verify |
+| 25 | Which year a publication is filed under | ✅ Resolved |
+| 26 | Five publication records have no abstract | ⚠️ Verify |
+| 27 | A non-TSR preprint was left out | ⚠️ Verify |
 
 ---
 
@@ -475,20 +482,186 @@ agree.
 
 ---
 
+### 21. Publication inventory — is anything still missing?
+
+`src/content/publications/`
+
+**Observed.** The legacy Publications page carried seven papers, hard-coded in
+`TSR-WEB/src/components/Publications.js`, and ended in 2024. The collection now
+holds **thirteen**, every one verified field by field against Crossref.
+
+Three of the six additions were not on the legacy page and were found by
+looking beyond it:
+
+- **Descriptor based protein structure representation using triangular spatial
+  relationships in 3-D** — Singh, Xu, Raghavan. *IEEE BIBM*, 2017, 1114–1118.
+  [10.1109/BIBM.2017.8217812](https://doi.org/10.1109/BIBM.2017.8217812)
+- **Application of the Triangular Spatial Relationship Algorithm … in
+  Chlorophylls and Protein Local Environments** — Milon, Orthi, Rauniyar,
+  Renfrow, Gallo, Xu. *Photochem*, 2025, 5(1), 8.
+  [10.3390/photochem5010008](https://doi.org/10.3390/photochem5010008)
+- **Quantification of Conformational Changes of Kinase Regulators, Kinases, and
+  Regulator–Kinase Complexes Using the TSR Algorithm** — Milon, Khajouie, Chen,
+  Borel, Knierim, Raghavan, Xu. *Methods in Molecular Biology: Protein
+  Evolution*, 2026, 189–212.
+  [10.1007/978-1-0716-4828-5_12](https://doi.org/10.1007/978-1-0716-4828-5_12)
+
+**How the search was done.** Poorya Khajouie's Google Scholar profile was
+readable and was used for discovery only, plus a Crossref author/title sweep
+for "triangular spatial relationship" restricted to papers with Xu as an
+author. Every record's metadata then came from Crossref, not from Scholar.
+
+**Question.** That profile covers one author. Papers by other members that
+Khajouie did not co-author — and anything too recent or too far outside the
+"TSR" phrasing for the Crossref sweep to catch — would not have been found.
+Please check the list against Wu Xu's and Vijay Raghavan's own Scholar profiles
+or CVs. **This is the one item that most needs an author's eye.**
+
+---
+
+### 22. Size-Filtering paper — 2021 or 2022? ✅ **resolved**
+
+**Observed.** The legacy page, and `src/content/methods/size-filtering.md` as
+migrated in Stage 7A, dated `10.1002/prot.26215` to **2021**. Crossref gives
+two dates for it.
+
+**Resolved** against Crossref:
+
+```
+published-online   2021-08-23
+published-print    2022-01
+volume 90, issue 1, pages 239–257
+```
+
+Both are correct; they describe different events. The version of record — the
+one a reader cites — is *Proteins* **2022**, 90(1), 239–257. The publication
+record uses that, and `size-filtering.md` was corrected to match, together with
+the volume, issue and page range it had never carried. Nothing about the
+science changed; this is a bibliographic correction with a citable source, of
+the same kind as items 14 and 15.
+
+---
+
+### 25. Which year a publication is filed under ✅ **resolved**
+
+**Observed.** Three papers are online in one year and in print the next:
+size-filtering (online 2021, print 2022), SSE-TSR (online 2025, print 2026) and
+the *Methods in Molecular Biology* chapter (online 2025, print 2026).
+
+**Resolved.** One rule, applied to all of them: **the year of the version of
+record** — the print or issue year where there is one, the online year
+otherwise. That is the year in the formal citation, and it keeps the year
+heading on the publications page agreeing with the volume and issue printed
+beneath it.
+
+The consequence worth knowing: the MiMB chapter appears under 2026 even though
+Google Scholar lists it as 2025. If the group would rather file papers by the
+date they first appeared, that is a one-line change to each record's `year` —
+recorded here so it is a choice rather than an accident.
+
+---
+
+### 23. Undergraduate members — are they still current?
+
+`src/content/people/`
+
+**Observed.** Seven undergraduate researchers came across from the legacy page.
+Their biographies were written in 2024 and several state plans that have since
+passed: *"plans to graduate in Fall 2025"*, *"graduating in Fall 2025"*,
+*"plans to take a gap year"*. Their roles were given as class standing —
+"Senior", "Junior" — which is true only for the year it was written.
+
+**What I did.** Migrated the substance and dropped the dated parts:
+
+- class standing became "Undergraduate Researcher" plus the subject, so the
+  role does not silently become wrong a year later;
+- sentences asserting a specific graduation date or gap year were removed;
+- everything about their studies, interests and involvement was kept;
+- all seven are marked `status: current`, because there is no evidence they
+  have left, and no authoritative source to say otherwise.
+
+Two of them are corroborated as genuine research contributors by authorship:
+Rhen Renfrow on the Photochem 2025 paper and Tyler Borel on the 2026 MiMB
+chapter.
+
+**Question.** Which of the seven are still in the group? Anyone who has
+finished should be moved to `status: former` — a one-field change in the CMS —
+and any current class standing or new role can be filled in there.
+
+---
+
+### 24. Former members — current employment claims removed
+
+**Observed.** The legacy entries for both former members described where they
+work now. Sarika Kondra's ran to a paragraph naming an employer and several
+named clients; Titli Sarkar's named her employer and the contractor managing
+the role. Both were written in 2024 or earlier.
+
+**What I did.** Kept education, the doctorate, and research interests. Removed
+the employer and client names. A website that says where someone works is
+making a claim on their behalf that goes stale silently, and neither is
+verifiable from any source available here.
+
+**Question.** If either would like their current position shown, the wording
+they want is theirs to give and can be added through the CMS.
+
+---
+
+### 26. Five publication records have no abstract
+
+**Observed.** Eight of the thirteen records carry a short abstract, taken from
+the group's own legacy page. Five do not: the 2017 BIBM paper, the Photochem
+2025 paper, the MiMB 2026 chapter, *Current Bioinformatics* 2025 and *Proteins*
+2025.
+
+**What I did.** Left them empty rather than pasting in publisher-formatted
+abstracts or writing my own condensation of someone else's results. The field
+is optional and the "Abstract" toggle simply does not appear without it.
+
+**Question.** Worth pasting the authors' own abstracts in through the CMS, for
+consistency across the page.
+
+---
+
+### 27. A non-TSR preprint was left out
+
+**Observed.** Khajouie's Scholar profile also lists *"Optimizing task
+scheduling in heterogeneous computing environments: a comparative analysis of
+CPU, GPU, and ASIC platforms using E2C simulator"* (arXiv:2405.08187, 2024,
+with A. Mohammadjafari).
+
+**What I did.** Did not add it. It is not TSR work, and its co-author is not a
+member of the group, so it looked like personal output rather than the
+research group's.
+
+**Question.** Confirm — if the publications page is meant to list members'
+complete output rather than the group's TSR work, this and anything like it
+should be added.
+
+---
+
 ## Data quality
 
 Not scientific questions, but content that must not be migrated as-is.
 
-**People.** Nine members have empty `phone`/`email` values that the old page
-rendered as bare `Phone:` / `Email:` labels with an empty `mailto:` link. Two
-former members carry values that appear to be placeholders
-(`former.member1@louisiana.edu`, `(337) 123-4567`). The new schema omits
-absent fields rather than rendering them empty; no placeholder contact details
-will be carried over. Needs someone to supply the real values, or confirm
-they should stay absent.
+**People — resolved in Stage 7D.** Nine members had empty `phone`/`email`
+values that the old page rendered as bare `Phone:` / `Email:` labels with an
+empty `mailto:` link, and two former members carried what look like
+placeholders (`former.member1@louisiana.edu`, `(337) 123-4567`).
 
-**Publications.** The legacy list ends in 2024. Needs confirming whether
-2025–2026 output is missing.
+None of that is migrated. Four people have a real address — Wu Xu, Vijay
+Raghavan, Poorya Khajouie and Krishna Rauniyar — and those are shown; every
+other contact field is simply absent, and the content loader now **rejects an
+empty string** so the old failure mode cannot come back through the CMS either.
+
+**No telephone number is published for anyone.** `phone` is not a field in the
+person schema at all. Three of the legacy numbers looked genuine, but a public
+group directory is not the place for direct personal lines, and the site
+already has one shared address for contact. If the group wants a departmental
+or office number shown, that is a deliberate decision to make — say so and it
+can be added, for the people who agree to it.
+
+**Publications — addressed in Stage 7D**, see item 21 for what remains.
 
 **Resolved already.** The old footer used `contact@ourlab.com`, and the old
 "Problems" page displayed *"Thank you for your submission! We will be in

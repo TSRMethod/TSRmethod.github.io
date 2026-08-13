@@ -2,6 +2,8 @@ import { parseFrontmatter, ContentError } from '../lib/frontmatter'
 import { extractHeadings } from '../lib/toc'
 
 import siteData from './site.json'
+import homeData from './home.json'
+import pagesData from './pages.json'
 
 /*
  * The content registry.
@@ -417,3 +419,229 @@ export const repositories = loadCollection(
   import.meta.glob('./repositories/*.json', { import: 'default', eager: true }),
   'repositories',
 )
+
+/* ------------------------------------------------------------------------ *
+ * People
+ * ------------------------------------------------------------------------ */
+
+const PERSON_STATUSES = ['current', 'former']
+
+/*
+ * Optional fields are ABSENT, never empty.
+ *
+ * The previous site stored `phone: ''` and `email: ''` for nine people and
+ * rendered "Phone:" followed by nothing, plus a `mailto:` link pointing at no
+ * address. Rejecting the empty string here means a component can simply ask
+ * "is there an email?" and trust the answer, and an editor who clears a field
+ * in the CMS gets a build failure rather than a broken link on the live site.
+ */
+function validatePerson(person) {
+  const source = `people/${person.id}.json`
+
+  if (!person.name?.trim()) throw new ContentError(source, '"name" is required')
+  if (!person.role?.trim()) throw new ContentError(source, '"role" is required')
+
+  const status = person.status ?? 'current'
+  if (!PERSON_STATUSES.includes(status)) {
+    throw new ContentError(
+      source,
+      `"status" must be current or former — got "${status}"`,
+    )
+  }
+
+  for (const field of ['email', 'photo', 'bio', 'affiliation']) {
+    if (field in person && !String(person[field]).trim()) {
+      throw new ContentError(
+        source,
+        `"${field}" is empty. Leave the field out entirely instead — an empty ` +
+          'value renders as a dangling label or a link to nowhere.',
+      )
+    }
+  }
+
+  return { ...person, status }
+}
+
+const validatedPeople = people.map(validatePerson)
+
+/** Group members, in display order, split by whether they are still here. */
+export const currentPeople = validatedPeople.filter(
+  (person) => person.status === 'current',
+)
+export const formerPeople = validatedPeople.filter(
+  (person) => person.status === 'former',
+)
+
+/**
+ * Faculty who lead the group.
+ *
+ * Derived from `group`, not from a second hand-maintained list, so nobody can
+ * be shown as faculty on the home page while their record says otherwise.
+ */
+export const facultyPeople = currentPeople.filter(
+  (person) => person.group === 'faculty',
+)
+
+/* ------------------------------------------------------------------------ *
+ * Publications
+ * ------------------------------------------------------------------------ */
+
+/**
+ * The publications list as it is displayed: newest first.
+ *
+ * `id` is the final tie-break so the order is total and deterministic — two
+ * papers from the same year with the same `order` cannot swap places between
+ * builds. `id` is unique by construction, because it is the filename.
+ */
+export const publicationsByYear = [...publications].sort(
+  (a, b) =>
+    (b.year ?? 0) - (a.year ?? 0) ||
+    (a.order ?? 999) - (b.order ?? 999) ||
+    a.id.localeCompare(b.id),
+)
+
+/*
+ * One record per paper.
+ *
+ * A single paper legitimately supports several method pages — the DrugTSR
+ * paper is cited by both DrugTSR and Key to 2D Image — but it must appear in
+ * this collection once. Two records for one DOI would show the paper twice on
+ * the publications page and make "which record do I edit?" ambiguous.
+ */
+const seenDois = new Map()
+for (const publication of publications) {
+  if (!publication.doi) continue
+  const doi = publication.doi.toLowerCase()
+  const first = seenDois.get(doi)
+  if (first) {
+    throw new ContentError(
+      `publications/${publication.id}.json`,
+      `DOI ${publication.doi} is already used by ${first}.json. One record per paper.`,
+    )
+  }
+  seenDois.set(doi, publication.id)
+}
+
+/** The resolver URL for a DOI, or null when the record has none. */
+export function doiUrl(doi) {
+  return doi ? `https://doi.org/${doi}` : null
+}
+
+/**
+ * "Frontiers in Chemistry, 2021, 8, 602291" for a publication record.
+ *
+ * Delegates to the same `formatCitation` used for the paper credited at the
+ * top of a method page, so the two never drift into different house styles.
+ * Publication records call the journal `venue`, because some of them are
+ * conferences or book chapters rather than journals.
+ */
+export function formatPublicationCitation(publication) {
+  return formatCitation({
+    journal: publication.venue,
+    year: publication.year,
+    volume: publication.volume,
+    issue: publication.issue,
+    pages: publication.pages,
+  })
+}
+
+/**
+ * The most recent publications, for the home page.
+ *
+ * Deliberately derived from the year rather than an editorial "featured" flag:
+ * the home page then stays current as papers are added through the CMS, with
+ * nothing to remember to update, and the section heading ("Recent
+ * publications") states the rule honestly. Returns fewer than `count` — or
+ * none at all — if that is all there is.
+ */
+export function getRecentPublications(count = 3, records = publicationsByYear) {
+  return records.slice(0, count)
+}
+
+/* ------------------------------------------------------------------------ *
+ * Home page editorial content
+ * ------------------------------------------------------------------------ */
+
+/*
+ * What the home page SAYS, and nothing about how it is arranged.
+ *
+ * There are no paths, component names or ordering hints in home.json: the
+ * sections, their links and their layout live in React. An editor changes the
+ * words; they cannot rewire the page or point a button at a route that does
+ * not exist.
+ *
+ * Every field is required. A blank heading or a missing call-to-action label
+ * would render as an empty button, so an emptied field fails the build — and
+ * because deployment runs the build, the live site keeps the last good
+ * version instead of publishing the gap.
+ */
+const HOME_SHAPE = {
+  hero: ['lede', 'primaryCta', 'secondaryCta'],
+  introduction: ['heading', 'body', 'cta'],
+  methods: ['heading', 'intro'],
+  analysis: ['heading', 'intro'],
+  software: ['heading', 'intro'],
+  publications: ['heading', 'intro', 'cta'],
+  group: ['heading', 'intro', 'cta'],
+  contact: ['heading', 'body', 'cta'],
+}
+
+function validateHome(data) {
+  for (const [section, fields] of Object.entries(HOME_SHAPE)) {
+    const block = data[section]
+    if (!block || typeof block !== 'object') {
+      throw new ContentError('home.json', `"${section}" section is missing`)
+    }
+    for (const name of fields) {
+      if (typeof block[name] !== 'string' || block[name].trim() === '') {
+        throw new ContentError(
+          'home.json',
+          `"${section}.${name}" is required and must not be empty`,
+        )
+      }
+    }
+  }
+
+  /* Same rule as a method page: an illustration without a description of
+     what it shows is not publishable. */
+  validateFigure(data.introduction.figure, 'home.json')
+
+  return data
+}
+
+export const home = validateHome(homeData)
+
+/*
+ * The same idea for the other hand-built pages.
+ *
+ * Separate from home.json because the home page is a distinct editing job with
+ * a lot more copy in it; keeping the rest together means Stage 8's software and
+ * contact pages extend this file rather than adding one more per page.
+ */
+const PAGES_SHAPE = {
+  publications: ['title', 'intro'],
+  people: ['title', 'intro', 'currentHeading', 'formerHeading'],
+}
+
+function validatePages(data) {
+  for (const [page, fields] of Object.entries(PAGES_SHAPE)) {
+    const block = data[page]
+    if (!block || typeof block !== 'object') {
+      throw new ContentError('pages.json', `"${page}" section is missing`)
+    }
+    for (const name of fields) {
+      if (typeof block[name] !== 'string' || block[name].trim() === '') {
+        throw new ContentError(
+          'pages.json',
+          `"${page}.${name}" is required and must not be empty`,
+        )
+      }
+    }
+  }
+  return data
+}
+
+export const pages = validatePages(pagesData)
+
+/* Exposed so tests can exercise the rules without a fixture file. */
+export { validateHome, validatePages, validatePerson }

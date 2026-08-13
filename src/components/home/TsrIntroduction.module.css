@@ -1,0 +1,46 @@
+.layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.body {
+  max-width: var(--content-measure);
+  margin: 0;
+}
+
+.figure {
+  margin: 0;
+  min-width: 0;
+}
+
+.figure img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+}
+
+.figure figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.action {
+  margin: var(--space-5) 0 0;
+  font-weight: 600;
+}
+
+/*
+ * The diagram is a wide, five-step strip, so it keeps the larger share of the
+ * row on desktop and drops below the prose when there is not enough width for
+ * its labels to stay legible.
+ */
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--space-6);
+    align-items: center;
+  }
+}

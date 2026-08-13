@@ -3,7 +3,15 @@ import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { load as parseYaml } from 'js-yaml'
 
-import { methods, site, people, publications, repositories } from './index'
+import {
+  methods,
+  site,
+  home,
+  pages as pageCopy,
+  people,
+  publications,
+  repositories,
+} from './index'
 
 /*
  * Validates .pages.yml against the repository it describes.
@@ -48,7 +56,9 @@ describe('.pages.yml is valid and matches the repository', () => {
   it('exposes exactly the expected content areas', () => {
     expect(Object.keys(entries).sort()).toEqual([
       'analysis',
+      'home',
       'methods',
+      'pages',
       'people',
       'publications',
       'repositories',
@@ -251,5 +261,64 @@ describe('site settings', () => {
 
   it('exposes the contact email as an editable field', () => {
     expect(field(entries.site, 'email').required).toBe(true)
+  })
+})
+
+describe('editorial copy for the hand-built pages', () => {
+  /** Every leaf key of a nested object, as "section.field" paths. */
+  function leafPaths(value, prefix = '') {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      return [prefix]
+    }
+    return Object.entries(value).flatMap(([key, child]) =>
+      leafPaths(child, prefix ? `${prefix}.${key}` : key),
+    )
+  }
+
+  /** The same paths, read from the .pages.yml field tree. */
+  function declaredPaths(fields, prefix = '') {
+    return fields.flatMap((f) => {
+      const path = prefix ? `${prefix}.${f.name}` : f.name
+      return f.fields ? declaredPaths(f.fields, path) : [path]
+    })
+  }
+
+  it.each([
+    ['home', home],
+    ['pages', pageCopy],
+  ])('%s: every stored value is editable in the CMS', (name, content) => {
+    const declared = new Set(declaredPaths(entries[name].fields))
+
+    for (const path of leafPaths(content)) {
+      expect(declared.has(path), `${name}.json: "${path}" is not in .pages.yml`)
+        .toBe(true)
+    }
+  })
+
+  it('gives the editor words, never architecture', () => {
+    /*
+     * The point of these two entries. An editor may rewrite any sentence on
+     * the home page, but nothing they can type decides where a button goes,
+     * what order the sections appear in, or which component renders them —
+     * those live in React. A field named for a path or a layout would be the
+     * first step towards a page builder, so the names are asserted here.
+     */
+    const forbidden = /(^|\.)(url|href|to|path|link|route|order|component|layout|class|style)$/i
+
+    for (const name of ['home', 'pages']) {
+      for (const path of declaredPaths(entries[name].fields)) {
+        expect(forbidden.test(path), `${name}: "${path}" is architecture`).toBe(
+          false,
+        )
+      }
+    }
+  })
+
+  it('requires the diagram on the home page to describe itself', () => {
+    const figure = field(entries.home, 'introduction').fields.find(
+      (f) => f.name === 'figure',
+    )
+    const alt = figure.fields.find((f) => f.name === 'alt')
+    expect(alt.description).toMatch(/screen reader/i)
   })
 })

@@ -1,0 +1,19 @@
+{
+  "id": "kondra-2022-size-filtering",
+  "title": "A study of a hierarchical structure of proteins and ligand binding sites of receptors using the triangular spatial relationship-based structure comparison method and development of a size-filtering feature designed for comparing different sizes of protein structures",
+  "authors": [
+    "Sarika Kondra",
+    "Feng Chen",
+    "Yixin Chen",
+    "Yuwu Chen",
+    "Caleb J. Collette",
+    "Wu Xu"
+  ],
+  "venue": "Proteins: Structure, Function, and Bioinformatics",
+  "year": 2022,
+  "volume": "90",
+  "issue": "1",
+  "pages": "239–257",
+  "doi": "10.1002/prot.26215",
+  "abstract": "We propose amino-acid scoring matrices that capture “evolutionary closeness” information based on the BLOSUM62 matrix, and present the development of a new visualization method where keys are organized according to evolutionary closeness and shown in a 2D image."
+}

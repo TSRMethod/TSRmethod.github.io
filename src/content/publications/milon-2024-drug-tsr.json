@@ -1,0 +1,19 @@
+{
+  "id": "milon-2024-drug-tsr",
+  "title": "Development of a novel representation of drug 3D structures and enhancement of the TSR-based method for probing drug and target interactions",
+  "authors": [
+    "Tarikul I. Milon",
+    "Yuhong Wang",
+    "Ryan L. Fontenot",
+    "Poorya Khajouie",
+    "Francois Villinger",
+    "Vijay Raghavan",
+    "Wu Xu"
+  ],
+  "venue": "Computational Biology and Chemistry",
+  "year": 2024,
+  "volume": "112",
+  "pages": "108117",
+  "doi": "10.1016/j.compbiolchem.2024.108117",
+  "abstract": "A new approach to representing ligand and drug 3D structures is introduced and evaluated. A novel algorithm calculating cross TSR keys is developed for enabling comparisons of drug/ligand–target complexes. The results demonstrate the capability of the TSR-based method to interpret hierarchical relationships of drugs and drug–target complexes."
+}

@@ -1,6 +1,8 @@
 import { matchRoutes, Navigate } from 'react-router-dom'
 import Home from '../pages/Home/Home'
 import NotFound from '../pages/NotFound/NotFound'
+import Publications from '../pages/Publications/Publications'
+import People from '../pages/People/People'
 import MethodPage from '../components/method/MethodPage'
 import { publishedMethods } from '../content'
 import { LEGACY_PATHS } from './legacyPaths'
@@ -25,8 +27,11 @@ import { LEGACY_PATHS } from './legacyPaths'
  * page has no route at all and cannot be reached by typing its address.
  *
  * Still to be hand-built:
- *   Stage 7  /publications, /people
  *   Stage 8  /software, /contact
+ *
+ * Adding a route here is the only thing needed to make its navigation and
+ * footer links appear: both ask `isRouteImplemented` rather than carrying
+ * their own list of what exists.
  */
 
 const methodRoutes = publishedMethods.map((method) => ({
@@ -50,6 +55,8 @@ const legacyRoutes = Object.entries(LEGACY_PATHS).flatMap(([from, slug]) => {
 
 export const routeConfig = [
   { path: '/', element: <Home /> },
+  { path: '/publications', element: <Publications /> },
+  { path: '/people', element: <People /> },
   ...methodRoutes,
   ...legacyRoutes,
   { path: '*', element: <NotFound /> },
