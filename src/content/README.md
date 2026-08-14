@@ -291,6 +291,10 @@ someone appears in. `group` is `faculty`, `postdoc`, `student`, `undergraduate`
 or `collaborator`; the home page shows the faculty, and takes who they are from
 this field.
 
+`photo` may point at either `/images/people/…` (curated by a developer) or
+`/images/uploads/…` (uploaded through the CMS). Both are approved; anywhere
+else fails the build. See [Media](#media).
+
 **Leave a field out entirely if you do not have it.** Do not put in an empty
 string or a placeholder — the old site rendered "Phone:" followed by nothing
 for nine people, and empty `mailto:` links. An empty value is now an error that
@@ -490,7 +494,23 @@ media:
 
 Vite's `base` is `/`, so the absolute output path resolves both locally and on
 GitHub Pages. Uploads are kept in `public/images/uploads/` and separate from
-`public/images/methods/`, which developers curate.
+`public/images/methods/` and `public/images/people/`, which developers curate.
+
+**Verified against the live CMS on 14 August 2026.** A portrait changed through
+Pages CMS was committed to `public/images/uploads/` with a slugified filename,
+and `/images/uploads/…` was written into the person's record — exactly what the
+configuration above describes. This is no longer an untested assumption.
+
+A person's `photo` may therefore be in either place:
+
+| Path | Who puts it there |
+| --- | --- |
+| `/images/people/…` | a developer, curated and converted to webp |
+| `/images/uploads/…` | Pages CMS, when an editor uploads one |
+
+Anything else — another folder, a `../` path, or an `http://` address — fails
+the build. `src/content/records.test.js` additionally checks that the file is
+really in the repository, by resolving the path under `public/`.
 
 ## Notes for developers
 

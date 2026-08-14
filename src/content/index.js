@@ -527,6 +527,32 @@ export function getRepositoriesByCategory(
 const PERSON_STATUSES = ['current', 'former']
 
 /*
+ * Where a portrait may live, as a path in the served site.
+ *
+ * TWO locations, because there are two ways a portrait legitimately arrives:
+ *
+ *   /images/people/   curated by a developer — the migrated portraits, sized
+ *                     and converted to webp by hand.
+ *   /images/uploads/  written by Pages CMS. This is `media.output` in
+ *                     .pages.yml, so it is the only path the CMS can produce,
+ *                     and a supervisor changing someone's photo through the
+ *                     editor will always land here.
+ *
+ * Anything else is rejected: an absolute `http://` URL would put a third-party
+ * request on the page and break if that host goes away, and a path outside
+ * `public/` cannot be served at all. `..` is refused even under an allowed
+ * prefix, so a traversal cannot smuggle its way past the prefix check.
+ */
+export const PHOTO_ROOTS = ['/images/people/', '/images/uploads/']
+
+/** Is `photo` a root-relative path inside one of the approved folders? */
+export function isApprovedPhotoPath(photo) {
+  if (typeof photo !== 'string') return false
+  if (photo.split('/').includes('..')) return false
+  return PHOTO_ROOTS.some((root) => photo.startsWith(root))
+}
+
+/*
  * Optional fields are ABSENT, never empty.
  *
  * The previous site stored `phone: ''` and `email: ''` for nine people and
@@ -557,6 +583,14 @@ function validatePerson(person) {
           'value renders as a dangling label or a link to nowhere.',
       )
     }
+  }
+
+  if (person.photo && !isApprovedPhotoPath(person.photo)) {
+    throw new ContentError(
+      source,
+      `"photo" is "${person.photo}". It must be a path inside ` +
+        `${PHOTO_ROOTS.join(' or ')} — uploads through the CMS already are.`,
+    )
   }
 
   return { ...person, status }
