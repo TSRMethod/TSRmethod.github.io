@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { ContentError } from '../lib/frontmatter'
 import { getContentGroups } from '../app/navigation'
@@ -13,6 +13,8 @@ import {
   getRecentPublications,
   formatPublicationCitation,
   doiUrl,
+  isApprovedPhotoPath,
+  PHOTO_ROOTS,
   validateHome,
   validatePages,
   validatePerson,
@@ -214,19 +216,90 @@ describe('people records', () => {
     ).toThrow(ContentError)
   })
 
-  it('points every photo at a file that exists', () => {
-    const available = new Set(
-      readdirSync(resolve(root, 'public/images/people')),
-    )
+  /*
+   * A portrait's path is a URL in the served site, and `public/` is the root
+   * of that site — so the file it names is found by resolving it under
+   * `public/`, whichever approved folder it happens to be in.
+   *
+   * This replaces an earlier version that listed `public/images/people` and
+   * string-replaced that one prefix. It assumed curated portraits were the
+   * only kind, and broke the moment Pages CMS did exactly what it is
+   * configured to do: write an upload to `/images/uploads/`.
+   */
+  const publicFile = (photo) => resolve(root, 'public', photo.replace(/^\//, ''))
+
+  it('points every photo at an approved folder', () => {
+    expect(people.some((person) => person.photo)).toBe(true)
 
     for (const person of people) {
       if (!person.photo) continue
-      expect(person.photo, person.id).toMatch(/^\/images\/people\//)
       expect(
-        available.has(person.photo.replace('/images/people/', '')),
+        isApprovedPhotoPath(person.photo),
+        `${person.id}: ${person.photo} is not in ${PHOTO_ROOTS.join(' or ')}`,
+      ).toBe(true)
+    }
+  })
+
+  it('points every photo at a file that exists', () => {
+    for (const person of people) {
+      if (!person.photo) continue
+      expect(
+        existsSync(publicFile(person.photo)),
         `${person.id}: ${person.photo} is missing from public/`,
       ).toBe(true)
     }
+  })
+
+  it('accepts a curated portrait and a CMS upload alike', () => {
+    /*
+     * Both halves of the model, asserted against the real repository rather
+     * than a fixture: the migrated portraits live in one folder, and the
+     * photo Pages CMS uploaded lives in the other. Each must resolve to a
+     * file that is actually there.
+     */
+    const curated = '/images/people/wu-xu.webp'
+    const uploaded = '/images/uploads/img202504141842238022-copy.jpeg'
+
+    for (const photo of [curated, uploaded]) {
+      expect(isApprovedPhotoPath(photo), photo).toBe(true)
+      expect(existsSync(publicFile(photo)), photo).toBe(true)
+    }
+
+    // ...and the site is genuinely using both, not just permitting them.
+    const roots = people
+      .filter((person) => person.photo)
+      .map((person) => PHOTO_ROOTS.find((r) => person.photo.startsWith(r)))
+    expect(new Set(roots)).toEqual(new Set(PHOTO_ROOTS))
+  })
+
+  it('refuses a photo outside the approved folders', () => {
+    for (const photo of [
+      '/random/portrait.jpg',
+      '../secret.png',
+      '/images/uploads/../../etc/passwd',
+      'http://example.com/portrait.jpg',
+      'https://example.com/portrait.jpg',
+      'images/people/no-leading-slash.webp',
+    ]) {
+      expect(isApprovedPhotoPath(photo), photo).toBe(false)
+      expect(
+        () => validatePerson({ id: 'x', name: 'X', role: 'Y', photo }),
+        photo,
+      ).toThrow(ContentError)
+    }
+  })
+
+  it('catches a photo whose file is not in the repository', () => {
+    /*
+     * The half of the check that a path rule cannot do: an approved,
+     * well-formed path naming a file nobody committed. That is what a broken
+     * image on the live site looks like, and it is why the existence check
+     * survives rather than being replaced by the prefix rule.
+     */
+    const missing = '/images/uploads/never-uploaded-this.jpeg'
+
+    expect(isApprovedPhotoPath(missing)).toBe(true)
+    expect(existsSync(publicFile(missing))).toBe(false)
   })
 
   it('orders people deterministically', () => {
