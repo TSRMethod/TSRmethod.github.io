@@ -54,6 +54,7 @@ rather than being renumbered or deleted.
 | 25 | Which year a publication is filed under | ✅ Resolved |
 | 26 | Five publication records have no abstract | ⚠️ Verify |
 | 27 | A non-TSR preprint was left out | ⚠️ Verify |
+| 28 | CMS media upload — tested live and working | ✅ Resolved |
 
 ---
 
@@ -640,7 +641,38 @@ should be added.
 
 ---
 
-## Data quality
+### 28. CMS media upload — tested live and working ✅ **resolved**
+
+**Was.** Every part of the image pipeline was verified in code except the
+upload itself. The tests proved `.pages.yml` was self-consistent; they could
+not prove that Pages CMS writes where it says it does.
+
+**Resolved.** A supervisor changed a portrait through the CMS on 14 August
+2026, and it behaved exactly as configured:
+
+- the file was committed to `public/images/uploads/`, with the filename
+  slugified as `media.rename: safe` specifies;
+- `/images/uploads/img202504141842238022-copy.jpeg` — the `media.output` form,
+  root-relative — was written into `src/content/people/poorya-khajouie.json`;
+- the change arrived as an ordinary commit and went through CI like any other.
+
+**The media path model is confirmed working end to end.** Nothing in
+`.pages.yml` needed changing.
+
+**One thing did break, and it was ours.** `records.test.js` asserted that every
+portrait path began `/images/people/`, which was true only while developers
+were the only ones adding portraits. The first genuine CMS upload failed CI on
+that assertion. The rule now accepts both approved locations —
+`/images/people/` for curated portraits and `/images/uploads/` for CMS uploads
+— and the existence check resolves a portrait's path under `public/` instead of
+assuming one folder. The path shape is enforced in `validatePerson`, so a photo
+outside those folders now fails the build rather than only the test.
+
+**Not a question, but worth knowing.** The uploaded file is 1474 × 1474 and
+270 KB, displayed at about 88 px. It is not resized on upload, and nothing in
+the CMS will do that — an editor uploading a phone photo will ship it at full
+size. Curated portraits are converted to webp and capped at 600 px by hand.
+Worth a look in the final performance pass.
 
 Not scientific questions, but content that must not be migrated as-is.
 
