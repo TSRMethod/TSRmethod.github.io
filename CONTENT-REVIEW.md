@@ -55,6 +55,10 @@ rather than being renumbered or deleted.
 | 26 | Five publication records have no abstract | ⚠️ Verify |
 | 27 | A non-TSR preprint was left out | ⚠️ Verify |
 | 28 | CMS media upload — tested live and working | ✅ Resolved |
+| 29 | Five repositories have no licence | ⚠️ Verify |
+| 30 | Who reads the GitHub issue trackers? | ⚠️ Verify |
+| 31 | The legacy postal address was not migrated | ⚠️ Verify |
+| 32 | `/problems` and `/community` retired | ✅ Resolved |
 
 ---
 
@@ -673,6 +677,110 @@ outside those folders now fails the build rather than only the test.
 the CMS will do that — an editor uploading a phone photo will ship it at full
 size. Curated portraits are converted to webp and capped at 600 px by hand.
 Worth a look in the final performance pass.
+
+---
+
+### 29. Five repositories have no licence
+
+`src/content/repositories/`
+
+**Observed.** The site calls this software open source, on the home page and
+now on `/software`. Checked against the GitHub API and each repository's file
+listing on 13 August 2026:
+
+| Repository | Licence | Installable |
+| --- | --- | --- |
+| `pooryakhajouie/TSR-Package` | MIT | `setup.py` |
+| `KrishnaRauniyar/TSR_AMINOACID_PACKAGE` | **none** | `setup.py` |
+| `KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE` | **none** | `setup.py` |
+| `KrishnaRauniyar/Nucleotide-Protein` | **none** | scripts |
+| `KrishnaRauniyar/Nucleotide_Analysis` | **none** | scripts |
+| `KrishnaRauniyar/Kinases-and-Phosphatases-Clustering` | **none** | scripts |
+| `dbxmcf/hsp70_actin` | GPL-3.0 | scripts (not the group's) |
+
+Code published on GitHub without a licence is **not** open source: the default
+is exclusive copyright, so a reader may look at it but has no permission to
+use, modify or redistribute it. Five of the six repositories the group owns are
+in that position, including two that are packaged for installation and are
+documented on this site with instructions telling people to install them.
+
+**What I did.** The software page describes what each repository *is* — an
+installable package or research scripts — and does not claim a licence for any
+of them. The word "open-source" survives only on the home page, where it
+describes the intent of the work rather than any individual repository.
+
+**Question.** Adding a `LICENSE` file to each is a small change with real
+consequences for anyone who wants to build on the work, and it matters more
+once a consolidated package is published. MIT would match TSR-Package. This is
+the authors' decision, not the website's.
+
+---
+
+### 30. Who reads the GitHub issue trackers?
+
+**Observed.** Issues are enabled on all seven repositories, and every one of
+them has zero open issues — so there is no evidence either way about whether
+anyone watches them.
+
+**What I did.** Only `TSR-Package` carries an `issuesUrl`, so it is the only
+entry on `/software` with a "Report a problem" link. The field is optional and
+the CMS describes it as a commitment: setting it puts that link on an entry.
+The rest link to their repository, where the Issues tab is one click away for
+anyone who wants it, without the site promising a response.
+
+The footer's own "Report a website problem" goes to this repository's tracker
+and is labelled to keep it distinct from the research code.
+
+**Question.** Should the other repositories advertise their trackers too? If
+somebody is willing to watch them, filling in one CMS field per repository is
+the whole change.
+
+---
+
+### 31. The legacy postal address was not migrated
+
+`TSR-WEB/src/components/ContactUs.js`
+
+**Observed.** The old contact page carried an embedded Google Map and two
+addresses:
+
+> Oliver Hall Room 317, 301 East Lewis Street, P.O. Box 43586,
+> Lafayette, LA 70504-3586 — School of Computing and Informatics
+
+**What I did.** Neither is on the new contact page. The address is a School of
+Computing and Informatics one, and the group spans Chemistry and Computing, so
+it is not obviously the right address for the group as a whole; it also could
+not be verified as current from anything available here. The embedded map was
+dropped for a second reason — it loads a third-party frame on a page that
+otherwise makes no external requests.
+
+**Question.** Should a postal address be published, and if so which one? It is
+a two-line addition to `pages.json` once someone confirms it.
+
+---
+
+### 32. `/problems` and `/community` retired ✅ **resolved**
+
+**Observed.** The old site had three routes with no equivalent here.
+
+**Resolved**, and recorded in `src/app/legacyPaths.js`:
+
+- **`/source-code` → `/software`.** Same purpose under a new name: the old page
+  existed to point people at the repositories. Redirected.
+- **`/problems`** — a form that reported nothing. It logged the message to the
+  browser console, then displayed *"Thank you for your submission! We will be
+  in touch with you soon."* Nothing replaces it, because the honest answer now
+  depends on the question: a reproducible bug belongs on the repository that
+  provides the tool, anything else belongs in an email, and `/contact` explains
+  both. Sending "report a problem" to one of them would be guessing which the
+  visitor meant, so the address 404s and the 404 page offers the way back.
+- **`/community`** — two affiliation logos. Those affiliations are now in the
+  footer of every page, including the 404, and on `/contact`. Not redirected,
+  because there is no page to redirect to.
+
+---
+
+## Data quality
 
 Not scientific questions, but content that must not be migrated as-is.
 

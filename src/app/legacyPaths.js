@@ -33,4 +33,33 @@ export const LEGACY_PATHS = {
   '/dnn': 'dnn',
 }
 
+/*
+ * The same idea for the hand-built pages, mapping an old address to a new one
+ * rather than to a method slug.
+ *
+ * Only one entry, and only because the destination genuinely is the same page
+ * under a new name: the old "Source Code" page existed to point people at the
+ * repositories, which is what /software does.
+ *
+ * TWO OLD ADDRESSES ARE DELIBERATELY NOT REDIRECTED, and both are decisions
+ * rather than oversights:
+ *
+ *   /problems   was a form that reported nothing. It logged the message to the
+ *               browser console and then displayed "Thank you for your
+ *               submission! We will be in touch with you soon." Nothing
+ *               replaces it, because the honest answer now depends on the
+ *               question: a reproducible bug belongs on the repository that
+ *               provides the tool, and everything else belongs in an email.
+ *               /contact explains both, but sending "report a problem" there
+ *               would be guessing which one the visitor wanted. It 404s, and
+ *               the 404 page offers the way back.
+ *
+ *   /community  was two affiliation logos. Those affiliations are now in the
+ *               footer of every page — including the 404 — and on /contact, so
+ *               there is no page to send anyone to.
+ */
+export const LEGACY_PAGE_PATHS = {
+  '/source-code': '/software',
+}
+
 export default LEGACY_PATHS

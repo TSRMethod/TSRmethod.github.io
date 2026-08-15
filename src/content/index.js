@@ -421,6 +421,106 @@ export const repositories = loadCollection(
 )
 
 /* ------------------------------------------------------------------------ *
+ * Software repositories
+ * ------------------------------------------------------------------------ */
+
+const REPOSITORY_CATEGORIES = ['core', 'method', 'analysis', 'tooling']
+
+/*
+ * Whether a repository is something you install, or a set of scripts you run
+ * where they sit.
+ *
+ * Worth a field of its own rather than a turn of phrase in each description,
+ * because it is the honest distinction between the three repositories with a
+ * `setup.py` and the four that are research code accompanying a paper. The
+ * page says which is which, so nothing here implies a maintained release when
+ * there is none.
+ */
+const REPOSITORY_KINDS = ['package', 'scripts']
+
+function validateRepository(repository) {
+  const source = `repositories/${repository.id}.json`
+
+  for (const field of ['name', 'url', 'description']) {
+    if (!String(repository[field] ?? '').trim()) {
+      throw new ContentError(source, `"${field}" is required`)
+    }
+  }
+
+  for (const [field, allowed] of [
+    ['category', REPOSITORY_CATEGORIES],
+    ['kind', REPOSITORY_KINDS],
+  ]) {
+    if (!allowed.includes(repository[field])) {
+      throw new ContentError(
+        source,
+        `"${field}" must be one of ${allowed.join(', ')} — got "${repository[field]}"`,
+      )
+    }
+  }
+
+  for (const field of ['url', 'issuesUrl']) {
+    const value = repository[field]
+    if (value === undefined) continue
+    if (!/^https:\/\/[^\s]+$/.test(value)) {
+      throw new ContentError(source, `"${field}" must be an https URL`)
+    }
+    // The placeholder the previous site shipped on its Source Code page.
+    if (value.includes('your-repo')) {
+      throw new ContentError(source, `"${field}" is a placeholder URL`)
+    }
+  }
+
+  return repository
+}
+
+const validatedRepositories = repositories.map(validateRepository)
+
+/** "pooryakhajouie/TSR-Package" — read from the URL, never stored twice. */
+export function repositoryPath(url) {
+  const match = /^https:\/\/github\.com\/([^/]+\/[^/]+?)\/?$/.exec(url)
+  return match ? match[1] : null
+}
+
+function sameRepository(a, b) {
+  return String(a).replace(/\/+$/, '') === String(b).replace(/\/+$/, '')
+}
+
+/**
+ * The published pages a repository provides the code for.
+ *
+ * DERIVED by matching the repository's URL against the `repositories` block
+ * already in each method's frontmatter, rather than stored a second time on
+ * the repository record. Two consequences worth having: the software page and
+ * the method pages cannot disagree about which code implements what, and a
+ * draft page is invisible here for free — `publishedMethods` excludes it, so
+ * Key to 2D Image cannot be reached through a repository card while its
+ * content is unreviewed.
+ */
+export function getPagesForRepository(url, methods = publishedMethods) {
+  return methods.filter((method) =>
+    method.repositories.some((repository) =>
+      sameRepository(repository.url, url),
+    ),
+  )
+}
+
+/**
+ * Repositories in one category, in display order.
+ *
+ * The software page asks for the categories it wants to show; nothing here
+ * knows what those are called or what order they appear in. That is what lets
+ * a future organisation-owned package take over the `core` category by editing
+ * one JSON file, with no change to the page.
+ */
+export function getRepositoriesByCategory(
+  category,
+  records = validatedRepositories,
+) {
+  return records.filter((repository) => repository.category === category)
+}
+
+/* ------------------------------------------------------------------------ *
  * People
  * ------------------------------------------------------------------------ */
 
@@ -655,6 +755,18 @@ export const home = validateHome(homeData)
 const PAGES_SHAPE = {
   publications: ['title', 'intro'],
   people: ['title', 'intro', 'currentHeading', 'formerHeading'],
+  software: ['title', 'intro', 'note'],
+  contact: [
+    'title',
+    'intro',
+    'emailHeading',
+    'emailAction',
+    'collaborationHeading',
+    'collaborationBody',
+    'softwareHeading',
+    'softwareBody',
+    'affiliationHeading',
+  ],
 }
 
 function validatePages(data) {
@@ -678,4 +790,4 @@ function validatePages(data) {
 export const pages = validatePages(pagesData)
 
 /* Exposed so tests can exercise the rules without a fixture file. */
-export { validateHome, validatePages, validatePerson }
+export { validateHome, validatePages, validatePerson, validateRepository }

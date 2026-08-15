@@ -64,7 +64,7 @@ Things worth knowing:
 
 You will notice some things you cannot change — the page's web address, which
 menu it sits under, and whether it is published. Those are deliberately not
-editable here; see section 12.
+editable here; see section 13.
 
 ## 5. Creating a new method draft
 
@@ -167,10 +167,32 @@ page, so a blank one would show as a gap or an unlabelled button. Emptying one
 stops the website rebuilding, and the live site stays as it was until it is
 filled in again.
 
-**Page introductions** works the same way, for the heading and opening
-paragraph of the Publications and People pages.
+**Page introductions** works the same way, for the wording on the Publications,
+People, Software and Contact pages. The contact page has no field for the email
+address — it uses the one in **Site settings**, so there is only ever one to
+change.
 
-## 10. Saving
+## 10. Adding or editing software
+
+1. Click **Software**.
+2. Click a repository, or **Add** for a new one.
+3. Fill in the fields. Notes:
+   - **URL** is the whole change if a repository moves. The link, the
+     `owner/name` shown on the card, and the connection to its tutorial pages
+     all follow it.
+   - **Category** picks the section it appears under on the software page.
+   - **What it is** should be honest: `package` for something a user installs,
+     `scripts` for research code that is run where it sits. It is printed on
+     the entry.
+   - **Issue tracker** is optional, and setting it is a promise. It puts a
+     "Report a problem" link on the entry, so only fill it in for a repository
+     whose issues somebody actually reads.
+4. Click **Save**.
+
+You will not find a field for "which tutorial does this go with". That is
+worked out from the method pages, which already name the repositories they use.
+
+## 11. Saving
 
 Click **Save**. That is the whole process — there is no separate "publish"
 step.
@@ -178,7 +200,7 @@ step.
 Your change is recorded straight away. The website itself is rebuilt
 automatically afterwards.
 
-## 11. How long until it appears
+## 12. How long until it appears
 
 **Deployment is not switched on yet.** Once it is, expect roughly **one to two
 minutes** between saving and the change appearing on
@@ -189,7 +211,7 @@ problem with the change — see the last section.
 
 Refresh the page in your browser if you still see the old version.
 
-## 12. What you should not try to change here
+## 13. What you should not try to change here
 
 Some things are hidden from the editor on purpose, because changing them would
 break the site's addresses, its menus, or its scientific review process:
@@ -209,7 +231,7 @@ after the science has been checked.
 If you need one of these changed, ask — it is a small job, it is just not a
 safe one to do by accident.
 
-## 13. If something goes wrong
+## 14. If something goes wrong
 
 The site checks every change before publishing it. If a change would break the
 site, **the site does not break** — the previous version stays online and the

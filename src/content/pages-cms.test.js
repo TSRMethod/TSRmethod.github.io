@@ -53,6 +53,24 @@ describe('.pages.yml is valid and matches the repository', () => {
     expect(config.media.input).toBe(`public${config.media.output}`)
   })
 
+  it('keeps uploads at the paths the application serves them from', () => {
+    /*
+     * Pinned literally, not just structurally. An upload is committed to
+     * `input` and the CMS writes `output` into the content file, so the two
+     * have to describe the same file from the repository's and the browser's
+     * point of view. Changing either without the other would break every
+     * image an editor uploads, and it would only show up on the live site.
+     *
+     * Uploads stay separate from public/images/methods, public/images/people
+     * and public/images/home, which developers curate.
+     */
+    expect(config.media.input).toBe('public/images/uploads')
+    expect(config.media.output).toBe('/images/uploads')
+    expect(config.media.extensions).toContain('webp')
+    // Filenames are slugified on upload: spaces and accents break URLs.
+    expect(config.media.rename).toBe('safe')
+  })
+
   it('exposes exactly the expected content areas', () => {
     expect(Object.keys(entries).sort()).toEqual([
       'analysis',

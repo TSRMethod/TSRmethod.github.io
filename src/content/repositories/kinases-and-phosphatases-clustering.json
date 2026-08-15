@@ -1,0 +1,10 @@
+{
+  "id": "kinases-and-phosphatases-clustering",
+  "name": "Kinases-and-Phosphatases-Clustering",
+  "url": "https://github.com/KrishnaRauniyar/Kinases-and-Phosphatases-Clustering",
+  "description": "Key frequency generation and the hierarchical clustermap — the first and last steps of the clustering workflow.",
+  "language": "Python",
+  "category": "analysis",
+  "kind": "scripts",
+  "order": 2
+}

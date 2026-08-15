@@ -6,6 +6,8 @@ import App from '../../app/App'
 import DesktopNav from './DesktopNav'
 import MobileNav from './MobileNav'
 import { setViewport } from '../../test/viewport'
+import { isRouteImplemented } from '../../app/routeRegistry'
+import { siteConfig } from '../../app/siteConfig'
 
 /*
  * The navigation components are tested against fixture data rather than the
@@ -313,5 +315,74 @@ describe('page layout', () => {
 
     const ids = Array.from(document.querySelectorAll('[id]')).map((el) => el.id)
     expect(new Set(ids).size).toBe(ids.length)
+  })
+})
+
+describe('the footer', () => {
+  beforeEach(() => setViewport('desktop'))
+
+  function renderApp(path = '/') {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <App />
+      </MemoryRouter>,
+    )
+  }
+
+  it('has no dead internal link', () => {
+    renderApp()
+
+    const footer = screen.getByRole('contentinfo')
+    const internal = Array.from(footer.querySelectorAll('a[href^="/"]')).map(
+      (link) => link.getAttribute('href'),
+    )
+
+    expect(internal.length).toBeGreaterThan(0)
+    for (const href of internal) {
+      expect(isRouteImplemented(href), href).toBe(true)
+    }
+  })
+
+  it('links to every hand-built page now they all exist', () => {
+    renderApp()
+
+    const footer = within(screen.getByRole('contentinfo'))
+    for (const [name, href] of [
+      ['TSR Method', '/tsr'],
+      ['Software', '/software'],
+      ['Publications', '/publications'],
+      ['People', '/people'],
+      ['Contact', '/contact'],
+    ]) {
+      expect(footer.getByRole('link', { name }), name).toHaveAttribute(
+        'href',
+        href,
+      )
+    }
+  })
+
+  it('separates a website problem from a problem with the research code', () => {
+    /*
+     * The footer's issue link is this repository's tracker, which is for the
+     * pages themselves. A bug in the research code belongs on the repository
+     * that provides it, and /software carries that link per entry — so the
+     * label has to say which one this is.
+     */
+    renderApp()
+
+    const footer = within(screen.getByRole('contentinfo'))
+    const link = footer.getByRole('link', { name: /website problem/i })
+
+    expect(link).toHaveAttribute(
+      'href',
+      'https://github.com/TSRMethod/TSRmethod.github.io/issues',
+    )
+  })
+
+  it('shows the tagline from site content, not a copy of it', () => {
+    renderApp()
+
+    const footer = within(screen.getByRole('contentinfo'))
+    expect(footer.getByText(siteConfig.tagline)).toBeInTheDocument()
   })
 })

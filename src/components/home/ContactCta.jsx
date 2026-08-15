@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom'
 import { home } from '../../content'
 import { siteConfig, mailtoHref } from '../../app/siteConfig'
+import { isRouteImplemented } from '../../app/routeRegistry'
 import { CONTACT_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
 import styles from './ContactCta.module.css'
+
+const CONTACT_PATH = '/contact'
 
 /*
  * Closing invitation.
@@ -30,6 +34,15 @@ export default function ContactCta({ tone }) {
       <p className={styles.address}>
         <a href={mailtoHref()}>{siteConfig.email}</a>
       </p>
+      {/*
+       * Appeared on its own when Stage 8 built the page: the gate is asked, so
+       * this needed no change on the day the route arrived.
+       */}
+      {isRouteImplemented(CONTACT_PATH) && (
+        <p className={styles.more}>
+          <Link to={CONTACT_PATH}>Other ways to reach us</Link>
+        </p>
+      )}
     </HomeSection>
   )
 }

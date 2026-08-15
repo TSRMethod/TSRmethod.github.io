@@ -112,6 +112,68 @@ own fallback handling. These must be checked on the real site:
 - an invalid URL such as `/no-such-page` shows the site's own 404 page
 - CSS, JavaScript and images all load
 
+## Media uploads through the CMS
+
+`src/content/pages-cms.test.js` pins the two paths that have to agree:
+
+```yaml
+media:
+  input: public/images/uploads    # where the file is committed
+  output: /images/uploads         # what gets written into the content file
+```
+
+Vite's `base` is `/`, so the absolute output path resolves both locally and on
+GitHub Pages, and uploads stay separate from `public/images/methods`,
+`public/images/people` and `public/images/home`, which developers curate.
+
+### Verified live on 14 August 2026
+
+This was previously untested — the tests could show the configuration was
+self-consistent, not that Pages CMS writes where it says it does. It has now
+been run for real, by changing a portrait through the CMS, and **the upload
+flow works exactly as configured**:
+
+- the image was committed under `public/images/uploads/`, with the filename
+  slugified as `media.rename: safe` specifies;
+- the content record received the root-relative `/images/uploads/…` form;
+- the change arrived as an ordinary commit and went through CI like any other.
+
+CI did fail on that first upload, and it is worth being precise about why:
+**the upload was correct and the test was wrong.** `records.test.js` asserted
+that every portrait path began `/images/people/`, which held only while
+developers were the only people adding portraits. Both approved roots are now
+accepted, and a photo's existence is checked by resolving its path under
+`public/` rather than by listing one folder. Nothing in `.pages.yml` changed.
+
+**The CMS does not resize or optimise what it is given.** The portrait uploaded
+in this test is 1474 × 1474 and 270 KB for a slot about 88 px wide; curated
+portraits are capped and converted to webp by hand. An editor uploading a photo
+straight from a phone will ship it at full size.
+
+### Running the check again
+
+Worth repeating if `media.input` or `media.output` is ever changed:
+
+1. Sign in at <https://app.pagescms.org> and open the site.
+2. Go to **Method & tutorial pages** and click **Add** — a new page is created
+   as a draft and cannot reach the live site, which is what makes it safe to
+   use as a test.
+3. Set the **Title** to `Media upload test`.
+4. Under **Main illustration**, upload any small PNG or JPEG, and write a line
+   of alt text.
+5. **Save.**
+6. In GitHub, check that the commit contains:
+   - the image, under `public/images/uploads/`, with a slugified filename;
+   - `src/content/methods/media-upload-test.md`, whose `figure.src` begins
+     `/images/uploads/`.
+7. Wait for CI on `main` to pass. The page is a draft, so nothing appears on
+   the live site.
+8. **Clean up:** delete both files. The CMS does not allow deleting a method,
+   so do it in Git — `git rm` the two paths, commit and push.
+
+If step 6 shows a different folder or a path without the leading slash, fix
+`media.input` / `media.output` in `.pages.yml` together and re-run the tests.
+
 ## Local commands
 
 ```bash

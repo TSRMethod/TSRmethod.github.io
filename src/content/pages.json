@@ -8,5 +8,21 @@
     "intro": "The TSR method is developed jointly by the Department of Chemistry and the School of Computing and Informatics at the University of Louisiana at Lafayette, with contributions from doctoral researchers and undergraduate students in chemistry, biology and computer science.",
     "currentHeading": "Current members",
     "formerHeading": "Former members"
+  },
+  "software": {
+    "title": "Software",
+    "intro": "The code behind the methods documented on this site. Some of it is an installable Python package; the rest is research code written alongside a particular paper, and is described as such. Each entry links to the repository, which is the authoritative source for the code and its installation instructions.",
+    "note": "The software is spread across several repositories, some under individual accounts. A single, consolidated package is planned; until it exists, the repository linked from each entry is the one to use."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Questions about the TSR method, about running the software on your own structures, and about research collaboration are all welcome.",
+    "emailHeading": "Email",
+    "emailAction": "Email the group",
+    "collaborationHeading": "Research and collaboration",
+    "collaborationBody": "For questions about the method, requests to collaborate, or enquiries about studying with the group, email us. Please say which method or paper you are asking about — it helps us send your message to the right person.",
+    "softwareHeading": "Software problems",
+    "softwareBody": "For a reproducible bug or a technical problem with the code, an issue on the repository that provides the tool is better than an email: it reaches whoever wrote it, and other people hit the same problem. Each entry on the software page links to its repository. For anything less definite — which tool to use, what an output file means — email is fine.",
+    "affiliationHeading": "Affiliation"
   }
 }
