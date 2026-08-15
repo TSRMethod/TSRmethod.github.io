@@ -26,18 +26,18 @@ function renderMethod(slug = 'tsr') {
 describe('/tsr route', () => {
   beforeEach(() => setViewport('desktop'))
 
-  it('renders the TSR page at its own address', () => {
+  it('renders the TSR page at its own address', async () => {
     renderApp('/tsr')
 
     expect(
-      screen.getByRole('heading', {
+      await screen.findByRole('heading', {
         level: 1,
         name: 'Triangular Spatial Relationship (TSR)',
       }),
     ).toBeInTheDocument()
   })
 
-  it('sets a route-specific document title', () => {
+  it('sets a route-specific document title', async () => {
     renderApp('/tsr')
 
     expect(document.title).toBe(
@@ -77,7 +77,14 @@ describe('page header', () => {
 
     const image = screen.getByRole('img', { name: figure.alt })
     expect(image).toHaveAttribute('src', figure.src)
-    expect(image).toHaveAttribute('loading', 'lazy')
+
+    /*
+     * Eager, not lazy. This figure sits above the fold and is usually the
+     * largest paint on a method page — deferring the illustration the reader
+     * came to look at delays the page for no saving. Everything further down
+     * still loads lazily.
+     */
+    expect(image).toHaveAttribute('loading', 'eager')
   })
 
   it('gives every image a non-empty alt attribute', () => {

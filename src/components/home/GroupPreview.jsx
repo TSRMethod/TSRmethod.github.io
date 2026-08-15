@@ -3,6 +3,7 @@ import { home, facultyPeople } from '../../content'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import { GROUP_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
+import OptimizedImage from '../shared/OptimizedImage'
 import styles from './GroupPreview.module.css'
 
 const PEOPLE_PATH = '/people'
@@ -38,12 +39,11 @@ export default function GroupPreview({ tone }) {
           {facultyPeople.map((person) => (
             <li key={person.id} className={styles.person}>
               {person.photo && (
-                <img
+                <OptimizedImage
                   className={styles.photo}
                   src={person.photo}
                   alt={`Portrait of ${person.name}`}
-                  loading="lazy"
-                  decoding="async"
+                  sizes="4.5rem"
                 />
               )}
               <div className={styles.naming}>

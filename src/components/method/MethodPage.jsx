@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import { getPublishedMethod, formatCitation } from '../../content'
 import NotFound from '../../pages/NotFound/NotFound'
 import MarkdownContent from './MarkdownContent'
 import SectionNavigation from './SectionNavigation'
 import SlurmGuide from './SlurmGuide'
 import SourceCodeCard from './SourceCodeCard'
+import OptimizedImage from '../shared/OptimizedImage'
 import Callout from './Callout'
 import styles from './MethodPage.module.css'
 
@@ -33,7 +34,7 @@ const REFERENCES_ID = 'references'
 export default function MethodPage({ slug }) {
   const method = getPublishedMethod(slug)
 
-  useDocumentTitle(method?.title)
+  usePageMetadata({ title: method?.title, description: method?.summary })
 
   /*
    * Content headings come from the Markdown; the trailing sections are
@@ -99,11 +100,17 @@ export default function MethodPage({ slug }) {
 
         {method.figure && (
           <figure className={styles.figure}>
-            <img
+            {/*
+             * The one image above the fold on a method page, so it loads
+             * eagerly — lazy-loading the thing the reader came to look at
+             * delays the largest paint for no benefit.
+             */}
+            <OptimizedImage
               src={method.figure.src}
               alt={method.figure.alt}
-              loading="lazy"
-              decoding="async"
+              sizes="(min-width: 1024px) 76ch, 100vw"
+              loading="eager"
+              fetchPriority="high"
             />
             {method.figure.caption && (
               <figcaption>{method.figure.caption}</figcaption>
