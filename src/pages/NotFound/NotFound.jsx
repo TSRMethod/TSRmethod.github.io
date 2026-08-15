@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import styles from './NotFound.module.css'
 
 export default function NotFound() {
-  useDocumentTitle('Page not found')
+  usePageMetadata({ title: 'Page not found' })
 
   return (
     <div className={styles.wrapper}>

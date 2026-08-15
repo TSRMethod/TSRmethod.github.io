@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import { pages } from '../../content'
 import { siteConfig, mailtoHref } from '../../app/siteConfig'
 import { isRouteImplemented } from '../../app/routeRegistry'
@@ -35,7 +35,7 @@ export default function Contact() {
     affiliationHeading,
   } = pages.contact
 
-  useDocumentTitle(title)
+  usePageMetadata({ title, description: intro })
 
   return (
     <div className={styles.page}>

@@ -3,13 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#0056b3" />
+
+    <!--
+      Site-level defaults. Every route updates the title, description,
+      canonical and og: tags as it renders (see src/hooks/usePageMetadata.js);
+      what is here is what a crawler that does not run JavaScript sees, so it
+      describes the site rather than any one page.
+    -->
     <title>TSR Research Group</title>
     <meta
       name="description"
-      content="The Triangular Spatial Relationship (TSR) method: alignment-free comparison of 3D protein structures, TSR-derived methods, and open-source Python tools."
+      content="The Triangular Spatial Relationship (TSR) method: alignment-free comparison of 3D protein structures, TSR-derived methods, and the Python tools that implement them."
     />
+    <link rel="canonical" href="https://tsrmethod.github.io/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TSR Research Group" />
+    <meta property="og:title" content="TSR Research Group" />
+    <meta
+      property="og:description"
+      content="The Triangular Spatial Relationship (TSR) method: alignment-free comparison of 3D protein structures, TSR-derived methods, and the Python tools that implement them."
+    />
+    <meta property="og:url" content="https://tsrmethod.github.io/" />
+    <!--
+      No social preview image is declared. A card image has to be a real
+      designed asset; a cropped logo or an auto-generated placeholder would
+      look like a finished one and quietly become permanent. Previews render
+      as text until there is an approved asset. See CONTENT-REVIEW.
+    -->
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0056b3" />
   </head>
   <body>
     <div id="root"></div>

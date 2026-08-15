@@ -1,4 +1,4 @@
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import { home } from '../../content'
 import Hero from '../../components/home/Hero'
 import TsrIntroduction from '../../components/home/TsrIntroduction'
@@ -27,11 +27,12 @@ import {
  *      this one, and each decides on its own whether it has anything to show:
  *      a section with no records renders nothing rather than an empty heading.
  *
- * The document title is the bare site name, which is what useDocumentTitle
- * produces when called with nothing.
+ * The document title is the bare site name, and the description falls back
+ * to the site-wide one — which is what usePageMetadata does when called with
+ * nothing.
  */
 export default function Home() {
-  useDocumentTitle()
+  usePageMetadata()
 
   return (
     <>

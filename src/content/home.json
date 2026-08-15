@@ -1,6 +1,6 @@
 {
   "hero": {
-    "lede": "We develop the Triangular Spatial Relationship (TSR) method: an alignment-free way of representing a 3D protein structure as a set of integer keys, so that structures can be compared, clustered and searched without superimposition. This site documents the method, the TSR-derived methods built on it, and the open-source Python packages that implement them.",
+    "lede": "We develop the Triangular Spatial Relationship (TSR) method: an alignment-free way of representing a 3D protein structure as a set of integer keys, so that structures can be compared, clustered and searched without superimposition. This site documents the method, the TSR-derived methods built on it, and the public Python packages that implement them.",
     "primaryCta": "Read about the TSR method",
     "secondaryCta": "Browse methods and tutorials"
   },
@@ -10,8 +10,8 @@
     "cta": "See the full method and tutorial",
     "figure": {
       "src": "/images/uploads/high-resolution-scientific-workflow-infographic-for-a-peer-reviewed-rev-image-9-2.png",
-      "alt": "Five-step diagram of TSR key generation: a sample protein structure; all of its Cα atoms selected; a triangle constructed between three of them; the triangle's side lengths and angle measured; the key formula applied to those values; and the protein finally presented as a table of integer keys.",
-      "caption": "Generating TSR keys: from a structure, to triangles between its Cα atoms, to one integer per triangle."
+      "alt": "Six-step diagram of the TSR pipeline: an input 3D protein structure; its representative Cα coordinates selected; triangular motifs constructed between triplets of those points; the geometric features of a triangle measured as its maximum distance, angle bin and vertex labels; those features mapped deterministically to TSR keys; and the keys counted into a key-frequency vector used for structural similarity and machine learning. A footnote reads: no structural superposition required.",
+      "caption": "From a structure, to triangles between its Cα atoms, to one integer key per triangle, to a vector describing the whole protein."
     }
   },
   "methods": {
@@ -23,7 +23,7 @@
     "intro": "Once keys have been generated, a second family of tools summarises and interprets them: finding the keys shared across a set of structures, clustering structures by key similarity, and training models on key frequencies."
   },
   "software": {
-    "heading": "Open-source software",
+    "heading": "Software and source code",
     "intro": "Every method on this site is implemented in a public repository. The packages are installed from source with pip; the method pages carry the exact commands and the expected input formats."
   },
   "publications": {

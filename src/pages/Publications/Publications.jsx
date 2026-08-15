@@ -1,4 +1,4 @@
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import {
   pages,
   publicationsByYear,
@@ -83,7 +83,7 @@ function Publication({ publication }) {
 export default function Publications() {
   const { title, intro } = pages.publications
 
-  useDocumentTitle(title)
+  usePageMetadata({ title, description: intro })
 
   const years = groupByYear(publicationsByYear)
 
