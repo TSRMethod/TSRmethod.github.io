@@ -32,5 +32,33 @@ export default function useMediaQuery(query) {
   return useSyncExternalStore(subscribe, getSnapshot, () => false)
 }
 
-/** Width at which the desktop navigation replaces the mobile drawer. */
+/**
+ * Width at which a page's content switches to its two-column desktop layout —
+ * the method-page section sidebar, and the home introduction's side-by-side
+ * text and diagram.
+ */
 export const DESKTOP_QUERY = '(min-width: 1024px)'
+
+/**
+ * Width at which the desktop navigation bar replaces the mobile drawer.
+ *
+ * DELIBERATELY HIGHER than the content breakpoint, and the number is measured
+ * rather than chosen. The header lays out as:
+ *
+ *   mark 40 + gap 12 + "TSR Research Group" 177 + gap 16 + nav 833 + padding 32
+ *   = 1110px
+ *
+ * Below that the group's own name is the thing that gives way, because it is
+ * the only flexible item in the row: at 1100px it was ellipsised, and at
+ * 1024px — exactly where the desktop navigation used to switch on — it
+ * collapsed to nothing, leaving a bare logo and no site name at all.
+ *
+ * The bar is what does not fit, so the bar is what moves. 1150px is the
+ * measured minimum plus enough slack that a menu label can grow a little
+ * without the identity paying for it. Between 1024 and 1150 the page content
+ * is in its desktop layout while navigation is still the drawer, which is a
+ * combination tablets have used for years.
+ *
+ * If a menu item is ever added, re-measure. Do not shave the brand instead.
+ */
+export const NAV_QUERY = '(min-width: 1150px)'

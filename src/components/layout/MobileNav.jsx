@@ -8,7 +8,7 @@ const DRAWER_ID = 'mobile-nav-drawer'
 /*
  * Mobile navigation: a toggle button plus a slide-in drawer.
  *
- * Only rendered below 1024px, so nothing here is ever a hidden tab stop on
+ * Only rendered below 1150px, so nothing here is ever a hidden tab stop on
  * desktop.
  *
  * Behaviour the previous site got wrong and this fixes:

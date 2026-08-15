@@ -1,5 +1,6 @@
 /*
- * Mobile navigation. Only rendered below 1024px (see useMediaQuery).
+ * Mobile navigation. Only rendered below 1150px (see NAV_QUERY in
+ * useMediaQuery.js, which explains where that number comes from).
  *
  * Widths use min(…, vw) rather than fixed pixels so the drawer cannot cause
  * horizontal overflow on a 320px phone.

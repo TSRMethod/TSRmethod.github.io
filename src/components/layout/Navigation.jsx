@@ -1,5 +1,5 @@
 import { getVisibleNavigation } from '../../app/navigation'
-import useMediaQuery, { DESKTOP_QUERY } from '../../hooks/useMediaQuery'
+import useMediaQuery, { NAV_QUERY } from '../../hooks/useMediaQuery'
 import DesktopNav from './DesktopNav'
 import MobileNav from './MobileNav'
 
@@ -11,7 +11,7 @@ import MobileNav from './MobileNav'
  * and invisible tab stops for keyboard users.
  */
 export default function Navigation() {
-  const isDesktop = useMediaQuery(DESKTOP_QUERY)
+  const isDesktop = useMediaQuery(NAV_QUERY)
   const items = getVisibleNavigation()
 
   return isDesktop ? <DesktopNav items={items} /> : <MobileNav items={items} />
