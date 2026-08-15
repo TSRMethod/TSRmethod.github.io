@@ -174,12 +174,14 @@ describe('published methods are reachable', () => {
     expect(isRouteImplemented(`/methods/${slug}`)).toBe(true)
   })
 
-  it.each(PUBLISHED)('%s renders its own page', (slug) => {
+  it.each(PUBLISHED)('%s renders its own page', async (slug) => {
     const method = getPublishedMethod(slug)
     renderApp(method.path)
 
+    /* `find` rather than `get`: MethodPage is code-split, so it arrives on a
+       later tick than the route that renders it. */
     expect(
-      screen.getByRole('heading', { level: 1, name: method.title }),
+      await screen.findByRole('heading', { level: 1, name: method.title }),
     ).toBeInTheDocument()
   })
 
@@ -279,11 +281,11 @@ describe('the draft safety model still holds', () => {
     }
   })
 
-  it('404s for an unknown method address', () => {
+  it('404s for an unknown method address', async () => {
     renderApp('/methods/future-method')
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /page not found/i }),
+      await screen.findByRole('heading', { level: 1, name: /page not found/i }),
     ).toBeInTheDocument()
   })
 })
@@ -300,11 +302,11 @@ describe('legacy aliases', () => {
     ['/aminoacid', 'Amino Acid TSR'],
     ['/nucleotide', 'Nucleotide TSR'],
     ['/nucleotide-protein', 'Nucleotide–Protein TSR'],
-  ])('%s redirects to the migrated page', (legacyPath, title) => {
+  ])('%s redirects to the migrated page', async (legacyPath, title) => {
     renderApp(legacyPath)
 
     expect(
-      screen.getByRole('heading', { level: 1, name: title }),
+      await screen.findByRole('heading', { level: 1, name: title }),
     ).toBeInTheDocument()
   })
 
@@ -387,11 +389,11 @@ describe('content quality of every published method', () => {
 describe('the existing TSR page is unaffected', () => {
   beforeEach(() => setViewport('desktop'))
 
-  it('still renders at /tsr', () => {
+  it('still renders at /tsr', async () => {
     renderApp('/tsr')
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /Triangular Spatial/ }),
+      await screen.findByRole('heading', { level: 1, name: /Triangular Spatial/ }),
     ).toBeInTheDocument()
   })
 

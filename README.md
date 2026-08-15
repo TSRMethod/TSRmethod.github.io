@@ -37,6 +37,9 @@ npm ci      # clean install matching package-lock.json; use `npm install` only
 
 Run `npm run lint`, `npm test` and `npm run build` before committing.
 
+`npm run build` also optimises every image and writes `sitemap.xml`; both are
+part of the ordinary build, so deployment gets them without a second step.
+
 ## Project layout
 
 ```
@@ -57,6 +60,12 @@ src/
 
 public/
   images/       Content images, referenced from Markdown and JSON
+    uploads/    Pages CMS uploads
+    brand/      The site mark, derived from assets/brand/
+  robots.txt    Crawling policy; sitemap.xml is generated at build time
+
+scripts/        Build-time tooling — image optimisation, sitemap routes
+assets/brand/   Logo masters. NOT served; see its README for what is derived
 ```
 
 Every public page now exists: the home page, the method and analysis tutorials,
@@ -80,6 +89,31 @@ defined once in `src/styles/tokens.css`. Component styles are CSS Modules
 (`Component.module.css`) placed next to the component. Avoid adding global
 element rules — the previous site defined `code` and `table` styles globally
 and they leaked into every page.
+
+## Images are optimised automatically
+
+**Nobody has to prepare an image before using it** — not a developer, and
+certainly not somebody editing through the CMS. Upload the best quality you
+have and the build does the rest.
+
+During `npm run build`, [`scripts/optimize-images.mjs`](scripts/optimize-images.mjs)
+reads everything under `public/images/` and writes, into `dist/` only:
+
+- responsive **WebP** derivatives at several widths (`photo.w320.webp`);
+- a re-encoded copy of the original at its own URL, as the fallback.
+
+`public/` is never touched, and **the path stored in content never changes**.
+`OptimizedImage` renders a `<picture>` when derivatives exist and a plain
+`<img>` when they do not, which is why the dev server and the tests work with
+no image build at all, and why a freshly uploaded photo is never broken.
+
+Two profiles, because a face and a labelled diagram need opposite things:
+portraits are capped at 600 px, figures at 1600 px with a higher quality floor.
+A portrait uploaded through the CMS lands in `/images/uploads/` beside the
+diagrams, so the profile is chosen by consulting the People records rather than
+by folder.
+
+Current effect: 3.5 MB of source images are delivered as about 1.0 MB.
 
 ## Deployment
 
@@ -105,8 +139,56 @@ works and its one tradeoff.
 Full details, including first-time Pages setup and how to verify a
 deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
-## Rebuild in progress
+## Handing this over
 
-This site is being rebuilt from an earlier Create React App version. Content is
-migrating in stages; some method pages are still marked as drafts and are
-deliberately absent from the navigation until their content has been reviewed.
+The rebuild from the earlier Create React App site is complete. Every page is
+live; three legacy pages remain unpublished because their *content* has known
+problems, not because anything is unbuilt — see
+[`CONTENT-REVIEW.md`](CONTENT-REVIEW.md), which is the list of questions only
+an author can answer.
+
+Where to look, depending on what you need to do:
+
+| I want to… | Read |
+| --- | --- |
+| Change what a page says | [`src/content/README.md`](src/content/README.md) |
+| Do that without touching code | [`docs/CONTENT-EDITOR-GUIDE.md`](docs/CONTENT-EDITOR-GUIDE.md) |
+| Understand how it deploys | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+| Replace the logo | [`assets/brand/README.md`](assets/brand/README.md) |
+| Know what still needs an author | [`CONTENT-REVIEW.md`](CONTENT-REVIEW.md) |
+
+### The five things worth knowing before changing anything
+
+1. **Content decides, code renders.** Publishing a method is setting
+   `status: published` in a Markdown file. Its route, its menu entry, its place
+   on the home page and its line in `sitemap.xml` all follow from that — there
+   is no list to update, and no way to publish a page that is not routed.
+
+2. **A draft is invisible, completely.** No route, no menu entry, no link, no
+   sitemap entry. Typing the address gives a 404. This is what keeps unreviewed
+   science off a public site, and it is enforced in the loader rather than by
+   remembering.
+
+3. **The CMS cannot break the architecture.** Fields that decide a URL, a menu
+   or publication are hidden from the editor and preserved on save
+   (`settings.content.merge: true`). Everything an editor *can* change is
+   validated at build time, so a bad save fails the build and the live site
+   keeps its last good version.
+
+4. **Nothing about a repository is written in a component.** Names, URLs,
+   owners and descriptions live in `src/content/repositories/`. When the
+   planned consolidated TSR package arrives, pointing the site at it is an edit
+   to one JSON file — a test fails if a GitHub account name ever appears in the
+   software page's JSX.
+
+5. **Run it on Node 24.** `nvm use`. On an older Node the test suite fails with
+   an error that looks like a broken dependency and is really a version
+   mismatch.
+
+### Deliberately not done
+
+Documenting the current Python packages' APIs in any depth. They are expected
+to be consolidated into a single package, and a second copy of today's import
+paths would be wrong the day that happens. The method pages carry verified
+usage; the software page is a directory that points at the authoritative
+repositories.

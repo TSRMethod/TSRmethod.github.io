@@ -59,6 +59,9 @@ rather than being renumbered or deleted.
 | 30 | Who reads the GitHub issue trackers? | ⚠️ Verify |
 | 31 | The legacy postal address was not migrated | ⚠️ Verify |
 | 32 | `/problems` and `/community` retired | ✅ Resolved |
+| 33 | Uploaded images are no longer the editor's problem | ✅ Resolved |
+| 34 | The home diagram's alt text described the old figure | ✅ Resolved |
+| 35 | No social preview image | ⚠️ Verify |
 
 ---
 
@@ -706,8 +709,18 @@ documented on this site with instructions telling people to install them.
 
 **What I did.** The software page describes what each repository *is* — an
 installable package or research scripts — and does not claim a licence for any
-of them. The word "open-source" survives only on the home page, where it
-describes the intent of the work rather than any individual repository.
+of them.
+
+**Updated in Stage 9.** The phrase "open-source" is now gone from the site
+entirely. It survived on the home page and in the site description, where it
+described a collection five-sevenths of which is not, in fact, open source.
+The wording is "public Python packages", "the Python tools that implement
+them" and a section headed "Software and source code" — all true of an
+unlicensed public repository. A test fails if the claim comes back.
+
+**The underlying issue is unchanged and still needs an author.** Removing the
+claim made the website accurate; it did not give anyone permission to use the
+code.
 
 **Question.** Adding a `LICENSE` file to each is a small change with real
 consequences for anyone who wants to build on the work, and it matters more
@@ -777,6 +790,70 @@ a two-line addition to `pages.json` once someone confirms it.
 - **`/community`** — two affiliation logos. Those affiliations are now in the
   footer of every page, including the 404, and on `/contact`. Not redirected,
   because there is no page to redirect to.
+
+---
+
+### 33. Uploaded images are no longer the editor's problem ✅ **resolved**
+
+**Observed.** The first two real CMS uploads were a 1474 × 1474 JPEG (270 kB)
+for a slot 88 px wide, and a 1376 × 768 PNG (1.2 MB) for the home page. Both
+were exactly what an editor should be able to upload — a good-quality image
+from whoever supplied it — and both were shipped to every visitor untouched.
+The alternative was a rule ("please resize before uploading") that would be
+forgotten, and whose only symptom when forgotten is a slow site.
+
+**Resolved.** The production build now optimises every raster image on its way
+into `dist/`, with no action required from anyone editing content. The upload
+is committed as-is, the path in the content record never changes, and the
+build produces responsive WebP derivatives plus a re-encoded fallback at the
+same URL.
+
+| | Uploaded | Delivered |
+| --- | --- | --- |
+| Portrait | 270 kB, 1474 px | **5.9 kB** at the size it is displayed |
+| Home diagram | 1226 kB, 1376 px | **56 kB** |
+
+Across the whole site: 3.5 MB of source images become 1.0 MB delivered, a 70%
+reduction, and no editor has to know any of it happened.
+
+**Nothing here needs a decision.** Recorded because the earlier note under item
+28 — that the CMS does not resize on upload and an editor uploading a phone
+photo would ship it at full size — is now handled, and should not be acted on
+a second time.
+
+---
+
+### 34. The home diagram's alt text described the old figure ✅ **resolved**
+
+**Observed.** The home page illustration was replaced through Pages CMS with a
+better six-step diagram. The `alt` text was not updated with it, so it still
+described the previous five-step figure step by step — a screen-reader user
+would have been told about a diagram that is no longer there.
+
+This is a general hazard of separating an image field from its description:
+changing one is easy, and nothing forces the other.
+
+**Resolved.** The alt text now describes the diagram that is actually on the
+page, and the caption follows it. Nothing about the CMS changed — the fields
+are adjacent in the editor and both are marked required — so the fix is the
+text, plus this note that the two must move together.
+
+---
+
+### 35. No social preview image
+
+**Observed.** Links to the site shared on Slack, Bluesky, LinkedIn or in a
+message render as a text-only card. The metadata behind them is complete —
+title, description, canonical URL — but there is no `og:image`.
+
+**What I did.** Left it out. A card image is a designed asset: cropping the
+logo or auto-generating something from the site name would produce a card that
+looks finished, and a card that looks finished never gets replaced. Text-only
+is honest about the fact that nobody has made one.
+
+**Question.** Worth having, if someone wants to make one — 1200 × 630, the
+group name and the mark, nothing that will date. Until then this is a
+deliberate absence rather than a gap.
 
 ---
 

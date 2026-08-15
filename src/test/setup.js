@@ -11,6 +11,23 @@ import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { installMatchMedia, resetViewport } from './viewport'
 
+/*
+ * Warm the one code-split route before any test renders.
+ *
+ * MethodPage is loaded with React.lazy (see src/app/LazyMethodPage.jsx), so in
+ * the browser it arrives a moment after the route that renders it. Tests
+ * handle that correctly with `findBy*`, which polls — but the *first* dynamic
+ * import in a worker also has to transform and evaluate the module, and under
+ * a full parallel run that occasionally took longer than findBy's one-second
+ * default. The result was a test that passed alone and failed in the suite.
+ *
+ * Evaluating the module here means the import resolves from the module cache
+ * when React asks for it, so what the tests wait on is React's re-render
+ * rather than a compile. Nothing is stubbed and no assertion is relaxed: the
+ * component is still loaded lazily, and the tests still await it.
+ */
+await import('../components/method/MethodPage')
+
 /* jsdom has no layout engine, so scrolling is unimplemented. */
 window.scrollTo = vi.fn()
 
