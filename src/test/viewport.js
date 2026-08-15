@@ -9,9 +9,17 @@
  *   setViewport('desktop')  // renders DesktopNav
  */
 
-const DESKTOP_MIN_WIDTH = 1024
+/*
+ * The width a test gets when it does not ask for one.
+ *
+ * A full desktop rather than the narrowest desktop: the navigation switches to
+ * the drawer below 1150px (NAV_QUERY), so a default of 1024 would silently
+ * give every test that never calls setViewport the mobile menu — passing, but
+ * not testing what its author meant.
+ */
+const DEFAULT_WIDTH = 1280
 
-let currentWidth = DESKTOP_MIN_WIDTH
+let currentWidth = DEFAULT_WIDTH
 const listeners = new Set()
 
 function evaluate(query) {
@@ -50,6 +58,6 @@ export function setViewport(viewport) {
 }
 
 export function resetViewport() {
-  currentWidth = DESKTOP_MIN_WIDTH
+  currentWidth = DEFAULT_WIDTH
   listeners.clear()
 }

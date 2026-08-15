@@ -1,5 +1,6 @@
 /*
- * Desktop navigation. Only rendered at >= 1024px (see useMediaQuery).
+ * Desktop navigation. Only rendered at >= 1150px (see NAV_QUERY in
+ * useMediaQuery.js, which explains where that number comes from).
  *
  * Note there is no `overflow: hidden` anywhere in this file. The previous
  * site set it on the navbar, which clipped every absolutely positioned

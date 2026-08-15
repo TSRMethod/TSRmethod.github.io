@@ -501,6 +501,25 @@ Pages CMS was committed to `public/images/uploads/` with a slugified filename,
 and `/images/uploads/…` was written into the person's record — exactly what the
 configuration above describes. This is no longer an untested assumption.
 
+### Upload a normal image. The site handles the rest.
+
+**You do not need to resize, compress or convert anything before uploading.**
+Pick the best-quality version you have and upload it.
+
+Every time the site is built, each image is automatically turned into several
+smaller WebP versions plus a compressed copy of the original, and each visitor's
+browser picks the smallest one that still looks sharp on their screen. A 270 kB
+photograph is delivered as about 6 kB; a 1.2 MB diagram as about 56 kB.
+
+You will not see those versions anywhere, and you should not look for them: the
+path stored in the content file is always the one you uploaded, and it keeps
+working. There is nothing to click and nothing to remember.
+
+The one thing worth keeping in mind is repository housekeeping rather than
+speed: a 40 MB photograph straight from a camera is stored in the repository
+forever, even though visitors would receive a small version of it. Something in
+the region of a few megabytes is plenty for any image on this site.
+
 A person's `photo` may therefore be in either place:
 
 | Path | Who puts it there |

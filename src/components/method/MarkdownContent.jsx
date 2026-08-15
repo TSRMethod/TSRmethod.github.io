@@ -5,6 +5,7 @@ import rehypeSlug from 'rehype-slug'
 import CodeBlock from './CodeBlock'
 import DataTable, { TableHeaderCell } from './DataTable'
 import Callout from './Callout'
+import OptimizedImage from '../shared/OptimizedImage'
 import { toText, codeLanguage, findCodeChild } from '../../lib/hast'
 import styles from './MarkdownContent.module.css'
 
@@ -49,10 +50,16 @@ const components = {
     return <Callout>{children}</Callout>
   },
 
+  /*
+   * Images written inside Markdown go through the same optimisation as the
+   * ones in frontmatter. Without this, an editor illustrating a tutorial with
+   * `![…](/images/uploads/…)` would be the one path still serving the raw
+   * upload — the slowest images on the site, in its longest pages.
+   */
   img({ src, alt }) {
     return (
       <figure className={styles.figure}>
-        <img src={src} alt={alt ?? ''} loading="lazy" decoding="async" />
+        <OptimizedImage src={src} alt={alt ?? ''} sizes="(min-width: 1024px) 76ch, 100vw" />
         {alt ? <figcaption>{alt}</figcaption> : null}
       </figure>
     )

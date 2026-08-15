@@ -294,7 +294,7 @@ describe('the real site is unaffected', () => {
     }
   })
 
-  it('renders /tsr and shows it in the navigation', () => {
+  it('renders /tsr and shows it in the navigation', async () => {
     setViewport('desktop')
     render(
       <MemoryRouter initialEntries={['/tsr']}>
@@ -303,7 +303,7 @@ describe('the real site is unaffected', () => {
     )
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /Triangular Spatial/ }),
+      await screen.findByRole('heading', { level: 1, name: /Triangular Spatial/ }),
     ).toBeInTheDocument()
   })
 

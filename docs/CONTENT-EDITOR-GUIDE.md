@@ -118,6 +118,25 @@ In the page form, find **Main illustration**.
 Uploaded images are stored together in one place, so they are easy to find
 again later.
 
+> ### You do not need to prepare images
+>
+> **Upload the best-quality picture you have.** Do not resize it, do not
+> compress it, and do not try to convert it to WebP or anything else.
+>
+> The website does all of that by itself every time it rebuilds: it makes
+> several smaller versions of each image and gives every visitor the one that
+> suits their screen. A large photograph typically reaches visitors at a
+> fraction of its original size. You will not see those versions and you do
+> not need to think about them.
+>
+> The only thing to avoid is something enormous — a raw 40 MB file straight
+> off a camera. Not because the website would be slow, but because the
+> original is kept forever. A few megabytes is plenty for any picture here.
+
+**If you change a picture, check the alt text underneath it.** The description
+does not update itself, and one that describes the old picture is worse than
+none — it tells a blind reader about something that is not there.
+
 ## 7. Adding or editing a publication
 
 1. Click **Publications**.

@@ -37,13 +37,26 @@ ol[class] {
 }
 
 img,
-picture,
 video,
 canvas,
 svg {
   display: block;
   max-width: 100%;
   height: auto;
+}
+
+/*
+ * `display: contents` rather than `block`.
+ *
+ * OptimizedImage wraps its <img> in a <picture> only when the build has
+ * produced WebP derivatives, so the same markup is a bare <img> in
+ * development and a wrapped one in production. Taking the wrapper out of the
+ * layout entirely means every rule written against the image — the fixed
+ * portrait box, `width: 100%` on a figure, flex and grid placement — keeps
+ * applying identically whether or not the wrapper is there.
+ */
+picture {
+  display: contents;
 }
 
 input,

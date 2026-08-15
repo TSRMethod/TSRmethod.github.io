@@ -5,7 +5,7 @@ import Publications from '../pages/Publications/Publications'
 import People from '../pages/People/People'
 import Software from '../pages/Software/Software'
 import Contact from '../pages/Contact/Contact'
-import MethodPage from '../components/method/MethodPage'
+import LazyMethodPage from './LazyMethodPage'
 import { publishedMethods } from '../content'
 import { LEGACY_PATHS, LEGACY_PAGE_PATHS } from './legacyPaths'
 
@@ -35,7 +35,7 @@ import { LEGACY_PATHS, LEGACY_PAGE_PATHS } from './legacyPaths'
 
 const methodRoutes = publishedMethods.map((method) => ({
   path: method.path,
-  element: <MethodPage slug={method.slug} />,
+  element: <LazyMethodPage slug={method.slug} />,
 }))
 
 /*

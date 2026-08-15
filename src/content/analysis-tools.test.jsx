@@ -49,12 +49,13 @@ describe('the analysis collection', () => {
     expect(isRouteImplemented(entry.path)).toBe(true)
   })
 
-  it.each(PUBLISHED)('%s renders its page', (slug) => {
+  it.each(PUBLISHED)('%s renders its page', async (slug) => {
     setViewport('desktop')
     renderApp(`/analysis/${slug}`)
 
+    /* `find` rather than `get`: MethodPage is code-split. */
     expect(
-      screen.getByRole('heading', { level: 1, name: analysis(slug).title }),
+      await screen.findByRole('heading', { level: 1, name: analysis(slug).title }),
     ).toBeInTheDocument()
   })
 
@@ -128,21 +129,21 @@ describe('the draft analysis page stays invisible', () => {
     expect(isRouteImplemented(`/analysis/${slug}`)).toBe(false)
   })
 
-  it('404s at its own address', () => {
+  it('404s at its own address', async () => {
     renderApp('/analysis/key-to-image')
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /page not found/i }),
+      await screen.findByRole('heading', { level: 1, name: /page not found/i }),
     ).toBeInTheDocument()
   })
 
-  it('404s at its legacy alias, which is configured but inert', () => {
+  it('404s at its legacy alias, which is configured but inert', async () => {
     expect(LEGACY_PATHS['/keytoimage']).toBe('key-to-image')
     expect(isRouteImplemented('/keytoimage')).toBe(false)
 
     renderApp('/keytoimage')
     expect(
-      screen.getByRole('heading', { level: 1, name: /page not found/i }),
+      await screen.findByRole('heading', { level: 1, name: /page not found/i }),
     ).toBeInTheDocument()
   })
 
@@ -167,11 +168,11 @@ describe('legacy aliases for analysis pages', () => {
     ['/commonkeys', 'Common Keys'],
     ['/clustering', 'Hierarchical Clustering'],
     ['/dnn', 'Deep Neural Network'],
-  ])('%s redirects to the migrated page', (legacyPath, title) => {
+  ])('%s redirects to the migrated page', async (legacyPath, title) => {
     renderApp(legacyPath)
 
     expect(
-      screen.getByRole('heading', { level: 1, name: title }),
+      await screen.findByRole('heading', { level: 1, name: title }),
     ).toBeInTheDocument()
   })
 })
@@ -279,10 +280,10 @@ describe('workflows match their authoritative sources', () => {
 describe('existing content is unaffected', () => {
   beforeEach(() => setViewport('desktop'))
 
-  it('still renders /tsr', () => {
+  it('still renders /tsr', async () => {
     renderApp('/tsr')
     expect(
-      screen.getByRole('heading', { level: 1, name: /Triangular Spatial/ }),
+      await screen.findByRole('heading', { level: 1, name: /Triangular Spatial/ }),
     ).toBeInTheDocument()
   })
 

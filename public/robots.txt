@@ -1,0 +1,10 @@
+# TSR Research Group — https://tsrmethod.github.io/
+#
+# Everything published here is meant to be found. Pages that are not meant to
+# be found are not served at all: a method whose `status` is draft has no route
+# and returns 404, so there is nothing here to disallow.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://tsrmethod.github.io/sitemap.xml

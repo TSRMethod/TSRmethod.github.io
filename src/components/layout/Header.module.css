@@ -29,25 +29,28 @@
 
 .brandMark {
   flex-shrink: 0;
-  display: grid;
-  place-items: center;
   width: 2.5rem;
   height: 2.5rem;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #ffffff;
-  background-color: var(--color-primary);
-  border-radius: var(--radius-md);
+  /* The artwork is square with its own internal padding; `contain` keeps it
+     from being cropped if that ever changes. */
+  object-fit: contain;
 }
 
+/*
+ * `white-space: nowrap` without `overflow: hidden`.
+ *
+ * The ellipsis that used to be here was hiding the problem rather than
+ * solving it — the name silently lost characters, and eventually all of them,
+ * whenever the navigation wanted the space. The navigation now switches to the
+ * drawer before that can happen (NAV_QUERY), so the name always has room and
+ * never needs truncating. Leaving the truncation in place would just mean the
+ * next person to add a menu item reintroduces the bug invisibly.
+ */
 .brandName {
   font-size: var(--text-lg);
   font-weight: 700;
   line-height: 1.2;
   color: var(--color-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

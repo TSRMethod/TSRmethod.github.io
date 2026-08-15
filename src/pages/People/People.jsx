@@ -1,5 +1,6 @@
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import { pages, currentPeople, formerPeople } from '../../content'
+import OptimizedImage from '../../components/shared/OptimizedImage'
 import styles from './People.module.css'
 
 /*
@@ -25,12 +26,11 @@ function Person({ person }) {
        */}
       <div className={styles.identity}>
         {person.photo && (
-          <img
+          <OptimizedImage
             className={styles.photo}
             src={person.photo}
             alt={`Portrait of ${person.name}`}
-            loading="lazy"
-            decoding="async"
+            sizes="6.5rem"
           />
         )}
         <div className={styles.naming}>
@@ -80,7 +80,7 @@ function PeopleSection({ id, heading, people }) {
 export default function People() {
   const { title, intro, currentHeading, formerHeading } = pages.people
 
-  useDocumentTitle(title)
+  usePageMetadata({ title, description: intro })
 
   return (
     <div className={styles.page}>

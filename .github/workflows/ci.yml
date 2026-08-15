@@ -8,14 +8,31 @@
 name: CI
 
 on:
+  # The gate that matters: nothing reaches main without this passing.
   pull_request:
     branches: [main]
+
+  # Work branches are validated as they are pushed, so a problem surfaces
+  # while it is still being worked on rather than when the pull request is
+  # opened.
+  #
+  # The prefixes are listed rather than using a bare `**` on purpose: a
+  # wildcard would also build every throwaway experiment and every branch
+  # pushed only for backup, which wastes minutes and trains people to ignore
+  # red builds. These are the prefixes the project actually uses.
+  #
+  # The list grew after a hotfix on `fix/cms-people-photo-paths` got no push
+  # CI at all — only `main` and `content/**` were covered, so a branch named
+  # by our own convention was silently unverified until a PR existed. If you
+  # start a branch with a new prefix, add it here.
   push:
     branches:
       - main
-      # Content migration branches are validated as they are pushed, so a
-      # problem surfaces before the pull request is opened rather than after.
       - 'content/**'
+      - 'fix/**'
+      - 'polish/**'
+      - 'feat/**'
+      - 'chore/**'
 
 # Read-only: this workflow only inspects the code.
 permissions:

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import useDocumentTitle from '../../hooks/useDocumentTitle'
+import usePageMetadata from '../../hooks/usePageMetadata'
 import {
   pages,
   getRepositoriesByCategory,
@@ -120,7 +120,7 @@ function Repository({ repository }) {
 export default function Software() {
   const { title, intro, note } = pages.software
 
-  useDocumentTitle(title)
+  usePageMetadata({ title, description: intro })
 
   const sections = SECTIONS.map((section) => ({
     ...section,
