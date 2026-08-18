@@ -50,11 +50,12 @@
   },
   "funding": {
     "heading": "Funding & Support",
-    "primarySupport": "Our TSR research is supported by the National Institutes of Health (NIH), National Institute of General Medical Sciences (NIGMS), through grants 1R15GM144944-01 and 2R15GM144944-02.",
-    "computingSupport": "Large-scale computational studies are supported by high-performance computing resources provided by the Louisiana Optical Network Infrastructure (LONI).",
-    "acknowledgmentsLabel": "Acknowledgments",
+    "primarySupport": "TSR research has been supported by the National Institutes of Health (NIH), National Institute of General Medical Sciences (NIGMS), and the Louisiana Board of Regents Support Fund. These awards support the development and application of computational methods for studying biomolecular 3D structures and molecular interactions.",
+    "computingSupport": "Large-scale computational studies are also supported by high-performance computing resources provided by the Louisiana Optical Network Infrastructure (LONI).",
+    "acknowledgmentsLabel": "Funding details & acknowledgments",
     "acknowledgments": [
-      "We gratefully acknowledge the high-performance computing resources provided by LONI and the support of its technical team, including Feng Chen, Siva Kasetti, Jianxiong Li, Oleg Starovoytov, and Le Yan. We also thank Thaliyah Mason for her assistance in preparing datasets."
+      "NIH / National Institute of General Medical Sciences\n\nWu Xu — 2R15GM144944-02\nWu Xu — 1R15GM144944-01\n\nLouisiana Board of Regents Support Fund\n\nWu Xu and Vijay Raghavan — LEQSF(2023-24)-RD-D-05\nWu Xu and Vijay Raghavan — LEQSF(2015-18)-RD-B-06",
+      "Computational Support\n\nWe gratefully acknowledge the high-performance computing resources provided by the Louisiana Optical Network Infrastructure (LONI) and the support of its technical team, including Feng Chen, Siva Kasetti, Jianxiong Li, Oleg Starovoytov, and Le Yan. We also thank Thaliyah Mason for her assistance in preparing datasets."
     ]
   },
   "contact": {
