@@ -1,11 +1,13 @@
 import usePageMetadata from '../../hooks/usePageMetadata'
 import { home } from '../../content'
 import Hero from '../../components/home/Hero'
+import ResearchVision from '../../components/home/ResearchVision'
 import TsrIntroduction from '../../components/home/TsrIntroduction'
 import ContentShowcase from '../../components/home/ContentShowcase'
 import SoftwareOverview from '../../components/home/SoftwareOverview'
 import PublicationHighlights from '../../components/home/PublicationHighlights'
 import GroupPreview from '../../components/home/GroupPreview'
+import FundingSupport from '../../components/home/FundingSupport'
 import ContactCta from '../../components/home/ContactCta'
 import {
   METHODS_SECTION_ID,
@@ -37,14 +39,19 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <TsrIntroduction />
+
+      {/*
+       * Why before how: the motivation for the research comes ahead of the
+       * explanation of the mechanism.
+       */}
+      <ResearchVision />
+      <TsrIntroduction tone="muted" />
 
       <ContentShowcase
         id={METHODS_SECTION_ID}
         heading={home.methods.heading}
         intro={home.methods.intro}
         category="method"
-        tone="muted"
       />
 
       <ContentShowcase
@@ -52,16 +59,21 @@ export default function Home() {
         heading={home.analysis.heading}
         intro={home.analysis.intro}
         category="analysis"
+        tone="muted"
       />
 
       {/*
        * Tone alternates band by band, and is decided here rather than inside
-       * each section, so the rhythm can be read off in one place. The last
-       * band is plain because the footer is already tinted.
+       * each section, so the rhythm can be read off in one place. Two sections
+       * were inserted, so every tone below them shifted by one to keep the
+       * alternation — the values moved, the rule did not. The first band is
+       * plain because the hero above it is already tinted, and the last is
+       * plain because the footer below it is.
        */}
-      <SoftwareOverview tone="muted" />
-      <PublicationHighlights />
-      <GroupPreview tone="muted" />
+      <SoftwareOverview />
+      <PublicationHighlights tone="muted" />
+      <GroupPreview />
+      <FundingSupport tone="muted" />
       <ContactCta />
     </>
   )

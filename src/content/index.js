@@ -711,13 +711,67 @@ export function getRecentPublications(count = 3, records = publicationsByYear) {
  */
 const HOME_SHAPE = {
   hero: ['lede', 'primaryCta', 'secondaryCta'],
+  researchVision: ['heading', 'question', 'intro', 'direction'],
   introduction: ['heading', 'body', 'cta'],
   methods: ['heading', 'intro'],
   analysis: ['heading', 'intro'],
   software: ['heading', 'intro'],
   publications: ['heading', 'intro', 'cta'],
   group: ['heading', 'intro', 'cta'],
+  funding: ['heading', 'primarySupport', 'computingSupport'],
   contact: ['heading', 'body', 'cta'],
+}
+
+/*
+ * Expandable detail: optional as a whole, strict once present.
+ *
+ * The label and the paragraphs only make sense together — a label with nothing
+ * behind it is a control that opens onto an empty box, and paragraphs with no
+ * label cannot be reached. Either both are there or neither is, and anything
+ * in between fails the build rather than shipping a dead control.
+ *
+ * Blank entries inside the list are rejected too: the CMS list widget adds an
+ * empty row as soon as an editor clicks "add", and an unfilled one would
+ * otherwise render as an empty paragraph.
+ */
+const HOME_DISCLOSURES = [
+  ['researchVision', 'detailsLabel', 'details'],
+  ['funding', 'acknowledgmentsLabel', 'acknowledgments'],
+]
+
+function validateDisclosure(block, section, labelField, listField) {
+  const label = block[labelField]
+  const paragraphs = block[listField]
+
+  const hasLabel = typeof label === 'string' && label.trim() !== ''
+  const hasList = Array.isArray(paragraphs) && paragraphs.length > 0
+
+  if (!hasLabel && !hasList) return
+
+  if (!hasLabel) {
+    throw new ContentError(
+      'home.json',
+      `"${section}.${listField}" has content but "${section}.${labelField}" is ` +
+        'empty, so there would be nothing to click to reveal it',
+    )
+  }
+
+  if (!hasList) {
+    throw new ContentError(
+      'home.json',
+      `"${section}.${labelField}" is set but "${section}.${listField}" is empty. ` +
+        'Remove the label, or write the text it should reveal.',
+    )
+  }
+
+  paragraphs.forEach((paragraph, index) => {
+    if (typeof paragraph !== 'string' || paragraph.trim() === '') {
+      throw new ContentError(
+        'home.json',
+        `"${section}.${listField}[${index}]" is empty`,
+      )
+    }
+  })
 }
 
 function validateHome(data) {
@@ -734,6 +788,10 @@ function validateHome(data) {
         )
       }
     }
+  }
+
+  for (const [section, labelField, listField] of HOME_DISCLOSURES) {
+    validateDisclosure(data[section], section, labelField, listField)
   }
 
   /* Same rule as a method page: an illustration without a description of

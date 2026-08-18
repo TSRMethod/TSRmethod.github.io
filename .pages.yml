@@ -691,6 +691,47 @@ content:
             type: string
             required: true
             description: Jumps to the list of methods further down the page.
+      - name: researchVision
+        label: Research vision
+        type: object
+        fields:
+          - name: heading
+            label: Section heading
+            type: string
+            required: true
+          - name: question
+            label: Scientific question
+            type: text
+            required: true
+            description: >-
+              The open research question, shown as the most prominent text in
+              the section. Keep it a question — the site should not read as
+              though the answer has been found.
+          - name: intro
+            label: Short explanation
+            type: text
+            required: true
+            description: >-
+              One or two sentences on what TSR does. The full explanation is
+              the next section down, so this should not repeat it.
+          - name: direction
+            label: Long-term direction
+            type: text
+            required: true
+            description: One sentence on where the research is going.
+          - name: detailsLabel
+            label: Read-more label
+            type: string
+            description: >-
+              The wording on the button that reveals the longer explanation.
+              Leave this and the paragraphs below empty to hide the button.
+          - name: details
+            label: Expanded explanation
+            type: text
+            list: true
+            description: >-
+              One entry per paragraph, shown when a reader opens the read-more
+              button. Fill in the label above if you add any.
       - name: introduction
         label: What TSR is
         type: object
@@ -806,6 +847,42 @@ content:
             type: string
             required: true
             description: Links to the people page.
+      - name: funding
+        label: Funding & support
+        type: object
+        fields:
+          - name: heading
+            label: Section heading
+            type: string
+            required: true
+          - name: primarySupport
+            label: Primary funding statement
+            type: text
+            required: true
+            description: >-
+              Who funds the research, including the grant numbers. Update this
+              when an award changes — no code change is needed.
+          - name: computingSupport
+            label: Computing support
+            type: text
+            required: true
+            description: >-
+              Who provides the computing resources. Kept separate from the
+              funding statement above so that a computing provider is not
+              described as a funder.
+          - name: acknowledgmentsLabel
+            label: Acknowledgments label
+            type: string
+            description: >-
+              The wording on the button that reveals the acknowledgments.
+              Leave this and the entries below empty to hide the button.
+          - name: acknowledgments
+            label: Acknowledgments
+            type: text
+            list: true
+            description: >-
+              One entry per paragraph. People to thank for computing support,
+              data preparation and similar help.
       - name: contact
         label: Closing section
         type: object

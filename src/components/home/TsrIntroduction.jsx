@@ -11,11 +11,11 @@ import styles from './TsrIntroduction.module.css'
  * tutorial live on /tsr, and duplicating any of that here would give the site
  * two copies of the same explanation to keep in step.
  */
-export default function TsrIntroduction() {
+export default function TsrIntroduction({ tone }) {
   const { heading, body, cta, figure } = home.introduction
 
   return (
-    <HomeSection id="introduction" heading={heading}>
+    <HomeSection id="introduction" heading={heading} tone={tone}>
       <div className={styles.layout}>
         <p className={styles.body}>{body}</p>
 

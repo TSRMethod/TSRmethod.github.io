@@ -1,0 +1,48 @@
+/*
+ * The open question, given the weight of the section without shouting.
+ *
+ * An accent rule and a tinted panel rather than display type: this is an
+ * academic research statement, so it should read as one. No gradient, no
+ * oversized quotation mark, no animation — the emphasis comes from position,
+ * a little extra size and the border.
+ */
+.question {
+  /*
+   * Narrower than the site's usual measure, not wider. `--content-measure` is
+   * 72ch, and ch scales with font size — at this larger type that came out
+   * near 980px, which is a long way for an eye to travel back on a sentence
+   * meant to be read in one go. A fixed max-width keeps it to two or three
+   * lines whatever the type size.
+   */
+  max-width: 46rem;
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background-color: var(--color-primary-light);
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  /* Long question, no fixed break points: let it wrap where it wants. */
+  text-wrap: pretty;
+}
+
+.body {
+  max-width: var(--content-measure);
+  margin-top: var(--space-5);
+}
+
+.body p {
+  margin: 0;
+}
+
+.body p + p {
+  margin-top: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .question {
+    font-size: var(--text-xl);
+    padding: var(--space-5) var(--space-6);
+  }
+}

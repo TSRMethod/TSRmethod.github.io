@@ -4,6 +4,18 @@
     "primaryCta": "Read about the TSR method",
     "secondaryCta": "Browse methods and tutorials"
   },
+  "researchVision": {
+    "heading": "Toward Deciphering Molecular Recognition",
+    "question": "Is there a general molecular recognition code that governs how biomolecules recognize one another and how those interactions reshape molecular structure?",
+    "intro": "TSR transforms molecular 3D geometry into interpretable integer descriptors that can be compared across structures to identify conserved, altered, and interaction-associated spatial patterns.",
+    "direction": "Our long-term goal is to combine these interpretable structural descriptors with machine learning, AI-generated structures, and simulation-derived ensembles to connect structural prediction with mechanistic understanding.",
+    "detailsLabel": "Read more about our research vision",
+    "details": [
+      "Biomolecular interactions can produce structural changes ranging from subtle local atomic rearrangements to larger conformational shifts. A continuing challenge is not only to generate or predict molecular structures, but also to determine which geometric features are conserved, altered, or specifically associated with recognition and binding.",
+      "TSR represents molecular 3D structures through triangular spatial relationships encoded as discrete integer keys. These descriptors make it possible to quantify structural relationships and investigate recurring or interaction-associated geometric signatures at global, local, and atomic scales. The TSR framework has been extended across proteins, amino acids, ligands, drugs, nucleotides, carbohydrates, and biomolecular interaction interfaces.",
+      "By combining TSR-based analysis with machine learning and structures generated through AI-guided prediction or physics-based simulation, we aim to identify structural determinants of molecular recognition and investigate whether common recognition principles emerge across different biomolecular systems."
+    ]
+  },
   "introduction": {
     "heading": "How TSR represents a structure",
     "body": "TSR takes the Cα atoms of a protein as the vertices of triangles. Every triangle is reduced to a single integer — its key — computed from the triangle's side lengths, its angles and the labels of its vertices. Identical triangles in different proteins receive the same key, so two structures can be compared by counting the keys they share, with no alignment step and no superimposition.",
@@ -35,6 +47,15 @@
     "heading": "The research group",
     "intro": "TSR is developed jointly by the Department of Chemistry and the School of Computing and Informatics at the University of Louisiana at Lafayette, bringing together faculty, doctoral researchers and undergraduate students from chemistry, biology and computer science.",
     "cta": "Meet the group"
+  },
+  "funding": {
+    "heading": "Funding & Support",
+    "primarySupport": "Our TSR research is supported by the National Institutes of Health (NIH), National Institute of General Medical Sciences (NIGMS), through grants 1R15GM144944-01 and 2R15GM144944-02.",
+    "computingSupport": "Large-scale computational studies are supported by high-performance computing resources provided by the Louisiana Optical Network Infrastructure (LONI).",
+    "acknowledgmentsLabel": "Acknowledgments",
+    "acknowledgments": [
+      "We gratefully acknowledge the high-performance computing resources provided by LONI and the support of its technical team, including Feng Chen, Siva Kasetti, Jianxiong Li, Oleg Starovoytov, and Le Yan. We also thank Thaliyah Mason for her assistance in preparing datasets."
+    ]
   },
   "contact": {
     "heading": "Working with us",
