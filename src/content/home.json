@@ -54,7 +54,12 @@
     "computingSupport": "Large-scale computational studies are also supported by high-performance computing resources provided by the Louisiana Optical Network Infrastructure (LONI).",
     "acknowledgmentsLabel": "Funding details & acknowledgments",
     "acknowledgments": [
-      "NIH / NIGMS\nWu Xu — 2R15GM144944-02\nWu Xu — 1R15GM144944-01\nLouisiana Board of Regents Support Fund\nWu Xu and Vijay Raghavan — LEQSF(2023-24)-RD-D-05\nWu Xu and Vijay Raghavan — LEQSF(2015-18)-RD-B-06"
+      "NIH / NIGMS",
+      "Wu Xu — 2R15GM144944-02",
+      "Wu Xu — 1R15GM144944-01",
+      "Louisiana Board of Regents Support Fund",
+      "Wu Xu and Vijay Raghavan — LEQSF(2023-24)-RD-D-05",
+      "Wu Xu and Vijay Raghavan — LEQSF(2015-18)-RD-B-06"
     ]
   },
   "contact": {
