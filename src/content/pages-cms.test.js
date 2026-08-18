@@ -332,6 +332,53 @@ describe('editorial copy for the hand-built pages', () => {
     }
   })
 
+  it('lets an editor rewrite the research vision and the funding notice', () => {
+    /*
+     * Both sections were added after the site went live, and both say things
+     * that change: a research question gets sharpened, and grant numbers
+     * change when an award does. Neither should ever need a developer.
+     */
+    const expected = {
+      researchVision: [
+        'heading',
+        'question',
+        'intro',
+        'direction',
+        'detailsLabel',
+        'details',
+      ],
+      funding: [
+        'heading',
+        'primarySupport',
+        'computingSupport',
+        'acknowledgmentsLabel',
+        'acknowledgments',
+      ],
+    }
+
+    for (const [section, names] of Object.entries(expected)) {
+      const block = field(entries.home, section)
+      expect(block, section).toBeDefined()
+      expect(block.type).toBe('object')
+      expect(block.fields.map((f) => f.name)).toEqual(names)
+    }
+  })
+
+  it('collects the expandable text as a list, one entry per paragraph', () => {
+    for (const [section, name] of [
+      ['researchVision', 'details'],
+      ['funding', 'acknowledgments'],
+    ]) {
+      const block = field(entries.home, section)
+      const list = block.fields.find((f) => f.name === name)
+
+      expect(list.list, `${section}.${name}`).toBe(true)
+      expect(list.type).toBe('text')
+      /* Optional: clearing both it and its label removes the disclosure. */
+      expect(list.required).toBeUndefined()
+    }
+  })
+
   it('requires the diagram on the home page to describe itself', () => {
     const figure = field(entries.home, 'introduction').fields.find(
       (f) => f.name === 'figure',

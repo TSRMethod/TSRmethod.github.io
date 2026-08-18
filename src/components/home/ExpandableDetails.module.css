@@ -1,0 +1,72 @@
+.details {
+  margin-top: var(--space-5);
+  max-width: var(--content-measure);
+}
+
+/*
+ * Styled as the site's secondary action, so it reads as something to press.
+ * `display: block` replaces the default list-item box, which is what removes
+ * the browser's own marker without `list-style: none` tricks; the triangle is
+ * drawn back in below so the control still looks like a disclosure.
+ */
+.summary {
+  display: block;
+  width: fit-content;
+  /* space-3 rather than space-2: it takes the control to ~50px tall, which
+     clears the 44px minimum for a comfortable touch target. */
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: var(--space-2);
+  vertical-align: middle;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+/*
+ * No transition on the marker and no height animation on the panel. An
+ * animated disclosure fights the browser's own behaviour, breaks find-in-page
+ * and is one more thing to disable for reduced motion.
+ */
+.details[open] .summary::before {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  border-bottom: 0;
+}
+
+.summary:hover {
+  border-color: var(--color-primary);
+}
+
+.content {
+  margin-top: var(--space-4);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-border);
+}
+
+.content p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.content p + p {
+  margin-top: var(--space-3);
+}

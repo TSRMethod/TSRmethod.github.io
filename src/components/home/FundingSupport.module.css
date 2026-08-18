@@ -1,0 +1,18 @@
+/*
+ * Lighter than the research vision above it. This is information a reader
+ * looks up rather than something the page needs to argue, so it gets ordinary
+ * prose with a clear order of importance: funding first, computing second.
+ */
+.primary {
+  max-width: var(--content-measure);
+  margin: 0;
+  font-size: var(--text-lg);
+  /* Grant numbers have no spaces and must not widen the page on a phone. */
+  overflow-wrap: break-word;
+}
+
+.computing {
+  max-width: var(--content-measure);
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-muted);
+}

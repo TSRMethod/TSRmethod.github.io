@@ -168,9 +168,9 @@ none — it tells a blind reader about something that is not there.
 ## 9. Changing the words on the home page
 
 1. Click **Home page**.
-2. Each section of the page is a group of fields — the opening section, what
-   TSR is, the methods, the software, the publications, the group and the
-   closing invitation.
+2. Each section of the page is a group of fields — the opening section, the
+   research vision, what TSR is, the methods, the software, the publications,
+   the group, funding & support, and the closing invitation.
 3. Rewrite whatever you like and click **Save**.
 
 Two things are worth knowing.
@@ -190,6 +190,45 @@ filled in again.
 People, Software and Contact pages. The contact page has no field for the email
 address — it uses the one in **Site settings**, so there is only ever one to
 change.
+
+### Research vision
+
+Under **Home page** you will also find **Research vision** — the section near
+the top of the home page with the scientific question in it. The heading, the
+question, the two short sentences and the longer explanation behind the
+"Read more" button are all editable here.
+
+Two things to keep in mind. **Keep the question a question**: it is what the
+research is trying to find out, and the site should not read as though the
+answer is already known. And the **Expanded explanation** is a list — each
+entry becomes one paragraph, so add a new entry rather than running everything
+together in one box.
+
+If you empty both the read-more label and every paragraph, the button
+disappears and the section simply ends after the short text. That is fine and
+supported. What is not allowed is one without the other — a button with
+nothing behind it, or text nobody can reach — and the site will refuse to
+rebuild until you fix it.
+
+### Funding & support
+
+Also under **Home page**. This is where the grant information lives, so
+**update it here whenever an award changes** — no developer and no code change
+is involved.
+
+There are two separate statements, and they should stay separate. The
+**Primary funding statement** is who funds the research, including the grant
+numbers. **Computing support** is who provides the machines. LONI belongs in
+the second one: it supplies high-performance computing, and describing it as a
+funder would be wrong.
+
+**Acknowledgments** works exactly like the research vision's read-more: one
+entry per paragraph, hidden behind a button, and removable by clearing both
+the label and the entries.
+
+You cannot change where either section sits on the page, how the expanding
+button behaves, or how any of it is laid out. That is the site's job, and it
+stays the same however you reword the text.
 
 ## 10. Adding or editing software
 
