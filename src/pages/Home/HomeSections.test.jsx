@@ -178,21 +178,25 @@ describe('funding and support', () => {
     expect(statement.querySelector('button')).toBeNull()
   })
 
-  it('describes LONI as computing support, separately from the funder', () => {
+  it('keeps computing support in its own statement, not the funder one', () => {
+    /*
+     * The structure that stops a computing provider reading as a funder: two
+     * separate paragraphs, each rendering one field, never concatenated.
+     *
+     * Which provider that is, and how the sentence is worded, is the
+     * editor's — the rule itself is stated where an editor will meet it, in
+     * the field's description in .pages.yml and in the editor guide, not
+     * pinned to today's provider in a test.
+     */
     renderHome()
 
     const computing = screen.getByText(asWritten(home.funding.computingSupport))
-    expect(computing).toBeInTheDocument()
-    expect(computing.textContent).toMatch(/computing/i)
-    expect(computing.textContent).toContain('LONI')
-
-    /*
-     * The two statements are separate elements on purpose. Merged into one
-     * "supported by" sentence, LONI would read as a funding agency.
-     */
     const funder = screen.getByText(asWritten(home.funding.primarySupport))
+
+    expect(computing.tagName).toBe('P')
     expect(funder).not.toBe(computing)
-    expect(funder.textContent).not.toContain('LONI')
+    expect(computing.contains(funder)).toBe(false)
+    expect(funder.contains(computing)).toBe(false)
   })
 
   it('keeps the funding detail inside a closed disclosure', () => {

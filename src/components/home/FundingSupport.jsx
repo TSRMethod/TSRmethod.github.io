@@ -7,19 +7,21 @@ import styles from './FundingSupport.module.css'
 /*
  * Who pays for the work, and who provides the machines to run it on.
  *
- * Two statements, deliberately not one. NIH/NIGMS funds the research; LONI
- * provides high-performance computing. Merging them into a single "supported
- * by" sentence would read as though LONI were a funding agency, which it is
- * not — hence the separate, quieter treatment for the computing line.
+ * Two statements, deliberately not one. The funding agencies award the
+ * grants; the computing provider supplies the machines. Merged into a single
+ * "supported by" sentence, the provider would read as a funder — hence the
+ * separate, quieter treatment for the computing line.
  *
- * The award-by-award detail and the acknowledgement of the LONI team belong
- * behind the disclosure: they matter to the people named in them and to
- * anyone checking a grant number, and they would unbalance a home page if
- * they were always open.
+ * The award-by-award detail and the acknowledgements belong behind the
+ * disclosure: they matter to the people named in them and to anyone checking
+ * a grant number, and they would unbalance a home page if always open.
  *
  * Grant numbers are plain text. They are identifiers to quote in a report, not
  * links and not controls, and styling them as either would invite a click that
  * goes nowhere.
+ *
+ * Not one organisation, person or identifier is named in this file. All of it
+ * is content, and a test asserts as much.
  */
 export default function FundingSupport({ tone }) {
   const {

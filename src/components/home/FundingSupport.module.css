@@ -65,9 +65,9 @@
 }
 
 /*
- * Grant identifiers contain no spaces and can be long — LEQSF(2023-24)-RD-D-05
- * is 22 characters. `anywhere` lets one break mid-token rather than push the
- * page sideways on a narrow screen.
+ * Grant identifiers contain no spaces and run to twenty characters and more.
+ * `anywhere` lets one break mid-token rather than push the page sideways on a
+ * narrow screen.
  */
 .grant {
   font-variant-numeric: tabular-nums;
