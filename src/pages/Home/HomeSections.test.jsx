@@ -21,6 +21,22 @@ import { ContentError } from '../../lib/frontmatter'
 
 const root = process.cwd()
 
+/*
+ * Find an element by the content it renders, however the editor typed it.
+ *
+ * getByText compares its string against the element's normalised text but not
+ * against a normalised copy of the string, so a value containing a line break
+ * matches nothing — which is exactly how a legitimate CMS edit took the build
+ * down. These tests assert that content reaches the page, not how its
+ * whitespace was entered, so both sides are normalised.
+ */
+const normalise = (value) => value.replace(/\s+/g, ' ').trim()
+
+const asWritten = (expected) => {
+  const wanted = normalise(expected)
+  return (_content, element) => normalise(element?.textContent ?? '') === wanted
+}
+
 function renderHome() {
   return render(
     <MemoryRouter initialEntries={['/']}>
@@ -54,7 +70,7 @@ describe('research vision', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: home.researchVision.heading }),
     ).toBeInTheDocument()
-    expect(screen.getByText(home.researchVision.question)).toBeInTheDocument()
+    expect(screen.getByText(asWritten(home.researchVision.question))).toBeInTheDocument()
   })
 
   it('states the question as a question', () => {
@@ -73,21 +89,21 @@ describe('research vision', () => {
   it('shows the short explanation and direction without expanding anything', () => {
     renderHome()
 
-    expect(screen.getByText(home.researchVision.intro)).toBeInTheDocument()
-    expect(screen.getByText(home.researchVision.direction)).toBeInTheDocument()
+    expect(screen.getByText(asWritten(home.researchVision.intro))).toBeInTheDocument()
+    expect(screen.getByText(asWritten(home.researchVision.direction))).toBeInTheDocument()
   })
 
   it('keeps the long explanation inside a closed disclosure', async () => {
     renderHome()
 
-    const summary = screen.getByText(home.researchVision.detailsLabel)
+    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
     const details = summary.closest('details')
 
     expect(details).not.toBeNull()
     expect(details.open).toBe(false)
 
     for (const paragraph of home.researchVision.details) {
-      expect(within(details).getByText(paragraph)).toBeInTheDocument()
+      expect(within(details).getByText(asWritten(paragraph))).toBeInTheDocument()
     }
 
     await userEvent.click(summary)
@@ -97,7 +113,7 @@ describe('research vision', () => {
   it('names the disclosure meaningfully', () => {
     renderHome()
 
-    const summary = screen.getByText(home.researchVision.detailsLabel)
+    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
     expect(summary.tagName).toBe('SUMMARY')
     expect(summary.textContent.trim().length).toBeGreaterThan(10)
     /* Native disclosure semantics, not a button inside a summary. */
@@ -149,7 +165,7 @@ describe('funding and support', () => {
      */
     renderHome()
 
-    const statement = screen.getByText(home.funding.primarySupport)
+    const statement = screen.getByText(asWritten(home.funding.primarySupport))
     expect(statement).toBeInTheDocument()
     expect(statement.tagName).toBe('P')
   })
@@ -157,7 +173,7 @@ describe('funding and support', () => {
   it('presents grant numbers as plain text, not as controls', () => {
     renderHome()
 
-    const statement = screen.getByText(home.funding.primarySupport)
+    const statement = screen.getByText(asWritten(home.funding.primarySupport))
     expect(statement.querySelector('a')).toBeNull()
     expect(statement.querySelector('button')).toBeNull()
   })
@@ -165,7 +181,7 @@ describe('funding and support', () => {
   it('describes LONI as computing support, separately from the funder', () => {
     renderHome()
 
-    const computing = screen.getByText(home.funding.computingSupport)
+    const computing = screen.getByText(asWritten(home.funding.computingSupport))
     expect(computing).toBeInTheDocument()
     expect(computing.textContent).toMatch(/computing/i)
     expect(computing.textContent).toContain('LONI')
@@ -174,7 +190,7 @@ describe('funding and support', () => {
      * The two statements are separate elements on purpose. Merged into one
      * "supported by" sentence, LONI would read as a funding agency.
      */
-    const funder = screen.getByText(home.funding.primarySupport)
+    const funder = screen.getByText(asWritten(home.funding.primarySupport))
     expect(funder).not.toBe(computing)
     expect(funder.textContent).not.toContain('LONI')
   })
@@ -192,7 +208,7 @@ describe('funding and support', () => {
     renderHome()
 
     const details = fundingDetails()
-    const summary = within(details).getByText(home.funding.detailsLabel)
+    const summary = within(details).getByText(asWritten(home.funding.detailsLabel))
 
     expect(summary.tagName).toBe('SUMMARY')
     await userEvent.click(summary)
@@ -214,9 +230,9 @@ describe('funding and support', () => {
         within(details).getAllByRole('heading', { name: award.funder }).length,
         award.grant,
       ).toBeGreaterThan(0)
-      expect(within(details).getAllByText(award.investigators).length)
+      expect(within(details).getAllByText(asWritten(award.investigators)).length)
         .toBeGreaterThan(0)
-      expect(within(details).getAllByText(award.grant).length).toBeGreaterThan(0)
+      expect(within(details).getAllByText(asWritten(award.grant)).length).toBeGreaterThan(0)
     }
   })
 
@@ -244,7 +260,7 @@ describe('funding and support', () => {
     const details = fundingDetails()
 
     for (const award of home.funding.awards) {
-      for (const element of within(details).getAllByText(award.grant)) {
+      for (const element of within(details).getAllByText(asWritten(award.grant))) {
         expect(element.closest('a')).toBeNull()
         expect(element.closest('button')).toBeNull()
       }
@@ -263,7 +279,7 @@ describe('funding and support', () => {
     ).toBeInTheDocument()
 
     for (const paragraph of home.funding.acknowledgments) {
-      const element = within(details).getByText(paragraph)
+      const element = within(details).getByText(asWritten(paragraph))
       expect(element.tagName).toBe('P')
     }
   })
