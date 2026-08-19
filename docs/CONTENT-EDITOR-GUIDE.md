@@ -212,23 +212,48 @@ rebuild until you fix it.
 
 ### Funding & support
 
-Also under **Home page**. This is where the grant information lives, so
-**update it here whenever an award changes** — no developer and no code change
-is involved.
+Also under **Home page**. Everything in this section is editable here, so
+**update it whenever an award changes** — no developer and no code change is
+involved.
 
-There are two separate statements, and they should stay separate. The
-**Primary funding statement** is who funds the research, including the grant
-numbers. **Computing support** is who provides the machines. LONI belongs in
-the second one: it supplies high-performance computing, and describing it as a
-funder would be wrong.
+The section is in four parts.
 
-**Acknowledgments** works exactly like the research vision's read-more: one
-entry per paragraph, hidden behind a button, and removable by clearing both
-the label and the entries.
+**The two visible statements stay separate.** The **Primary funding
+statement** is who funds the research, in a sentence. **Computing support** is
+who provides the machines. LONI belongs in the second one: it supplies
+high-performance computing, and describing it as a funder would be wrong.
 
-You cannot change where either section sits on the page, how the expanding
-button behaves, or how any of it is laid out. That is the site's job, and it
-stays the same however you reword the text.
+**Funding awards** is a list of records, one per award. To add one:
+
+1. Open **Home page**.
+2. Go to **Funding & support**.
+3. Go to **Funding awards**.
+4. Click **Add award**.
+5. Fill in **Funding organization**, **Investigator(s)** and **Grant / award
+   number**.
+6. Click **Save**.
+
+Awards from the same organisation are gathered under one heading
+automatically, so type the organisation the same way each time and do not
+create a heading of your own. **No line breaks and no special formatting are
+needed anywhere.** If you find yourself pressing Enter inside a box to make
+something line up, it belongs in separate fields instead — add another award.
+
+**Acknowledgments** is ordinary prose and stays separate from the award
+records: an **Acknowledgments heading** and then one entry per paragraph.
+Names of people to thank go here; award numbers go in **Funding awards**.
+
+Everything behind the button is optional. Clear the awards, the
+acknowledgments and the disclosure label together and the button disappears,
+leaving the two statements. Awards without acknowledgments, and
+acknowledgments without awards, both work. What is not allowed is a button
+with nothing behind it, an award row with a blank field, or acknowledgment
+paragraphs with no heading — the site refuses to rebuild until it is fixed,
+and the live site stays as it was in the meantime.
+
+You never need to edit JSON, and you cannot change where the section sits on
+the page, how the expanding button behaves, or how any of it is laid out.
+That is the site's job, and it stays the same however you reword the text.
 
 ## 10. Adding or editing software
 
