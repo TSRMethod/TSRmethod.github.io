@@ -860,8 +860,9 @@ content:
             type: text
             required: true
             description: >-
-              Who funds the research, including the grant numbers. Update this
-              when an award changes — no code change is needed.
+              Who funds the research, in a sentence. The award-by-award detail
+              goes in Funding awards below, so this stays readable however
+              many awards there are.
           - name: computingSupport
             label: Computing support
             type: text
@@ -870,19 +871,53 @@ content:
               Who provides the computing resources. Kept separate from the
               funding statement above so that a computing provider is not
               described as a funder.
-          - name: acknowledgmentsLabel
-            label: Acknowledgments label
+          - name: detailsLabel
+            label: Disclosure label
             type: string
             description: >-
-              The wording on the button that reveals the acknowledgments.
-              Leave this and the entries below empty to hide the button.
+              The wording on the button that reveals the awards and the
+              acknowledgments. Leave this, the awards and the acknowledgments
+              empty to hide the button entirely.
+          - name: awards
+            label: Funding awards
+            type: object
+            list: true
+            description: >-
+              One entry per award. Awards from the same organisation are
+              grouped under it automatically — do not type a heading, and do
+              not use line breaks to lay anything out.
+            fields:
+              - name: funder
+                label: Funding organization
+                type: string
+                required: true
+                description: >-
+                  Written the same way for every award from that organisation,
+                  since matching names are grouped together.
+              - name: investigators
+                label: Investigator(s)
+                type: string
+                required: true
+                description: One line, e.g. "Wu Xu and Vijay Raghavan".
+              - name: grant
+                label: Grant / award number
+                type: string
+                required: true
+                description: The identifier exactly as the funder writes it.
+          - name: acknowledgmentsHeading
+            label: Acknowledgments heading
+            type: string
+            description: >-
+              Introduces the acknowledgment paragraphs inside the expanded
+              panel, so they are not read as part of the award list.
           - name: acknowledgments
             label: Acknowledgments
             type: text
             list: true
             description: >-
-              One entry per paragraph. People to thank for computing support,
-              data preparation and similar help.
+              Ordinary prose, one entry per paragraph. People to thank for
+              computing support, data preparation and similar help — award
+              numbers belong in Funding awards above, not here.
       - name: contact
         label: Closing section
         type: object

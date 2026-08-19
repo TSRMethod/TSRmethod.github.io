@@ -734,10 +734,7 @@ const HOME_SHAPE = {
  * empty row as soon as an editor clicks "add", and an unfilled one would
  * otherwise render as an empty paragraph.
  */
-const HOME_DISCLOSURES = [
-  ['researchVision', 'detailsLabel', 'details'],
-  ['funding', 'acknowledgmentsLabel', 'acknowledgments'],
-]
+const HOME_DISCLOSURES = [['researchVision', 'detailsLabel', 'details']]
 
 function validateDisclosure(block, section, labelField, listField) {
   const label = block[labelField]
@@ -764,6 +761,11 @@ function validateDisclosure(block, section, labelField, listField) {
     )
   }
 
+  validateParagraphs(paragraphs, section, listField)
+}
+
+/** Every entry of an editorial paragraph list is prose someone has written. */
+function validateParagraphs(paragraphs, section, listField) {
   paragraphs.forEach((paragraph, index) => {
     if (typeof paragraph !== 'string' || paragraph.trim() === '') {
       throw new ContentError(
@@ -772,6 +774,109 @@ function validateDisclosure(block, section, labelField, listField) {
       )
     }
   })
+}
+
+/*
+ * Funding: structured awards, prose acknowledgments — never the two mixed.
+ *
+ * An award is three facts (who funded it, who holds it, and the identifier to
+ * quote), so it is stored as three fields and the page arranges them. The
+ * earlier model kept the same information as one long acknowledgment string,
+ * which meant an editor had to build the layout out of line breaks — and the
+ * moment they did, the rendered text no longer matched anything the site
+ * could reason about. Structure belongs here; wording belongs to the editor.
+ *
+ * Everything below is optional as a whole and strict once present. A funding
+ * section with no awards and no acknowledgments is a valid, shorter section.
+ */
+const AWARD_FIELDS = ['funder', 'investigators', 'grant']
+
+function validateFunding(block) {
+  const awards = requireList(block.awards, 'funding.awards')
+
+  awards.forEach((award, index) => {
+    /* The CMS adds an empty row the moment "add award" is clicked. */
+    if (!award || typeof award !== 'object' || Array.isArray(award)) {
+      throw new ContentError(
+        'home.json',
+        `"funding.awards[${index}]" is not an award. Each entry needs a ` +
+          `funding organisation, its investigators and an award number.`,
+      )
+    }
+    for (const name of AWARD_FIELDS) {
+      if (typeof award[name] !== 'string' || award[name].trim() === '') {
+        throw new ContentError(
+          'home.json',
+          `"funding.awards[${index}].${name}" is required and must not be empty`,
+        )
+      }
+    }
+  })
+
+  const acknowledgments = requireList(
+    block.acknowledgments,
+    'funding.acknowledgments',
+  )
+  validateParagraphs(acknowledgments, 'funding', 'acknowledgments')
+
+  /*
+   * The acknowledgments get their own heading inside the disclosure, so the
+   * names are not read as part of the award list. One without the other is a
+   * heading over nothing, or prose that arrives unannounced.
+   */
+  const heading = block.acknowledgmentsHeading
+  const hasHeading = typeof heading === 'string' && heading.trim() !== ''
+
+  if (acknowledgments.length > 0 && !hasHeading) {
+    throw new ContentError(
+      'home.json',
+      '"funding.acknowledgments" has content but ' +
+        '"funding.acknowledgmentsHeading" is empty, so the paragraphs would ' +
+        'run on from the award list with nothing to introduce them',
+    )
+  }
+  if (hasHeading && acknowledgments.length === 0) {
+    throw new ContentError(
+      'home.json',
+      '"funding.acknowledgmentsHeading" is set but ' +
+        '"funding.acknowledgments" is empty. Remove the heading, or write ' +
+        'the text it should introduce.',
+    )
+  }
+
+  /*
+   * The same rule as any other disclosure, applied across both lists: the
+   * button is only shown when there is something behind it, and there must
+   * never be content nobody can reach.
+   */
+  const label = block.detailsLabel
+  const hasLabel = typeof label === 'string' && label.trim() !== ''
+  const hasContent = awards.length > 0 || acknowledgments.length > 0
+
+  if (hasContent && !hasLabel) {
+    throw new ContentError(
+      'home.json',
+      '"funding" has awards or acknowledgments but "funding.detailsLabel" ' +
+        'is empty, so there would be nothing to click to reveal them',
+    )
+  }
+  if (hasLabel && !hasContent) {
+    throw new ContentError(
+      'home.json',
+      '"funding.detailsLabel" is set but there are no awards and no ' +
+        'acknowledgments behind it. Remove the label, or add the detail it ' +
+        'should reveal.',
+    )
+  }
+}
+
+/** An absent list is an empty one; anything else must actually be a list. */
+function requireList(value, path) {
+  if (value === undefined || value === null) return []
+  if (!Array.isArray(value)) {
+    throw new ContentError('home.json', `"${path}" must be a list`)
+  }
+  return value
 }
 
 function validateHome(data) {
@@ -793,6 +898,8 @@ function validateHome(data) {
   for (const [section, labelField, listField] of HOME_DISCLOSURES) {
     validateDisclosure(data[section], section, labelField, listField)
   }
+
+  validateFunding(data.funding)
 
   /* Same rule as a method page: an illustration without a description of
      what it shows is not publishable. */

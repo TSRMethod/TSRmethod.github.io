@@ -283,9 +283,19 @@ describe('site settings', () => {
 })
 
 describe('editorial copy for the hand-built pages', () => {
-  /** Every leaf key of a nested object, as "section.field" paths. */
+  /**
+   * Every leaf key of a nested object, as "section.field" paths.
+   *
+   * A list of records descends into its entries under the same path, so
+   * funding.awards contributes funding.awards.funder and its siblings — the
+   * fields an editor actually fills in. A list of plain strings is itself the
+   * leaf, since that is how the CMS declares it.
+   */
   function leafPaths(value, prefix = '') {
-    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    if (Array.isArray(value)) {
+      return value.flatMap((entry) => leafPaths(entry, prefix))
+    }
+    if (value === null || typeof value !== 'object') {
       return [prefix]
     }
     return Object.entries(value).flatMap(([key, child]) =>
@@ -351,7 +361,9 @@ describe('editorial copy for the hand-built pages', () => {
         'heading',
         'primarySupport',
         'computingSupport',
-        'acknowledgmentsLabel',
+        'detailsLabel',
+        'awards',
+        'acknowledgmentsHeading',
         'acknowledgments',
       ],
     }
@@ -362,6 +374,43 @@ describe('editorial copy for the hand-built pages', () => {
       expect(block.type).toBe('object')
       expect(block.fields.map((f) => f.name)).toEqual(names)
     }
+  })
+
+  it('collects an award as three fields, never as formatted text', () => {
+    /*
+     * The fault this replaced: funder, investigators and award numbers all
+     * typed into one paragraph box, with line breaks standing in for a
+     * heading and a list. Three required fields per row make that impossible
+     * and make the page's structure the site's job rather than the editor's.
+     */
+    const awards = field(entries.home, 'funding').fields.find(
+      (f) => f.name === 'awards',
+    )
+
+    expect(awards.type).toBe('object')
+    expect(awards.list).toBe(true)
+    expect(awards.fields.map((f) => f.name)).toEqual([
+      'funder',
+      'investigators',
+      'grant',
+    ])
+    for (const sub of awards.fields) {
+      expect(sub.type, sub.name).toBe('string')
+      expect(sub.required, sub.name).toBe(true)
+    }
+    /* Optional as a whole: a section with no awards is a valid section. */
+    expect(awards.required).toBeUndefined()
+  })
+
+  it('tells the editor not to lay anything out by hand', () => {
+    const funding = field(entries.home, 'funding')
+    const awards = funding.fields.find((f) => f.name === 'awards')
+    const acknowledgments = funding.fields.find(
+      (f) => f.name === 'acknowledgments',
+    )
+
+    expect(awards.description).toMatch(/line breaks/i)
+    expect(acknowledgments.description).toMatch(/paragraph/i)
   })
 
   it('collects the expandable text as a list, one entry per paragraph', () => {
