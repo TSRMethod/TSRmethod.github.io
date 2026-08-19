@@ -16,3 +16,71 @@
   margin: var(--space-4) 0 0;
   color: var(--color-text-muted);
 }
+
+/*
+ * The award list behind the disclosure.
+ *
+ * Restrained on purpose: this is reference material someone opens to check a
+ * grant number, so it gets clear grouping and nothing decorative. The funder
+ * is a heading, its awards are a list, and each award is one investigator
+ * line and one identifier — no table, which would not survive a 320px screen.
+ */
+.awards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.funderName {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+}
+
+.awardList {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/*
+ * Investigators and identifier stack on a phone and sit side by side once
+ * there is room, which is what `wrap` buys: no media query, and the identifier
+ * never squeezes the names into a one-word column.
+ */
+.award {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.investigators {
+  font-weight: 600;
+}
+
+/*
+ * Grant identifiers contain no spaces and run to twenty characters and more.
+ * `anywhere` lets one break mid-token rather than push the page sideways on a
+ * narrow screen.
+ */
+.grant {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.acknowledgments {
+  margin-top: var(--space-5);
+}
+
+.acknowledgmentsHeading {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+}

@@ -21,6 +21,22 @@ import { ContentError } from '../../lib/frontmatter'
 
 const root = process.cwd()
 
+/*
+ * Find an element by the content it renders, however the editor typed it.
+ *
+ * getByText compares its string against the element's normalised text but not
+ * against a normalised copy of the string, so a value containing a line break
+ * matches nothing — which is exactly how a legitimate CMS edit took the build
+ * down. These tests assert that content reaches the page, not how its
+ * whitespace was entered, so both sides are normalised.
+ */
+const normalise = (value) => value.replace(/\s+/g, ' ').trim()
+
+const asWritten = (expected) => {
+  const wanted = normalise(expected)
+  return (_content, element) => normalise(element?.textContent ?? '') === wanted
+}
+
 function renderHome() {
   return render(
     <MemoryRouter initialEntries={['/']}>
@@ -54,7 +70,7 @@ describe('research vision', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: home.researchVision.heading }),
     ).toBeInTheDocument()
-    expect(screen.getByText(home.researchVision.question)).toBeInTheDocument()
+    expect(screen.getByText(asWritten(home.researchVision.question))).toBeInTheDocument()
   })
 
   it('states the question as a question', () => {
@@ -62,29 +78,32 @@ describe('research vision', () => {
      * Guards the one claim the site must not make. TSR is a framework for
      * investigating whether a general recognition code exists; it has not
      * found one.
+     *
+     * Structure only: the sentence must be interrogative. Which question is
+     * asked, and in whose words, is the group's to change — an assertion on
+     * its opening words would have made sharpening the wording a code change.
      */
     expect(home.researchVision.question.trim()).toMatch(/\?$/)
-    expect(home.researchVision.question).toMatch(/^Is there/i)
   })
 
   it('shows the short explanation and direction without expanding anything', () => {
     renderHome()
 
-    expect(screen.getByText(home.researchVision.intro)).toBeInTheDocument()
-    expect(screen.getByText(home.researchVision.direction)).toBeInTheDocument()
+    expect(screen.getByText(asWritten(home.researchVision.intro))).toBeInTheDocument()
+    expect(screen.getByText(asWritten(home.researchVision.direction))).toBeInTheDocument()
   })
 
   it('keeps the long explanation inside a closed disclosure', async () => {
     renderHome()
 
-    const summary = screen.getByText(home.researchVision.detailsLabel)
+    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
     const details = summary.closest('details')
 
     expect(details).not.toBeNull()
     expect(details.open).toBe(false)
 
     for (const paragraph of home.researchVision.details) {
-      expect(within(details).getByText(paragraph)).toBeInTheDocument()
+      expect(within(details).getByText(asWritten(paragraph))).toBeInTheDocument()
     }
 
     await userEvent.click(summary)
@@ -94,7 +113,7 @@ describe('research vision', () => {
   it('names the disclosure meaningfully', () => {
     renderHome()
 
-    const summary = screen.getByText(home.researchVision.detailsLabel)
+    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
     expect(summary.tagName).toBe('SUMMARY')
     expect(summary.textContent.trim().length).toBeGreaterThan(10)
     /* Native disclosure semantics, not a button inside a summary. */
@@ -117,6 +136,15 @@ describe('research vision', () => {
 })
 
 describe('funding and support', () => {
+  /** The disclosure inside the funding section, found by its section. */
+  function fundingDetails() {
+    const heading = screen.getByRole('heading', {
+      level: 2,
+      name: home.funding.heading,
+    })
+    return heading.closest('section').querySelector('details')
+  }
+
   it('appears between the research group and the closing section', () => {
     renderHome()
 
@@ -129,63 +157,153 @@ describe('funding and support', () => {
     expect(funding).toBeLessThan(contact)
   })
 
-  it('shows the funding statement and both grant numbers', () => {
+  it('shows the funding statement exactly as it is written in content', () => {
+    /*
+     * No assertion about which funder or which award this sentence names.
+     * Awards change, and the point of the section is that changing them is an
+     * edit in the CMS rather than a change to this file.
+     */
     renderHome()
 
-    const statement = screen.getByText(home.funding.primarySupport)
+    const statement = screen.getByText(asWritten(home.funding.primarySupport))
     expect(statement).toBeInTheDocument()
-    expect(statement.textContent).toContain('1R15GM144944-01')
-    expect(statement.textContent).toContain('2R15GM144944-02')
-    expect(statement.textContent).toMatch(/National Institutes of Health/)
+    expect(statement.tagName).toBe('P')
   })
 
   it('presents grant numbers as plain text, not as controls', () => {
     renderHome()
 
-    const statement = screen.getByText(home.funding.primarySupport)
+    const statement = screen.getByText(asWritten(home.funding.primarySupport))
     expect(statement.querySelector('a')).toBeNull()
     expect(statement.querySelector('button')).toBeNull()
   })
 
-  it('describes LONI as computing support, separately from the funder', () => {
+  it('keeps computing support in its own statement, not the funder one', () => {
+    /*
+     * The structure that stops a computing provider reading as a funder: two
+     * separate paragraphs, each rendering one field, never concatenated.
+     *
+     * Which provider that is, and how the sentence is worded, is the
+     * editor's — the rule itself is stated where an editor will meet it, in
+     * the field's description in .pages.yml and in the editor guide, not
+     * pinned to today's provider in a test.
+     */
     renderHome()
 
-    const computing = screen.getByText(home.funding.computingSupport)
-    expect(computing).toBeInTheDocument()
-    expect(computing.textContent).toMatch(/computing/i)
-    expect(computing.textContent).toContain('LONI')
+    const computing = screen.getByText(asWritten(home.funding.computingSupport))
+    const funder = screen.getByText(asWritten(home.funding.primarySupport))
 
-    /*
-     * The two statements are separate elements on purpose. Merged into one
-     * "supported by" sentence, LONI would read as a funding agency.
-     */
-    const funder = screen.getByText(home.funding.primarySupport)
+    expect(computing.tagName).toBe('P')
     expect(funder).not.toBe(computing)
-    expect(funder.textContent).not.toContain('LONI')
+    expect(computing.contains(funder)).toBe(false)
+    expect(funder.contains(computing)).toBe(false)
   })
 
-  it('keeps the acknowledgments inside a closed disclosure', () => {
+  it('keeps the funding detail inside a closed disclosure', () => {
     renderHome()
 
-    const summary = screen.getByText(home.funding.acknowledgmentsLabel)
-    const details = summary.closest('details')
+    const details = fundingDetails()
 
     expect(details).not.toBeNull()
     expect(details.open).toBe(false)
+  })
 
-    for (const paragraph of home.funding.acknowledgments) {
-      expect(within(details).getByText(paragraph)).toBeInTheDocument()
+  it('opens the disclosure on activation, with no JavaScript accordion', async () => {
+    renderHome()
+
+    const details = fundingDetails()
+    const summary = within(details).getByText(asWritten(home.funding.detailsLabel))
+
+    expect(summary.tagName).toBe('SUMMARY')
+    await userEvent.click(summary)
+    expect(details.open).toBe(true)
+  })
+
+  it('renders every award as a funder, its investigators and its number', () => {
+    /*
+     * Driven entirely by the records in home.json. Rename an investigator or
+     * add an award in the CMS and this test follows it; nothing here needs a
+     * developer, which is precisely what broke before.
+     */
+    renderHome()
+
+    const details = fundingDetails()
+
+    for (const award of home.funding.awards) {
+      expect(
+        within(details).getAllByRole('heading', { name: award.funder }).length,
+        award.grant,
+      ).toBeGreaterThan(0)
+      expect(within(details).getAllByText(asWritten(award.investigators)).length)
+        .toBeGreaterThan(0)
+      expect(within(details).getAllByText(asWritten(award.grant)).length).toBeGreaterThan(0)
     }
   })
 
-  it('takes the acknowledged names from content', () => {
+  it('gives each funder one heading, however many awards it holds', () => {
+    /*
+     * The grouping the editor does not have to do. Two awards from the same
+     * organisation are two CMS rows and one heading on the page.
+     */
     renderHome()
 
-    const summary = screen.getByText(home.funding.acknowledgmentsLabel)
-    const text = summary.closest('details').textContent
+    const details = fundingDetails()
+    const funders = home.funding.awards.map((award) => award.funder)
 
-    for (const name of ['Feng Chen', 'Le Yan', 'Thaliyah Mason']) {
-      expect(text).toContain(name)
+    for (const funder of new Set(funders)) {
+      expect(
+        within(details).getAllByRole('heading', { name: funder }),
+        funder,
+      ).toHaveLength(1)
+    }
+  })
+
+  it('presents award numbers as plain text, not as links', () => {
+    renderHome()
+
+    const details = fundingDetails()
+
+    for (const award of home.funding.awards) {
+      for (const element of within(details).getAllByText(asWritten(award.grant))) {
+        expect(element.closest('a')).toBeNull()
+        expect(element.closest('button')).toBeNull()
+      }
+    }
+  })
+
+  it('renders the acknowledgments as prose under their own heading', () => {
+    renderHome()
+
+    const details = fundingDetails()
+
+    expect(
+      within(details).getByRole('heading', {
+        name: home.funding.acknowledgmentsHeading,
+      }),
+    ).toBeInTheDocument()
+
+    for (const paragraph of home.funding.acknowledgments) {
+      const element = within(details).getByText(asWritten(paragraph))
+      expect(element.tagName).toBe('P')
+    }
+  })
+
+  it('needs no line breaks in any editorial field to produce that structure', () => {
+    /*
+     * The regression this whole hotfix exists for. The structure above comes
+     * from separate fields, so no editor should ever have to fake a heading
+     * or a list with newlines inside a text box.
+     */
+    const { awards, acknowledgments, primarySupport, computingSupport } =
+      home.funding
+
+    for (const award of awards) {
+      for (const value of Object.values(award)) {
+        expect(value, JSON.stringify(award)).not.toMatch(/\n/)
+      }
+    }
+    for (const text of [primarySupport, computingSupport, ...acknowledgments]) {
+      expect(text).not.toMatch(/\n/)
     }
   })
 
@@ -197,9 +315,14 @@ describe('funding and support', () => {
 
     expect(source).not.toContain(home.funding.primarySupport)
     expect(source).not.toContain(home.funding.computingSupport)
-    expect(source).not.toContain('1R15GM144944')
     for (const paragraph of home.funding.acknowledgments) {
       expect(source).not.toContain(paragraph)
+    }
+    /* Not one funder, investigator or award number is written in the JSX. */
+    for (const award of home.funding.awards) {
+      for (const value of Object.values(award)) {
+        expect(source, value).not.toContain(value)
+      }
     }
   })
 })
@@ -270,14 +393,27 @@ describe('content validation for the new sections', () => {
 
   it('accepts a disclosure that has been removed entirely', () => {
     /*
-     * An editor who clears the acknowledgments should get a shorter section,
+     * An editor who clears the funding detail should get a shorter section,
      * not a build failure and not a button that opens onto nothing.
      */
     const data = clone()
-    data.funding.acknowledgmentsLabel = ''
+    data.funding.detailsLabel = ''
+    data.funding.awards = []
+    data.funding.acknowledgmentsHeading = ''
     data.funding.acknowledgments = []
 
     expect(() => validateHome(data)).not.toThrow()
+  })
+
+  it('accepts awards with no acknowledgments, and the reverse', () => {
+    const withoutThanks = clone()
+    withoutThanks.funding.acknowledgmentsHeading = ''
+    withoutThanks.funding.acknowledgments = []
+    expect(() => validateHome(withoutThanks), 'awards only').not.toThrow()
+
+    const withoutAwards = clone()
+    withoutAwards.funding.awards = []
+    expect(() => validateHome(withoutAwards), 'acknowledgments only').not.toThrow()
   })
 
   it('rejects a label with nothing behind it', () => {
@@ -286,9 +422,54 @@ describe('content validation for the new sections', () => {
     expect(() => validateHome(data)).toThrow(ContentError)
   })
 
-  it('rejects paragraphs with no label to reveal them', () => {
+  it('rejects funding detail with no label to reveal it', () => {
     const data = clone()
-    data.funding.acknowledgmentsLabel = ''
+    data.funding.detailsLabel = ''
+    expect(() => validateHome(data)).toThrow(ContentError)
+  })
+
+  it('rejects a funding label with nothing behind it', () => {
+    const data = clone()
+    data.funding.awards = []
+    data.funding.acknowledgmentsHeading = ''
+    data.funding.acknowledgments = []
+    expect(() => validateHome(data)).toThrow(ContentError)
+  })
+
+  it('rejects acknowledgments with no heading, and a heading with none', () => {
+    const orphanProse = clone()
+    orphanProse.funding.acknowledgmentsHeading = '  '
+    expect(() => validateHome(orphanProse)).toThrow(ContentError)
+
+    const orphanHeading = clone()
+    orphanHeading.funding.acknowledgments = []
+    expect(() => validateHome(orphanHeading)).toThrow(ContentError)
+  })
+
+  it('rejects an award that is missing any of its three facts', () => {
+    for (const field of ['funder', 'investigators', 'grant']) {
+      const data = clone()
+      data.funding.awards[0][field] = '   '
+      expect(() => validateHome(data), field).toThrow(ContentError)
+
+      const removed = clone()
+      delete removed.funding.awards[0][field]
+      expect(() => validateHome(removed), `missing ${field}`).toThrow(ContentError)
+    }
+  })
+
+  it('rejects an empty award row, however the CMS produced it', () => {
+    /* "Add award" then Save, with nothing typed in. */
+    for (const row of [{}, '', null, 'NIH — some grant', ['NIH']]) {
+      const data = clone()
+      data.funding.awards = [...data.funding.awards, row]
+      expect(() => validateHome(data), JSON.stringify(row)).toThrow(ContentError)
+    }
+  })
+
+  it('rejects awards that are not a list at all', () => {
+    const data = clone()
+    data.funding.awards = 'NIH — 2R15GM144944-02'
     expect(() => validateHome(data)).toThrow(ContentError)
   })
 
@@ -297,5 +478,105 @@ describe('content validation for the new sections', () => {
     const data = clone()
     data.researchVision.details = [...data.researchVision.details, '  ']
     expect(() => validateHome(data)).toThrow(ContentError)
+  })
+})
+
+describe('an ordinary CMS edit does not need a developer', () => {
+  /*
+   * The test this hotfix exists to add.
+   *
+   * Every value below is editorial: a funder, an investigator, an award
+   * number, the prose around them. All of it changes when an award ends or a
+   * student joins, and none of it should ever fail a build or send anyone to
+   * a test file. If this test starts failing, the content model has grown a
+   * dependency on today's wording again — which is the fault it guards.
+   */
+  const edited = () => {
+    const data = JSON.parse(JSON.stringify(home))
+
+    data.funding.heading = 'Funding and support'
+    data.funding.primarySupport =
+      'This work is supported by the National Science Foundation and by a ' +
+      'new institutional award.'
+    data.funding.computingSupport =
+      'Computation runs on a departmental cluster.'
+    data.funding.detailsLabel = 'Awards and thanks'
+    data.funding.awards = [
+      {
+        funder: 'National Science Foundation',
+        investigators: 'A New Investigator',
+        grant: 'NSF-0000000',
+      },
+      {
+        funder: 'National Science Foundation',
+        investigators: 'A New Investigator and A Second One',
+        grant: 'NSF-1111111',
+      },
+      {
+        funder: 'Some Other Foundation',
+        investigators: 'Someone Else',
+        grant: 'SOF/2030/17',
+      },
+    ]
+    data.funding.acknowledgmentsHeading = 'With thanks'
+    data.funding.acknowledgments = [
+      'We thank the cluster team for their help.',
+      'We thank a second group of people, in a second paragraph.',
+    ]
+
+    data.researchVision.question = 'Does molecular recognition follow rules?'
+    data.researchVision.direction = 'A different long-term direction.'
+    data.researchVision.details = ['One rewritten paragraph.']
+
+    return data
+  }
+
+  it('accepts rewritten funding wording, funders, names and numbers', () => {
+    expect(() => validateHome(edited())).not.toThrow()
+  })
+
+  it('accepts an award being added to an existing funder', () => {
+    const data = edited()
+    data.funding.awards.push({
+      funder: 'National Science Foundation',
+      investigators: 'A Third Investigator',
+      grant: 'NSF-2222222',
+    })
+
+    expect(() => validateHome(data)).not.toThrow()
+  })
+
+  it('accepts the whole funding detail being cleared', () => {
+    const data = edited()
+    data.funding.detailsLabel = ''
+    data.funding.awards = []
+    data.funding.acknowledgmentsHeading = ''
+    data.funding.acknowledgments = []
+
+    expect(() => validateHome(data)).not.toThrow()
+  })
+
+  it('still refuses malformed structure in that edited content', () => {
+    const blankField = edited()
+    blankField.funding.awards[0].grant = ''
+    expect(() => validateHome(blankField), 'blank grant').toThrow(ContentError)
+
+    const emptyRow = edited()
+    emptyRow.funding.awards.push({})
+    expect(() => validateHome(emptyRow), 'empty row').toThrow(ContentError)
+
+    const notARecord = edited()
+    notARecord.funding.awards.push('NSF — NSF-3333333')
+    expect(() => validateHome(notARecord), 'string award').toThrow(ContentError)
+
+    const blankParagraph = edited()
+    blankParagraph.funding.acknowledgments.push('   ')
+    expect(() => validateHome(blankParagraph), 'blank prose').toThrow(ContentError)
+
+    const missingStatement = edited()
+    missingStatement.funding.primarySupport = ''
+    expect(() => validateHome(missingStatement), 'no statement').toThrow(
+      ContentError,
+    )
   })
 })
