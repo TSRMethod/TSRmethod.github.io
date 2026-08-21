@@ -3,6 +3,8 @@ import { home, repositories } from '../../content'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import { SOFTWARE_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
+import Reveal from '../shared/Reveal'
+import { EVENTS, trackEvent } from '../../lib/analytics'
 import styles from './SoftwareOverview.module.css'
 
 const SOFTWARE_PATH = '/software'
@@ -41,13 +43,24 @@ export default function SoftwareOverview({ tone }) {
       }
     >
       <ul className={styles.list}>
-        {repositories.map((repository) => (
-          <li key={repository.id} className={styles.card}>
+        {repositories.map((repository, index) => (
+          <Reveal
+            as="li"
+            key={repository.id}
+            index={index}
+            className={styles.card}
+          >
             <h3 className={styles.name}>
               <a
                 href={repository.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackEvent(EVENTS.repositoryLink, {
+                    repository_id: repository.id,
+                    link_type: 'repository',
+                  })
+                }
               >
                 {repository.name}
                 <span className="visually-hidden"> on GitHub (opens in a new tab)</span>
@@ -59,7 +72,7 @@ export default function SoftwareOverview({ tone }) {
             {repository.language && (
               <p className={styles.language}>{repository.language}</p>
             )}
-          </li>
+          </Reveal>
         ))}
       </ul>
     </HomeSection>

@@ -62,3 +62,14 @@ export const DESKTOP_QUERY = '(min-width: 1024px)'
  * If a menu item is ever added, re-measure. Do not shave the brand instead.
  */
 export const NAV_QUERY = '(min-width: 1150px)'
+
+/**
+ * Set when the reader has asked their system for less motion.
+ *
+ * Everything decorative on this site is expected to consult this: the CSS
+ * reset already shortens transitions to nothing, but a scroll reveal starts
+ * from `opacity: 0`, and a transition that has been shortened away would
+ * leave that element invisible forever. Components read this and skip the
+ * hidden state entirely, so the content is simply there.
+ */
+export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'

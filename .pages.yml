@@ -506,7 +506,22 @@ content:
       - name: email
         label: Email
         type: string
-        description: Leave empty if it should not be shown. Never enter a placeholder.
+        description: >-
+          Shown on the card as a mail icon, not as text. Leave empty if it
+          should not be shown. Never enter a placeholder.
+      - name: scholar
+        label: Google Scholar profile
+        type: string
+        description: >-
+          The full https:// address of the person's Google Scholar page, copied
+          from the browser. Leave empty if they do not have one — the icon is
+          only shown when there is a link behind it.
+      - name: linkedin
+        label: LinkedIn profile
+        type: string
+        description: >-
+          The full https:// address of the person's LinkedIn page. Leave empty
+          if they do not have one.
       - name: photo
         label: Photo
         type: image

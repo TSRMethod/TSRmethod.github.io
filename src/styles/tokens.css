@@ -70,6 +70,20 @@
   --shadow-md: 0 4px 12px rgba(31, 41, 51, 0.12);
 
   /* ---- Layout ---- */
+  /* Motion.
+   *
+   * Three durations and one easing curve, so every transition on the site is
+   * recognisably the same gesture. The curve decelerates hard at the end,
+   * which is what makes a 200ms movement read as settling into place rather
+   * than as stopping. Reduced motion is handled where each is used, and again
+   * globally in reset.css.
+   */
+  --motion-fast: 150ms; /* colour and small state changes */
+  --motion-base: 220ms; /* card lift, page entrance */
+  --motion-reveal: 420ms; /* scroll reveal */
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --card-lift: -2px; /* how far an interactive card rises under a pointer */
+
   --content-measure: 72ch; /* readable line length for prose */
   --layout-max: 1200px; /* outer page width */
   --sidebar-width: 15rem; /* method-page section nav, desktop only */

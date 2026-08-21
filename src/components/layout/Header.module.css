@@ -4,6 +4,34 @@
   z-index: 80;
   background-color: var(--color-background);
   border-bottom: 1px solid var(--color-border);
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease);
+}
+
+/*
+ * Scrolled: the bar lifts off the page.
+ *
+ * An opaque background is declared FIRST and the translucent one only inside
+ * an @supports block, so a browser without backdrop-filter keeps a solid
+ * header rather than showing the page's text sliding underneath it. That is
+ * the whole fallback: no capability detection in JavaScript, and no state in
+ * which the navigation is hard to read.
+ */
+.header[data-scrolled] {
+  border-bottom-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .header[data-scrolled] {
+    /* color-mix keeps the tint tied to the theme's own background token
+       instead of hard-coding a fourth white. */
+    background-color: color-mix(in srgb, var(--color-background) 82%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
 }
 
 .inner {
@@ -27,13 +55,25 @@
   text-decoration: none;
 }
 
+/*
+ * The mark tightens by a quarter of a rem once the page moves — the only part
+ * of the "more compact" scrolled state that is safe to animate, because the
+ * header's own min-height does not follow it and nothing below moves.
+ */
 .brandMark {
   flex-shrink: 0;
   width: 2.5rem;
   height: 2.5rem;
+  transition: width var(--motion-base) var(--motion-ease),
+    height var(--motion-base) var(--motion-ease);
   /* The artwork is square with its own internal padding; `contain` keeps it
      from being cropped if that ever changes. */
   object-fit: contain;
+}
+
+.header[data-scrolled] .brandMark {
+  width: 2.25rem;
+  height: 2.25rem;
 }
 
 /*
@@ -69,5 +109,12 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .brandMark {
+    transition: none;
   }
 }

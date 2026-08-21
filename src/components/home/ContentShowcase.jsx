@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { getContentGroups } from '../../app/navigation'
 import HomeSection from './HomeSection'
+import Reveal from '../shared/Reveal'
 import styles from './ContentShowcase.module.css'
 
 /*
@@ -37,15 +38,20 @@ export default function ContentShowcase({ id, heading, intro, category, tone }) 
               {group.label}
             </h3>
             <ul className={styles.list}>
-              {group.methods.map((method) => (
-                <li key={method.slug} className={styles.card}>
+              {group.methods.map((method, index) => (
+                <Reveal
+                  as="li"
+                  key={method.slug}
+                  index={index}
+                  className={styles.card}
+                >
                   <h4 className={styles.cardTitle}>
                     <Link to={method.path}>
                       {method.shortTitle ?? method.title}
                     </Link>
                   </h4>
                   <p className={styles.cardSummary}>{method.summary}</p>
-                </li>
+                </Reveal>
               ))}
             </ul>
           </section>

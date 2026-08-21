@@ -261,6 +261,43 @@ describe('record collections match their sample data', () => {
     expect(entries[name].format).toBe('json')
   })
 
+  it('offers the optional profile links on a person, and requires neither', () => {
+    /*
+     * Both are content: a supervisor pastes a Scholar or LinkedIn address and
+     * an icon appears on the card. Optional on purpose — most of the group has
+     * neither, and a required field would push someone into inventing a value.
+     */
+    const declared = Object.fromEntries(
+      entries.people.fields.map((f) => [f.name, f]),
+    )
+
+    for (const name of ['scholar', 'linkedin']) {
+      expect(declared[name], name).toBeDefined()
+      expect(declared[name].type).toBe('string')
+      expect(declared[name].required, name).toBeUndefined()
+      expect(declared[name].hidden, name).toBeUndefined()
+      /* The editor is told what to paste, and that empty means no icon. */
+      expect(declared[name].description).toMatch(/https:\/\//)
+    }
+  })
+
+  it('keeps every key of a person record safe when the CMS saves it', () => {
+    /*
+     * Round-trip: the schema must be able to hold every key a person record
+     * actually has, and `merge` must be on so that a key it does not know
+     * about survives a save rather than being written out of the file.
+     */
+    const declared = new Set(fieldNames(entries.people))
+
+    for (const person of people) {
+      for (const key of Object.keys(person)) {
+        expect(declared.has(key), `people.${key} is not in .pages.yml`).toBe(true)
+      }
+    }
+
+    expect(config.settings.content.merge).toBe(true)
+  })
+
   it('lets an editor add and remove records', () => {
     // The opposite of the methods collection: these are meant to grow.
     for (const [name] of cases) {

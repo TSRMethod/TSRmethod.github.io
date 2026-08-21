@@ -15,6 +15,7 @@ import {
   formatPublicationCitation,
   doiUrl,
   isApprovedPhotoPath,
+  isValidProfileUrl,
   PHOTO_ROOTS,
   repositories,
   repositoryPath,
@@ -214,6 +215,75 @@ describe('people records', () => {
     expect(() =>
       validatePerson({ id: 'x', name: 'X', role: 'Y', email: '  ' }),
     ).toThrow(ContentError)
+  })
+
+  it('accepts a person with no external profile links', () => {
+    /*
+     * The common case, and the one that must never become an empty icon:
+     * most of the group has neither profile, and their records simply do not
+     * carry the fields.
+     */
+    expect(() =>
+      validatePerson({ id: 'x', name: 'X', role: 'Y' }),
+    ).not.toThrow()
+  })
+
+  it('accepts a real Scholar or LinkedIn address, on any of their domains', () => {
+    /*
+     * Both services answer on many hosts, and a supervisor pastes whichever
+     * one their browser gave them. Rejecting a country domain would send them
+     * to a developer, so only the parts that actually break a link are
+     * checked: that it parses, and that it is https.
+     */
+    for (const url of [
+      'https://scholar.google.com/citations?user=AbCdEfG',
+      'https://scholar.google.co.uk/citations?hl=en&user=AbCdEfG',
+      'https://www.linkedin.com/in/somebody-1234',
+      'https://uk.linkedin.com/in/somebody',
+    ]) {
+      expect(isValidProfileUrl(url), url).toBe(true)
+      expect(
+        () => validatePerson({ id: 'x', name: 'X', role: 'Y', scholar: url }),
+        url,
+      ).not.toThrow()
+      expect(
+        () => validatePerson({ id: 'x', name: 'X', role: 'Y', linkedin: url }),
+        url,
+      ).not.toThrow()
+    }
+  })
+
+  it('rejects a profile link that would not work', () => {
+    for (const url of [
+      'scholar.google.com/citations?user=AbCdEfG', /* no scheme */
+      'www.linkedin.com/in/somebody',
+      'http://scholar.google.com/citations?user=AbCdEfG', /* not https */
+      'javascript:alert(1)',
+      '/in/somebody',
+      'https://',
+      'https://localhost/in/somebody',
+      'not a url at all',
+    ]) {
+      expect(isValidProfileUrl(url), url).toBe(false)
+
+      for (const field of ['scholar', 'linkedin']) {
+        expect(
+          () =>
+            validatePerson({ id: 'x', name: 'X', role: 'Y', [field]: url }),
+          `${field}: ${url}`,
+        ).toThrow(ContentError)
+      }
+    }
+  })
+
+  it('rejects an emptied profile field rather than rendering a dead icon', () => {
+    /* What "clear this field" in the CMS produces if it writes a key back. */
+    for (const field of ['scholar', 'linkedin']) {
+      expect(
+        () => validatePerson({ id: 'x', name: 'X', role: 'Y', [field]: '   ' }),
+        field,
+      ).toThrow(ContentError)
+    }
   })
 
   it('rejects a status it does not understand', () => {

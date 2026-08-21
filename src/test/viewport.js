@@ -20,6 +20,7 @@
 const DEFAULT_WIDTH = 1280
 
 let currentWidth = DEFAULT_WIDTH
+let reducedMotion = false
 const listeners = new Set()
 
 function evaluate(query) {
@@ -28,6 +29,15 @@ function evaluate(query) {
 
   const max = query.match(/max-width:\s*(\d+)px/)
   if (max) return currentWidth <= Number(max[1])
+
+  /*
+   * The other query the site asks about. It defaults to false — motion
+   * allowed — because that is the state most tests should be exercising; a
+   * test that cares says so with setReducedMotion(true).
+   */
+  if (query.includes('prefers-reduced-motion')) {
+    return query.includes('reduce') ? reducedMotion : !reducedMotion
+  }
 
   return false
 }
@@ -57,7 +67,18 @@ export function setViewport(viewport) {
   listeners.forEach((callback) => callback({ matches: undefined }))
 }
 
+/**
+ * Simulate the operating system's "reduce motion" setting.
+ *
+ * @param {boolean} [reduce]
+ */
+export function setReducedMotion(reduce = true) {
+  reducedMotion = reduce
+  listeners.forEach((callback) => callback({ matches: reduce }))
+}
+
 export function resetViewport() {
   currentWidth = DEFAULT_WIDTH
+  reducedMotion = false
   listeners.clear()
 }

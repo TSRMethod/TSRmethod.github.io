@@ -1,0 +1,34 @@
+/*
+ * 220ms, 8px, once. Long enough to register as a transition and short enough
+ * that nobody waiting for the page notices it happening.
+ *
+ * `display: contents` would remove this element from the layout entirely, but
+ * it cannot be animated; a plain block is used instead, which is transparent
+ * to the column layout above it because <main> lays its children out the same
+ * way either way.
+ */
+.page {
+  animation: page-enter var(--motion-base) var(--motion-ease) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * With reduced motion the page simply appears. `animation: none` rather than
+ * a shortened duration, so there is no state in which the content is at
+ * `opacity: 0` waiting for a frame that never comes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+}

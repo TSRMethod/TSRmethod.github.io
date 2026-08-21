@@ -1,0 +1,47 @@
+/*
+ * The reveal itself: 16px and a fade, over 420ms, easing out.
+ *
+ * Short travel on purpose. Anything further reads as an element flying in,
+ * and at this distance the movement is felt rather than watched — which is
+ * the difference between a page that feels alive and one that performs.
+ *
+ * Only opacity and transform are animated. Both are composited, so a column
+ * of cards revealing at once costs no layout work.
+ */
+.reveal[data-reveal='hidden'] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.reveal[data-reveal='shown'] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-reveal) var(--motion-ease) var(--reveal-delay, 0ms),
+    transform var(--motion-reveal) var(--motion-ease) var(--reveal-delay, 0ms);
+}
+
+/*
+ * The safety net, and the reason it is written twice.
+ *
+ * The component already skips the hidden state when a reader asks for reduced
+ * motion. This says the same thing in CSS, so that a script error, a blocked
+ * bundle or a future refactor can never leave a reader looking at an empty
+ * page: with reduced motion, or on paper, the content is simply present.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .reveal[data-reveal='hidden'],
+  .reveal[data-reveal='shown'] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+@media print {
+  .reveal[data-reveal='hidden'],
+  .reveal[data-reveal='shown'] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -6,6 +6,8 @@ import {
   getPagesForRepository,
   repositoryPath,
 } from '../../content'
+import Reveal from '../../components/shared/Reveal'
+import { EVENTS, trackEvent } from '../../lib/analytics'
 import styles from './Software.module.css'
 
 /*
@@ -48,20 +50,39 @@ const SECTIONS = [
   },
 ]
 
+/*
+ * One place decides what a repository click is called and what identifies it.
+ *
+ * The id comes from the record, so the event survives a repository being
+ * renamed or moved — which is the whole reason repositories are records
+ * rather than URLs written into a page.
+ */
+function trackRepositoryLink(repository, linkType) {
+  trackEvent(EVENTS.repositoryLink, {
+    repository_id: repository.id,
+    link_type: linkType,
+  })
+}
+
 /** What the reader is actually getting, in two words. */
 const KIND_LABEL = {
   package: 'Installable Python package',
   scripts: 'Research scripts',
 }
 
-function Repository({ repository }) {
+function Repository({ repository, index }) {
   const path = repositoryPath(repository.url)
   const documentation = getPagesForRepository(repository.url)
 
   return (
-    <li className={styles.repository}>
+    <Reveal as="li" index={index} className={styles.repository}>
       <h3 className={styles.name}>
-        <a href={repository.url} target="_blank" rel="noopener noreferrer">
+        <a
+          href={repository.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackRepositoryLink(repository, 'repository')}
+        >
           {repository.name}
           <span className="visually-hidden">
             {` — ${path ?? repository.url} on GitHub (opens in a new tab)`}
@@ -92,7 +113,23 @@ function Repository({ repository }) {
           <ul className={styles.documentationList}>
             {documentation.map((method) => (
               <li key={method.slug}>
-                <Link to={method.path}>{method.shortTitle ?? method.title}</Link>
+                <Link
+                  to={method.path}
+                  onClick={() =>
+                    /*
+                     * Not ordinary navigation: someone looking at a package
+                     * and choosing to read its tutorial is the engagement
+                     * this site exists to produce, so it is worth a name.
+                     */
+                    trackEvent(EVENTS.tutorialLink, {
+                      method_slug: method.slug,
+                      repository_id: repository.id,
+                      link_type: 'documentation',
+                    })
+                  }
+                >
+                  {method.shortTitle ?? method.title}
+                </Link>
               </li>
             ))}
           </ul>
@@ -105,6 +142,7 @@ function Repository({ repository }) {
             href={repository.issuesUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackRepositoryLink(repository, 'issues')}
           >
             Report a problem
             <span className="visually-hidden">
@@ -113,7 +151,7 @@ function Repository({ repository }) {
           </a>
         </p>
       )}
-    </li>
+    </Reveal>
   )
 }
 
@@ -146,8 +184,12 @@ export default function Software() {
           </h2>
           <p className={styles.blurb}>{section.blurb}</p>
           <ul className={styles.list}>
-            {section.repositories.map((repository) => (
-              <Repository key={repository.id} repository={repository} />
+            {section.repositories.map((repository, index) => (
+              <Repository
+                key={repository.id}
+                repository={repository}
+                index={index}
+              />
             ))}
           </ul>
         </section>

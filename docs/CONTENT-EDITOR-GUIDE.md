@@ -155,15 +155,36 @@ none — it tells a blind reader about something that is not there.
 
 1. Click **People**.
 2. Click the person, or **Add** for someone new.
-3. Fill in name, role, affiliation, biography, and optionally a photo and
-   email address.
+3. Fill in name, role, affiliation, biography, and optionally a photo, an
+   email address and their profile links.
    - **Identifier** works the same way as for publications, e.g. `jane-smith`.
+   - **Role or title** is what the card shows under the name, so keep it to
+     one short line — "Doctoral Researcher — Computational Biology & AI"
+     rather than a full job description.
    - **Current or former member** moves someone between the two lists on the
      People page.
    - **Leave a field blank if you do not have it.** Do not type a placeholder
      like "TBC" or "none" — a blank field is simply not shown, whereas a
      placeholder would be published.
 4. Click **Save**.
+
+**What the People page shows, and what it keeps.** A card is a portrait, a
+name, one role, and a small row of icons — mail, Google Scholar, LinkedIn —
+for whichever of those the person has. The **biography** and **affiliation**
+are still here and still worth filling in: they are held on the record for
+future use, and they are simply not printed on the directory, which had become
+a wall of text. Nothing you have written has been thrown away.
+
+**Email and profile links become icons.** The address is never shown as text
+on the card; it is behind the mail icon, and someone using a screen reader
+hears "Email Jane Smith". For **Google Scholar profile** and **LinkedIn
+profile**, paste the whole address from your browser's address bar, starting
+with `https://`. Leave a field empty and its icon simply does not appear —
+there is no such thing as a greyed-out icon here, and no link to nowhere.
+
+If you paste something that is not a full `https://` address, the site will
+refuse to rebuild and tell you which person and which field. The live site
+stays as it was until it is corrected.
 
 ## 9. Changing the words on the home page
 

@@ -506,6 +506,19 @@ export function getPagesForRepository(url, methods = publishedMethods) {
 }
 
 /**
+ * The repository record for a URL, or null if there is no record for it.
+ *
+ * A method page lists its repositories in its own frontmatter as a name and a
+ * URL, which is all a reader needs. Anything that has to IDENTIFY one — an
+ * analytics event, say — needs the stable id from the collection instead, and
+ * this is the one place that translation happens. Returns null rather than
+ * inventing an id: not every repository cited by a page has a record.
+ */
+export function getRepositoryByUrl(url, records = validatedRepositories) {
+  return records.find((record) => sameRepository(record.url, url)) ?? null
+}
+
+/**
  * Repositories in one category, in display order.
  *
  * The software page asks for the categories it wants to show; nothing here
@@ -553,6 +566,44 @@ export function isApprovedPhotoPath(photo) {
 }
 
 /*
+ * External profile links a person may have.
+ *
+ * Optional, one line each, and the card shows an icon per link that exists.
+ * Held in a list rather than written out twice so that adding a third service
+ * later is one entry here, one icon, and nothing else.
+ */
+export const PROFILE_FIELDS = ['scholar', 'linkedin']
+
+/*
+ * What counts as a usable profile URL.
+ *
+ * Deliberately NOT a hostname whitelist. Google Scholar answers on a dozen
+ * country domains and LinkedIn on nearly as many, so pinning either to one
+ * host would reject a legitimate link that a supervisor pasted from their own
+ * browser — and the person who then has to change it is a developer, which is
+ * the failure this project keeps designing out.
+ *
+ * What is checked is what actually breaks a page: the value must parse as an
+ * absolute URL, and it must be https. A relative or malformed string renders
+ * as a link to nowhere, and an http:// link on an https:// site is a downgrade
+ * some browsers block outright.
+ */
+export function isValidProfileUrl(value) {
+  if (typeof value !== 'string' || value.trim() === '') return false
+
+  let url
+  try {
+    url = new URL(value.trim())
+  } catch {
+    return false
+  }
+
+  if (url.protocol !== 'https:') return false
+  /* Rejects https://localhost and other single-label hosts. */
+  return url.hostname.includes('.')
+}
+
+/*
  * Optional fields are ABSENT, never empty.
  *
  * The previous site stored `phone: ''` and `email: ''` for nine people and
@@ -575,12 +626,22 @@ function validatePerson(person) {
     )
   }
 
-  for (const field of ['email', 'photo', 'bio', 'affiliation']) {
+  for (const field of ['email', 'photo', 'bio', 'affiliation', ...PROFILE_FIELDS]) {
     if (field in person && !String(person[field]).trim()) {
       throw new ContentError(
         source,
         `"${field}" is empty. Leave the field out entirely instead — an empty ` +
           'value renders as a dangling label or a link to nowhere.',
+      )
+    }
+  }
+
+  for (const field of PROFILE_FIELDS) {
+    if (person[field] && !isValidProfileUrl(person[field])) {
+      throw new ContentError(
+        source,
+        `"${field}" is "${person[field]}". A profile link must be a full ` +
+          'https:// address copied from the browser, or left out entirely.',
       )
     }
   }

@@ -27,78 +27,127 @@
 }
 
 /*
- * `minmax(min(100%, 20rem), 1fr)` rather than a bare `minmax(20rem, 1fr)`.
+ * `minmax(min(100%, 16rem), 1fr)` rather than a bare `minmax(16rem, 1fr)`.
  *
- * A fixed minimum cannot shrink below itself, so on a 320px screen a 20rem
- * track overflows the viewport and the whole document scrolls sideways — the
- * bug the previous site had with its 400px cards. `min(100%, …)` lets the
+ * A fixed minimum cannot shrink below itself, so on a 320px screen a track
+ * wider than the viewport overflows and the whole document scrolls sideways —
+ * the bug the previous site had with its 400px cards. `min(100%, …)` lets the
  * track collapse to the container width when there is no room for the ideal
  * size, so the grid becomes a single column instead of overflowing.
+ *
+ * The ideal width came down from 20rem to 16rem with the biographies. A card
+ * is now a portrait, a name, a role and up to three icons; at the old width
+ * those sat in a wide, half-empty box. Narrower tracks put four across a
+ * desktop and read as a directory rather than as a list of profiles.
  */
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
-  gap: var(--space-5);
-}
-
-.person {
-  padding: var(--space-4);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.identity {
-  display: flex;
-  align-items: flex-start;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
   gap: var(--space-4);
 }
 
+/*
+ * Centred column: portrait, name, role, links.
+ *
+ * `justify-items` rather than `text-align` alone, so the icon row centres as a
+ * box too. The card is a fixed rhythm regardless of how much of it is filled
+ * in — someone with no portrait and no links still produces a card the same
+ * shape as the one beside it, which is what stops a mixed row looking broken.
+ */
+.person {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  /* Both properties are animated in one declaration so the hover and the
+     focus state below cannot drift apart. Movement is added on top of this
+     only where a pointer can actually hover — see below. */
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+
+/*
+ * A card is not a link — the links are the icons inside it — so this is
+ * recognition, not an affordance: the surface lifts a little under the
+ * pointer and settles when it leaves. Two pixels and a shadow, no scaling.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .person:hover {
+    transform: translateY(var(--card-lift));
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Keyboard users get the same acknowledgement when focus lands inside. */
+.person:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.photo,
+.photoPlaceholder {
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-raised);
+}
+
 .photo {
-  flex: none;
-  width: 5.5rem;
-  height: 5.5rem;
   object-fit: cover;
   /* Portraits are framed differently; favour the top of the frame so the crop
      keeps faces rather than centring on a torso. */
   object-position: top center;
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-raised);
-}
-
-/* `min-width: 0` lets a long name wrap instead of widening the flex row. */
-.naming {
-  min-width: 0;
+  border: 1px solid var(--color-border);
 }
 
 .name {
-  font-size: var(--text-lg);
-  margin: 0 0 var(--space-1);
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+  margin: var(--space-2) 0 0;
+  /* Long single-token surnames must not widen the track on a phone. */
   overflow-wrap: break-word;
 }
 
+/*
+ * The role is the only prose left on the card, so it is styled as supporting
+ * text rather than as a second heading: two bold lines of similar weight would
+ * make the name harder to find when scanning a grid of thirteen.
+ */
 .role {
   margin: 0;
-  font-weight: 600;
+  /*
+   * 24ch measured, not guessed: at 18ch every student role wrapped onto three
+   * lines and the cards grew tall and ragged; at 24ch the faculty roles fit on
+   * one line and the rest on two, which is what makes a row of them scan.
+   */
+  max-width: 24ch;
   font-size: var(--text-sm);
-}
-
-.affiliation,
-.bio,
-.contact {
-  margin: var(--space-2) 0 0;
-  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
   color: var(--color-text-muted);
+  text-wrap: balance;
 }
 
-.bio {
-  margin-top: var(--space-4);
+/* Pushes the icon row to the bottom edge of a card that has room to spare. */
+.person > ul {
+  margin-top: var(--space-1);
 }
 
-/* An address has no spaces to break at, so allow a break anywhere in it. */
-.contact {
-  overflow-wrap: anywhere;
+@media (prefers-reduced-motion: reduce) {
+  .person {
+    transition: none;
+  }
+
+  .person:hover {
+    transform: none;
+  }
 }

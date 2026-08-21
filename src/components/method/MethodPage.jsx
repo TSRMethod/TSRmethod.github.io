@@ -6,6 +6,7 @@ import MarkdownContent from './MarkdownContent'
 import SectionNavigation from './SectionNavigation'
 import SlurmGuide from './SlurmGuide'
 import SourceCodeCard from './SourceCodeCard'
+import Reveal from '../shared/Reveal'
 import OptimizedImage from '../shared/OptimizedImage'
 import Callout from './Callout'
 import styles from './MethodPage.module.css'
@@ -128,16 +129,24 @@ export default function MethodPage({ slug }) {
           <SlurmGuide slurm={method.slurm} headingId={SLURM_ID} />
 
           {method.repositories.length > 0 && (
-            <section className={styles.section} aria-labelledby={SOURCE_ID}>
+            <Reveal
+              as="section"
+              className={styles.section}
+              aria-labelledby={SOURCE_ID}
+            >
               <h2 id={SOURCE_ID} className={styles.sectionHeading}>
                 Source code
               </h2>
               <ul className={styles.repositories}>
-                {method.repositories.map((repository) => (
-                  <SourceCodeCard key={repository.url} repository={repository} />
+                {method.repositories.map((repository, index) => (
+                  <SourceCodeCard
+                    key={repository.url}
+                    repository={repository}
+                    index={index}
+                  />
                 ))}
               </ul>
-            </section>
+            </Reveal>
           )}
 
           {method.references.length > 0 && (
