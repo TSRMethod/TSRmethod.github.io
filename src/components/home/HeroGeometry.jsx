@@ -1,90 +1,51 @@
+import {
+  ALPHA_CARBONS,
+  BACKBONE,
+  BACKBONE_NEAR,
+  DEPTH,
+  RESIDUE_POINTS,
+  TRIPLETS,
+} from './ubiquitin'
 import styles from './HeroGeometry.module.css'
 
 /*
- * The decorative TSR figure behind the hero.
+ * The figure behind the hero: ubiquitin, and TSR being done to it.
  *
- * WHAT IT DRAWS, and why it is this and not a particle field: TSR represents
- * a structure by taking triplets of points and reducing each triangle between
- * them to one integer. So the picture is exactly that — a sparse field of
- * points with faint relationships between them, out of which three points at
- * a time are picked out and the triangle between them is drawn, held, and let
- * go as another triplet is chosen elsewhere. Someone who reads the method
- * should recognise the page; someone who has not should still see geometry
- * rather than decoration.
+ * IT IS A REAL PROTEIN. Every coordinate comes from PDB entry 1UBQ — the 1.8 Å
+ * structure of ubiquitin — projected once, at development time, by
+ * scripts/derive-1ubq-figure.mjs. The browser receives about eighty numbers
+ * and a path string; there is no structure file to download, no parser in the
+ * bundle, and nothing is fetched from RCSB when someone opens the page. The
+ * supplied camera-spin MP4 was used as a visual reference for what the fold
+ * should look like and nothing else: at 2 MB, on a white background, it would
+ * have cost more than the whole rest of the page to show a picture we can draw
+ * from the coordinates themselves.
  *
- * EVERY TRIANGLE IS SCALENE, deliberately and by measurement: side ratios run
- * about 1 : 1.6 : 2.0, each with one near-horizontal edge (5–13° off level).
- * TSR keys depend on a triangle's sides being different — that is what makes
- * a key distinctive — and the group's own mark is a scalene triangle. A ring
- * of equilateral triangles would look like a logo grid and would quietly say
- * the wrong thing about the method.
+ * IT TELLS THE METHOD'S STORY, in the order the method works:
  *
- * HOW IT MOVES: CSS only. No animation library, no canvas, no requestAnimation
- * Frame loop, no state, no JavaScript running after this renders once. The
- * whole thing is static SVG plus a handful of keyframes on opacity, transform
- * and stroke-dashoffset — all of which the compositor can handle — so the
- * cost of the hero being animated is the cost of the markup.
+ *   the backbone resolves          — a structure
+ *   α-carbons appear along it      — its residues
+ *   three of them are picked out   — a triplet
+ *   the triangle between them draws — one TSR key
+ *   it fades, and another triplet is chosen elsewhere
  *
- * IT IS INVISIBLE TO ASSISTIVE TECHNOLOGY. `aria-hidden` and `focusable`
- * false on the SVG, `pointer-events: none` on the layer: it adds nothing to
- * the accessibility tree, creates no tab stop, and cannot intercept a click
- * meant for the hero's own links.
+ * The protein never leaves. It is the context the triangles are measured
+ * against, which is exactly its role in the method.
+ *
+ * THE TRIANGLES ARE THE REAL ONES. Each is drawn between three actual
+ * α-carbons of the fold — the same points the figure already shows as
+ * residues — chosen by the script for being properly scalene (sides around
+ * 1 : 1.3 : 1.5). Nothing here is invented geometry, and because a corner and
+ * its residue are the same coordinate, an edge cannot come away from its point.
+ *
+ * IT IS INVISIBLE TO ASSISTIVE TECHNOLOGY: `aria-hidden` on the layer and the
+ * SVG, `focusable="false"`, `pointer-events: none`. It adds nothing to the
+ * accessibility tree, takes no focus, and cannot intercept a click meant for
+ * the hero's own links.
  */
 
-/*
- * A 600×400 field. Coordinates are written out rather than generated: the
- * composition is a drawing — weighted to the right so the heading and lede
- * keep the left — not something an algorithm should be asked to re-derive on
- * every page load.
- */
-const NODES = [
-  /* Triangle vertices. */
-  { x: 250, y: 270 },
-  { x: 452, y: 300 },
-  { x: 322, y: 198, ring: true },
-  { x: 398, y: 96 },
-  { x: 548, y: 116 },
-  { x: 496, y: 170, ring: true },
-  { x: 416, y: 300, ring: true },
-  { x: 516, y: 244 },
-  { x: 540, y: 310 },
-  { x: 120, y: 190, wide: true },
-  { x: 300, y: 150 },
-  { x: 150, y: 286, wide: true },
-  /* Points that belong to no triangle: a structure has more residues than
-     the ones any one key is built from. */
-  { x: 196, y: 88, wide: true },
-  { x: 78, y: 332, wide: true },
-  { x: 350, y: 352 },
-  { x: 470, y: 378 },
-]
-
-/** The faint web of relationships the triangles are selected from. */
-const EDGES = [
-  { from: 12, to: 10, wide: true },
-  { from: 9, to: 12, wide: true },
-  { from: 9, to: 11, wide: true },
-  { from: 11, to: 13, wide: true },
-  { from: 10, to: 2 },
-  { from: 0, to: 14 },
-  { from: 14, to: 6 },
-  { from: 2, to: 3 },
-  { from: 5, to: 7 },
-  { from: 1, to: 15 },
-  { from: 3, to: 10 },
-  { from: 0, to: 11, wide: true },
-]
-
-/*
- * The triplets that are picked out. `length` is the perimeter, which is what
- * stroke-dasharray needs to draw an edge on rather than dash it.
- */
-const TRIANGLES = [
-  { points: '250,270 452,300 322,198', length: 480 },
-  { points: '398,96 548,116 496,170', length: 355 },
-  { points: '416,300 516,244 540,310', length: 315 },
-  { points: '120,190 300,150 150,286', length: 495, wide: true },
-]
+/** "x,y" for an α-carbon, by its index in the chain. */
+const at = (residue) => ALPHA_CARBONS[residue].join(',')
 
 export default function HeroGeometry() {
   return (
@@ -92,66 +53,95 @@ export default function HeroGeometry() {
       <svg
         className={styles.figure}
         viewBox="0 0 600 400"
-        /*
-         * `meet`, not `slice`. The hero is a wide, short band; sliced into it,
-         * the figure was magnified until only two or three enormous nodes were
-         * left on screen and no triangle could be read as a triangle — which
-         * is the one thing this graphic exists to show. `meet` keeps the whole
-         * composition inside its box, and the box is placed on the right of
-         * the hero by the stylesheet. `xMax` then pins the drawing to that
-         * box's right edge, so the figure sits with the band rather than
-         * floating in the middle of a gap.
-         */
         preserveAspectRatio="xMaxYMid meet"
         aria-hidden="true"
         focusable="false"
       >
-        <g className={styles.edges}>
-          {EDGES.map(({ from, to, wide }) => (
-            <line
-              key={`${from}-${to}`}
-              className={wide ? styles.wideOnly : undefined}
-              x1={NODES[from].x}
-              y1={NODES[from].y}
-              x2={NODES[to].x}
-              y2={NODES[to].y}
-            />
-          ))}
-        </g>
+        {/*
+         * ONE GROUP FOR EVERYTHING. The whole structure shares a single
+         * transform, so if it moves at all it moves as one object. The
+         * previous abstract figure animated points and lines separately and
+         * they slid apart from each other; here there is no arrangement in
+         * which that can happen, because there is only one thing being moved.
+         */}
+        <g className={styles.structure}>
+          {/*
+           * Two passes over the same trace, and the reason is depth. A flat
+           * Cα line through a globular fold reads as a ball of string; drawing
+           * the half of the chain nearest the viewer a shade stronger over the
+           * whole of it brings the front of the molecule forward, which is
+           * what makes it read as an object rather than a scribble.
+           */}
+          <path className={styles.backbone} d={BACKBONE} />
+          <path className={styles.backboneNear} d={BACKBONE_NEAR} />
 
-        <g className={styles.triangles}>
-          {TRIANGLES.map(({ points, length, wide }) => (
-            <polygon
-              key={points}
-              className={[styles.triangle, wide ? styles.wideOnly : null]
-                .filter(Boolean)
-                .join(' ')}
-              points={points}
-              style={{
-                /* The dash pattern is the shape's own perimeter, so one
-                   "dash" is the whole outline and the offset draws it. */
-                strokeDasharray: length,
-                '--tsr-outline': `${length}px`,
-              }}
-            />
-          ))}
-        </g>
-
-        <g className={styles.nodes}>
-          {NODES.map(({ x, y, ring, wide }, index) => (
-            <g
-              key={`${x}-${y}`}
-              className={[styles.node, wide ? styles.wideOnly : null]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {ring && <circle className={styles.ring} cx={x} cy={y} r="11" />}
+          <g className={styles.residues}>
+            {RESIDUE_POINTS.map((residue, index) => (
               <circle
-                className={styles.dot}
-                cx={x}
-                cy={y}
-                r={index % 3 === 0 ? 4 : 3}
+                key={residue}
+                className={styles.residue}
+                cx={ALPHA_CARBONS[residue][0]}
+                cy={ALPHA_CARBONS[residue][1]}
+                /* Nearer α-carbons are drawn slightly larger, for the same
+                   reason the near half of the trace is drawn stronger. */
+                r={2.1 + DEPTH[residue] * 1.5}
+                style={{
+                  '--residue-index': index,
+                  '--residue-depth': 0.2 + DEPTH[residue] * 0.25,
+                }}
               />
+            ))}
+          </g>
+
+          {TRIPLETS.map((triplet, index) => (
+            <g
+              key={triplet.residues.join('-')}
+              /*
+               * The first triplet is marked rather than found by position.
+               * `:first-of-type` would have matched the residues group — the
+               * first <g> in here — and quietly hidden every triangle in the
+               * reduced-motion state, which is the one state that must always
+               * show a completed one.
+               */
+              className={[styles.triplet, index === 0 ? styles.primaryTriplet : null]
+                .filter(Boolean)
+                .join(' ')}
+              /*
+               * Each triplet has the stage to itself: one cycle, divided
+               * between however many the structure yielded, so exactly one
+               * relationship is being read at a time. The cycle is derived
+               * from that number rather than written down, so re-deriving the
+               * figure from another structure cannot leave a silent gap or an
+               * overlap in the rhythm.
+               */
+              style={{ '--turn': index, '--cycle': `${TRIPLETS.length * 9}s` }}
+            >
+              <polygon
+                className={styles.triangle}
+                points={triplet.residues.map(at).join(' ')}
+                style={{
+                  strokeDasharray: triplet.perimeter,
+                  '--outline': `${triplet.perimeter}px`,
+                }}
+              />
+
+              {triplet.residues.map((residue) => (
+                <g key={residue}>
+                  {/* Centred on the residue, so a pulse cannot detach it. */}
+                  <circle
+                    className={styles.selectedRing}
+                    cx={ALPHA_CARBONS[residue][0]}
+                    cy={ALPHA_CARBONS[residue][1]}
+                    r="9"
+                  />
+                  <circle
+                    className={styles.selected}
+                    cx={ALPHA_CARBONS[residue][0]}
+                    cy={ALPHA_CARBONS[residue][1]}
+                    r="4.2"
+                  />
+                </g>
+              ))}
             </g>
           ))}
         </g>

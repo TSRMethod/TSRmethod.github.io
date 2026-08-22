@@ -1,20 +1,13 @@
 /*
- * The hero figure's appearance and its motion.
+ * The hero figure: appearance, and a story told in one 24-second loop.
  *
- * THE BASE STATE IS THE FINISHED PICTURE. Every rule below describes the
- * figure as it should look standing still; the keyframes only cycle around
- * that. This is the property that makes reduced motion safe — turning the
- * animations off leaves a complete illustration rather than an empty box,
- * which is what happens when a decorative layer starts at `opacity: 0` and
- * waits for a frame that never comes.
+ * THE BASE STATE IS A FINISHED PICTURE — the protein, its residues, and one
+ * completed TSR triangle. Every keyframe below cycles around that rather than
+ * building it from nothing, which is what makes the reduced-motion state at
+ * the bottom of this file a deliberate composition instead of an animation
+ * caught halfway.
  */
 
-/*
- * The figure occupies the right of the band and is never asked to sit behind
- * the heading. Placing it rather than stretching it across the whole hero is
- * what keeps the composition legible: the drawing has its own proportions and
- * `meet` respects them, so the box it is given decides how big it reads.
- */
 .layer {
   position: absolute;
   top: 0;
@@ -27,8 +20,8 @@
   /*
    * Fades out towards the text. The heading and lede sit on the left, so the
    * figure is masked away under them rather than being drawn at an opacity
-   * low enough to be safe everywhere — this way it can be properly visible on
-   * the right and completely absent behind the words.
+   * low enough to be safe everywhere — this way the structure can be properly
+   * legible on the right and completely absent behind the words.
    */
   -webkit-mask-image: linear-gradient(
     to right,
@@ -50,251 +43,283 @@
   display: block;
 }
 
-/* ---- The network ---- */
-
-.edges line {
-  stroke: var(--color-primary);
-  stroke-width: 1;
-  opacity: 0.18;
-  animation: tsr-edge-breathe 14s ease-in-out infinite alternate;
-}
+/* ---- The structure ---- */
 
 /*
- * Desynchronised by hand. Neighbouring edges brightening together would read
- * as a pulse across the whole picture, which is the thing that makes a
- * background feel like it is demanding attention.
+ * A breath of movement, applied to the whole molecule at once — never to its
+ * parts. Two degrees over three quarters of a minute is not a spinning model;
+ * it is the difference between a diagram and something alive. Because every
+ * point, edge and triangle is inside this one group, nothing can drift out of
+ * register with anything else.
  */
-.edges line:nth-child(3n) {
-  animation-duration: 19s;
-  animation-delay: -7s;
+.structure {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tsr-sway 46s ease-in-out infinite alternate;
 }
 
-.edges line:nth-child(3n + 1) {
-  animation-duration: 23s;
-  animation-delay: -13s;
-}
-
-@keyframes tsr-edge-breathe {
+@keyframes tsr-sway {
   from {
-    opacity: 0.1;
+    transform: rotate(-1.1deg) translateY(-2px);
   }
   to {
-    opacity: 0.24;
+    transform: rotate(1.1deg) translateY(2px);
   }
 }
 
-/* ---- The triangles ---- */
+/*
+ * PHASE A — the fold resolves. Once, on load, over a little over two seconds:
+ * the trace draws itself along the chain from the N-terminus, which is the
+ * order the structure is actually written in.
+ */
+.backbone,
+.backboneNear {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 7000;
+  stroke-dashoffset: 0;
+  animation: tsr-trace 2.4s ease-out both;
+}
 
+/*
+ * The three layers are deliberately an order apart in weight: the fold is
+ * context, the residues are the points a key is built from, and the triangle
+ * is the thing being said. Drawn at similar strengths, the relationship
+ * disappeared into the chain — the one thing this figure must not do.
+ */
+.backbone {
+  stroke-width: 1.5;
+  opacity: 0.14;
+}
+
+/* The near half, drawn over the whole trace: thicker and a little stronger,
+   which is the entire depth cue. */
+.backboneNear {
+  stroke-width: 2.1;
+  opacity: 0.24;
+}
+
+/*
+ * The trace draws itself along the chain, from the N-terminus, over a little
+ * over two seconds. `opacity` is left out of the keyframes on purpose so each
+ * pass keeps its own — the animation is about the line arriving, not about
+ * how strongly it is drawn.
+ */
+@keyframes tsr-trace {
+  from {
+    stroke-dashoffset: 7000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/*
+ * PHASE B — residues appear along the resolved trace, in chain order. The
+ * stagger is small: this is a structure being read, not a queue.
+ */
+.residue {
+  fill: var(--color-primary);
+  opacity: var(--residue-depth);
+  animation: tsr-residue-in 900ms ease-out both;
+  animation-delay: calc(1.4s + var(--residue-index) * 45ms);
+}
+
+@keyframes tsr-residue-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--residue-depth);
+  }
+}
+
+/* ---- The TSR relationships ---- */
+
+/*
+ * PHASES C–F, one 24-second cycle per triplet, each starting eight seconds
+ * after the last: a triplet is picked out, its triangle draws, it is held
+ * long enough to read, and it fades as the next is chosen elsewhere on the
+ * fold. Only one is ever prominent.
+ */
+.triplet {
+  /* `--cycle` is set by the component from the number of triplets; the
+     fallback keeps this file readable on its own. */
+  --start: calc(2.6s + var(--turn) * 9s);
+}
+
+/*
+ * PHASE D — the triangle draws between the three selected α-carbons, then
+ * PHASE E holds it. `stroke-dasharray` is the polygon's own perimeter, so one
+ * "dash" is the whole outline and the offset draws it edge by edge.
+ */
 .triangle {
   fill: var(--color-primary);
-  fill-opacity: 0.04;
+  fill-opacity: 0.06;
   stroke: var(--color-primary);
-  stroke-width: 1.4;
+  stroke-width: 2.2;
   stroke-linejoin: round;
-  opacity: 0.42;
-  /* Drawn, not dashed: the offset is animated from one full perimeter to 0. */
+  opacity: 0;
   stroke-dashoffset: 0;
-  animation: tsr-triangle 21s ease-in-out infinite;
+  animation: tsr-triangle var(--cycle, 18s) linear infinite;
+  animation-delay: var(--start);
 }
 
-/*
- * Four different durations and four negative delays, so the cycle each
- * triangle is in has nothing to do with its neighbours' and the picture never
- * resets all at once. Negative delays also mean the page does not open on
- * four triangles drawing themselves in unison.
- */
-.triangles .triangle:nth-child(2) {
-  animation-duration: 26s;
-  animation-delay: -9s;
-}
-
-.triangles .triangle:nth-child(3) {
-  animation-duration: 18s;
-  animation-delay: -14s;
-}
-
-.triangles .triangle:nth-child(4) {
-  animation-duration: 24s;
-  animation-delay: -5s;
-}
-
-/*
- * One relationship is chosen, held long enough to be read, and let go while
- * another is being chosen elsewhere. The long plateau in the middle is the
- * point: the fade is the transition, not the event.
- */
 @keyframes tsr-triangle {
   0% {
     opacity: 0;
-    stroke-dashoffset: var(--tsr-outline);
+    stroke-dashoffset: var(--outline);
   }
-  14% {
-    opacity: 0.5;
+  4% {
+    opacity: 0.82;
+    stroke-dashoffset: var(--outline);
   }
-  34% {
-    opacity: 0.5;
+  20% {
+    opacity: 0.82;
     stroke-dashoffset: 0;
   }
-  66% {
-    opacity: 0.46;
+  /* Held: long enough to be understood as one relationship. */
+  33% {
+    opacity: 0.82;
     stroke-dashoffset: 0;
   }
-  86% {
-    opacity: 0.08;
+  40% {
+    opacity: 0;
+    stroke-dashoffset: 0;
   }
   100% {
     opacity: 0;
-    stroke-dashoffset: var(--tsr-outline);
+    stroke-dashoffset: var(--outline);
   }
 }
 
-/* ---- The points ---- */
-
-.dot {
+/*
+ * PHASE C — the three residues of the active triplet come forward slightly
+ * before their triangle is drawn, so the eye is told which points the
+ * relationship is between before the relationship appears.
+ */
+.selected {
   fill: var(--color-primary);
-  opacity: 0.55;
+  opacity: 0;
+  animation: tsr-selected var(--cycle, 18s) linear infinite;
+  animation-delay: var(--start);
 }
 
-.node:nth-child(4n) .dot {
-  fill: var(--color-accent);
-  opacity: 0.6;
-}
-
-.node:nth-child(3n) .dot {
-  opacity: 0.38;
-}
-
-/*
- * A ring on three points only, and never the same beat twice. A pulse on
- * every node is a starfield; on three of sixteen it reads as emphasis.
- */
-.ring {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 1;
-  opacity: 0.22;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: tsr-ring 9s ease-in-out infinite;
-}
-
-.node:nth-child(6) .ring {
-  animation-duration: 11.5s;
-  animation-delay: -4s;
-}
-
-.node:nth-child(7) .ring {
-  animation-duration: 13.5s;
-  animation-delay: -8s;
-}
-
-@keyframes tsr-ring {
-  0%,
+@keyframes tsr-selected {
+  0% {
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.85;
+  }
+  33% {
+    opacity: 0.85;
+  }
+  42% {
+    opacity: 0;
+  }
   100% {
-    opacity: 0.1;
-    transform: scale(0.86);
-  }
-  50% {
-    opacity: 0.28;
-    transform: scale(1.06);
+    opacity: 0;
   }
 }
 
 /*
- * Drift: a few pixels over twenty-odd seconds, which at this scale is barely
- * a movement at all — enough that the figure is alive if you watch it, not
- * enough to notice while reading. Transforms only, so no layout is involved.
+ * The ring is drawn on the residue's own centre and only ever scales about
+ * that centre, so however it pulses the point it marks — and the triangle
+ * corner sitting on it — stay exactly where they are.
  */
-.node {
+.selectedRing {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.1;
+  opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
-  animation: tsr-drift 22s ease-in-out infinite alternate;
+  animation: tsr-selected-ring var(--cycle, 18s) linear infinite;
+  animation-delay: var(--start);
 }
 
-.node:nth-child(2n) {
-  animation-duration: 27s;
-  animation-delay: -6s;
-}
-
-.node:nth-child(3n) {
-  animation-duration: 19s;
-  animation-delay: -11s;
-}
-
-.node:nth-child(5n) {
-  animation-duration: 31s;
-  animation-delay: -3s;
-}
-
-@keyframes tsr-drift {
-  from {
-    transform: translate(0, 0);
+@keyframes tsr-selected-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
   }
-  to {
-    transform: translate(4px, -5px);
+  3% {
+    opacity: 0.5;
+    transform: scale(0.85);
   }
-}
-
-/* Every other point drifts the other way, so the field does not slide. */
-.node:nth-child(2n) {
-  animation-name: tsr-drift-alt;
-}
-
-@keyframes tsr-drift-alt {
-  from {
-    transform: translate(0, 0);
+  10% {
+    opacity: 0.3;
+    transform: scale(1);
   }
-  to {
-    transform: translate(-5px, 4px);
+  33% {
+    opacity: 0.24;
+    transform: scale(1);
+  }
+  42% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.55);
   }
 }
 
 /* ---- Responsive simplification ---- */
 
 /*
- * Below the tablet breakpoint the left-hand cluster is not drawn at all —
- * four points, five relationships and one triangle fewer — and what remains
- * is the right-hand group, which is the part the crop keeps anyway. The
- * alternative, the same figure scaled down behind the text, is how a hero
- * graphic ends up fighting its own heading.
+ * On a phone the figure keeps the protein and one relationship. Half the
+ * residue points and two of the three triplets are not drawn at all, the
+ * whole thing is enlarged and cropped to the right of the text rather than
+ * shrunk to fit beside it, and the sway is dropped — at that size it is
+ * movement without a picture to read.
  */
 @media (max-width: 767px) {
-  .wideOnly {
+  .residue:nth-child(2n) {
     display: none;
   }
 
-  /*
-   * On a phone the figure takes the column of empty space to the right of the
-   * text — where the lines end — for the full height of the band, and is
-   * enlarged and cropped rather than shrunk to fit. Fitting the whole drawing
-   * into a narrow column produced a scattering of dots too small to read as
-   * anything; this shows less of the composition at a size where the part
-   * that is shown is still recognisably points and triangles.
-   */
+  .triplet:not(.primaryTriplet) {
+    display: none;
+  }
+
+  .structure {
+    animation: none;
+  }
+
   .layer {
-    width: 58%;
-    /* Weighted harder to the right than on a wide screen: a phone's lines of
-       text run almost to the edge, so the figure is kept to the last quarter
-       of the band where nothing is set. */
+    width: 62%;
+    /*
+     * The mask still clears the text completely — everything left of about
+     * two fifths is gone — but what survives on the right is drawn at close
+     * to full strength. At a phone's line lengths a figure faint enough to be
+     * safe everywhere is a figure nobody can see at all, so the safety comes
+     * from where it is, not from how faint it is.
+     */
     -webkit-mask-image: linear-gradient(
       to right,
       transparent 0%,
-      rgba(0, 0, 0, 0.16) 46%,
-      #000 88%
+      rgba(0, 0, 0, 0.12) 42%,
+      #000 80%
     );
     mask-image: linear-gradient(
       to right,
       transparent 0%,
-      rgba(0, 0, 0, 0.16) 46%,
-      #000 88%
+      rgba(0, 0, 0, 0.12) 42%,
+      #000 80%
     );
-    opacity: 0.62;
+    opacity: 0.9;
   }
 
   /* The CSS equivalent of `slice`, which is an attribute and cannot be set
-     per breakpoint: enlarge, anchor to the right, let the layer crop. */
+     per breakpoint: enlarge, anchor to the right, let the layer crop. A
+     smaller factor than it looks — enough to keep the residues and their
+     triangle legible without cropping the fold down to a corner. */
   .figure {
-    transform: scale(1.9);
+    transform: scale(1.4);
     transform-origin: 100% 50%;
   }
 }
@@ -302,17 +327,48 @@
 /* ---- Reduced motion ---- */
 
 /*
- * Everything stops; nothing disappears. The base rules above already describe
- * a finished drawing — triangles at 0.42 opacity and fully drawn, rings and
- * points at their resting values — so removing the animations leaves the
- * identity intact rather than an empty band. `animation: none` rather than a
- * shortened duration, so no element can be caught part-way through a cycle.
+ * A composition, not a frozen frame: the fold, its residues, and one
+ * completed TSR triangle with its three residues marked. Nothing draws,
+ * nothing pulses, nothing sways, and nothing is left at zero opacity waiting
+ * for a keyframe that will not run — the two spare triplets are removed
+ * outright rather than hidden, because one clear relationship is the whole
+ * point being made.
  */
 @media (prefers-reduced-motion: reduce) {
-  .edges line,
+  .structure,
+  .backbone,
+  .backboneNear,
+  .residue,
   .triangle,
-  .ring,
-  .node {
+  .selected,
+  .selectedRing {
     animation: none;
+  }
+
+  .backbone,
+  .backboneNear {
+    stroke-dashoffset: 0;
+  }
+
+  .residue {
+    opacity: var(--residue-depth);
+  }
+
+  .triplet:not(.primaryTriplet) {
+    display: none;
+  }
+
+  .primaryTriplet .triangle {
+    opacity: 0.82;
+    stroke-dashoffset: 0;
+  }
+
+  .primaryTriplet .selected {
+    opacity: 0.85;
+  }
+
+  .primaryTriplet .selectedRing {
+    opacity: 0.26;
+    transform: scale(1);
   }
 }

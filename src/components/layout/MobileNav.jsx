@@ -53,13 +53,29 @@ export default function MobileNav({ items }) {
   useFocusTrap(drawerRef, isOpen)
 
   /*
+   * Where the page was when the user dismissed the drawer, or null when it
+   * closed for any other reason. Read once by the scroll lock's cleanup —
+   * see the effect below for why it is a ref and not state.
+   */
+  const restoreScrollTo = useRef(null)
+
+  /*
    * Dismissal by the user: close and hand focus back to the button they
    * opened it with. Closing because the route changed is handled separately
    * below — there, focus belongs on the new page, not back up in the header.
+   *
+   * `preventScroll` is the important half. `focus()` asks the browser to
+   * reveal the element, and the browser obliges by scrolling the document —
+   * which is how closing the menu moved the page a little each time. The
+   * toggle is in a sticky header and is therefore already on screen, so
+   * there is never anything to reveal: the request can only ever do harm.
+   * Focus still moves, which is what a keyboard user needs; the page does
+   * not, which is what everyone else notices.
    */
   const dismiss = useCallback(() => {
+    restoreScrollTo.current = window.scrollY
     setIsOpen(false)
-    toggleRef.current?.focus()
+    toggleRef.current?.focus({ preventScroll: true })
   }, [])
 
   /*
@@ -90,14 +106,41 @@ export default function MobileNav({ items }) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, dismiss])
 
-  // Stop the page behind the drawer from scrolling.
+  /*
+   * Stop the page behind the drawer from scrolling, and put it back exactly
+   * where it was.
+   *
+   * The lock itself is unchanged — one property, restored to whatever it was
+   * before. What is new is the check on the way out: taking `overflow:
+   * hidden` off a scrolled document is a layout change, and a browser is
+   * entitled to settle the scroll position differently afterwards. This
+   * compares where the page ended up with where it was when the user reached
+   * for the close, and corrects it only if they differ, so in the normal case
+   * — the browser holding its position, which is most of them — this does
+   * nothing at all. No timer, no guessing: a comparison and, at most, one
+   * assignment.
+   *
+   * It runs ONLY for a dismissal. When the drawer closes because a link was
+   * followed, `restoreScrollTo` is null and this leaves the scroll position
+   * alone, so ScrollToTop can take the reader to the top of the new page as
+   * it always has. Restoring the old offset there would be a bug, not a fix.
+   */
   useEffect(() => {
     if (!isOpen) return
 
-    const previous = document.body.style.overflow
+    const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+
     return () => {
-      document.body.style.overflow = previous
+      document.body.style.overflow = previousOverflow
+
+      const target = restoreScrollTo.current
+      restoreScrollTo.current = null
+
+      if (target === null) return
+      if (Math.round(window.scrollY) === Math.round(target)) return
+
+      window.scrollTo({ top: target, left: window.scrollX, behavior: 'instant' })
     }
   }, [isOpen])
 

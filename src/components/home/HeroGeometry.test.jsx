@@ -7,6 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 import App from '../../app/App'
 import Hero from './Hero'
 import { home } from '../../content'
+import { ALPHA_CARBONS } from './ubiquitin'
 import { siteConfig } from '../../app/siteConfig'
 import { setReducedMotion } from '../../test/viewport'
 
@@ -127,49 +128,93 @@ describe('the figure is decoration and nothing else', () => {
   })
 })
 
-describe('the figure with animation switched off', () => {
-  it('still draws the geometry rather than an empty band', () => {
+describe('the figure is built from the real structure', () => {
+  it('draws its triangles between actual α-carbons of the fold', () => {
     /*
-     * The failure this guards is a decorative layer that starts at opacity 0
-     * and waits for an animation that reduced motion has removed. Nothing
-     * here may be hidden inline: the visible state is the base state, and the
-     * stylesheet only cycles around it.
+     * The claim the figure makes is that this is ubiquitin and these are
+     * spatial relationships between its residues. That claim is only true if
+     * every corner is a real α-carbon, so it is checked rather than trusted:
+     * each vertex must be a point in the derived structure, not a coordinate
+     * someone typed to make a nice shape.
      */
-    setReducedMotion(true)
     const { container } = renderHero()
 
-    const svg = figureLayer(container).querySelector('svg')
+    const known = new Set(ALPHA_CARBONS.map(([x, y]) => `${x},${y}`))
+    const polygons = [...figureLayer(container).querySelectorAll('polygon')]
 
-    expect(svg.querySelectorAll('polygon').length).toBeGreaterThanOrEqual(3)
-    expect(svg.querySelectorAll('line').length).toBeGreaterThanOrEqual(8)
-    expect(svg.querySelectorAll('circle').length).toBeGreaterThanOrEqual(12)
+    expect(polygons.length).toBeGreaterThanOrEqual(1)
 
-    for (const shape of svg.querySelectorAll('polygon, line, circle')) {
-      expect(shape.style.opacity, shape.tagName).not.toBe('0')
-      expect(shape.style.display, shape.tagName).not.toBe('none')
-      expect(shape.getAttribute('visibility')).not.toBe('hidden')
+    for (const polygon of polygons) {
+      const vertices = polygon.getAttribute('points').split(' ')
+      expect(vertices).toHaveLength(3)
+      for (const vertex of vertices) {
+        expect(known.has(vertex), vertex).toBe(true)
+      }
+    }
+  })
+
+  it('marks every triangle corner with the residue it is drawn from', () => {
+    /*
+     * The invariant that replaces the old figure's worst artifact: a corner
+     * and its residue are not two things kept in step, they are one
+     * coordinate used twice. Nothing in this component can move one without
+     * the other, and this is what says so.
+     */
+    const { container } = renderHero()
+
+    for (const triplet of figureLayer(container).querySelectorAll(
+      'g[class*="triplet"]',
+    )) {
+      const vertices = triplet
+        .querySelector('polygon')
+        .getAttribute('points')
+        .split(' ')
+
+      const markers = new Set(
+        [...triplet.querySelectorAll('circle')].map(
+          (circle) =>
+            `${circle.getAttribute('cx')},${circle.getAttribute('cy')}`,
+        ),
+      )
+
+      for (const vertex of vertices) {
+        expect(markers.has(vertex), vertex).toBe(true)
+      }
+    }
+  })
+
+  it('gives no element its own transform to drift with', () => {
+    /*
+     * Movement belongs to the structure as a whole. The one exception is the
+     * ring around a selected residue, which scales about its own centre — the
+     * centre being the residue, so it cannot take the point anywhere.
+     */
+    const { container } = renderHero()
+
+    for (const element of figureLayer(container).querySelectorAll(
+      'path, polygon, circle',
+    )) {
+      const className = element.getAttribute('class') ?? ''
+      if (className.includes('selectedRing')) continue
+      expect(element.style.transform, className).toBeFalsy()
+      expect(element.getAttribute('transform'), className).toBeNull()
     }
   })
 
   it('draws triangles that are properly scalene', () => {
     /*
-     * Not a coordinate test — a meaning test. TSR keys exist because the
-     * three sides of a triangle differ; a row of equilateral triangles would
-     * illustrate the wrong idea, however pretty it looked. Each triangle's
-     * longest side must be clearly longer than its shortest.
+     * Not a coordinate test — a meaning test. A TSR key is distinctive
+     * because the three sides of the triangle differ; the derivation script
+     * selects triplets on exactly that basis, and this holds the shipped
+     * figure to it.
      */
     const { container } = renderHero()
 
-    const polygons = [...figureLayer(container).querySelectorAll('polygon')]
-    expect(polygons.length).toBeGreaterThanOrEqual(3)
-
-    for (const polygon of polygons) {
+    for (const polygon of figureLayer(container).querySelectorAll('polygon')) {
       const points = polygon
         .getAttribute('points')
         .split(' ')
         .map((pair) => pair.split(',').map(Number))
-
-      expect(points).toHaveLength(3)
 
       const [a, b, c] = points
       const side = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1])
@@ -177,6 +222,57 @@ describe('the figure with animation switched off', () => {
 
       expect(sides[2] / sides[0]).toBeGreaterThan(1.4)
       expect(sides[1] / sides[0]).toBeGreaterThan(1.15)
+      /* Mutually different, not merely the extremes. */
+      expect(sides[2] / sides[1]).toBeGreaterThan(1.1)
     }
+  })
+})
+
+describe('the figure with animation switched off', () => {
+  it('still shows the protein, its residues and one finished triangle', () => {
+    /*
+     * The reduced-motion composition has to be a picture in its own right —
+     * the fold, the points a key is built from, and one completed
+     * relationship — rather than an animation stopped halfway. Nothing may be
+     * hidden inline: the visible state is the base state, and the stylesheet
+     * only cycles around it.
+     */
+    setReducedMotion(true)
+    const { container } = renderHero()
+
+    const svg = figureLayer(container).querySelector('svg')
+
+    /* The structure: a backbone trace and its residue points. */
+    expect(svg.querySelectorAll('path').length).toBeGreaterThanOrEqual(1)
+    expect(svg.querySelectorAll('circle').length).toBeGreaterThanOrEqual(12)
+    /* At least one relationship to read. */
+    expect(svg.querySelectorAll('polygon').length).toBeGreaterThanOrEqual(1)
+
+    for (const shape of svg.querySelectorAll('path, polygon, circle')) {
+      expect(shape.style.opacity, shape.tagName).not.toBe('0')
+      expect(shape.style.display, shape.tagName).not.toBe('none')
+      expect(shape.getAttribute('visibility')).not.toBe('hidden')
+    }
+  })
+
+  it('marks exactly one triplet as the one shown when nothing animates', () => {
+    /*
+     * Reduced motion keeps one relationship and drops the rest, so which one
+     * has to be named rather than found by position — a positional selector
+     * would have matched the residues group instead and left the still with
+     * no triangle at all.
+     */
+    const { container } = renderHero()
+
+    const triplets = [
+      ...figureLayer(container).querySelectorAll('g[class*="triplet"]'),
+    ]
+    const primary = triplets.filter((group) =>
+      (group.getAttribute('class') ?? '').includes('primaryTriplet'),
+    )
+
+    expect(triplets.length).toBeGreaterThanOrEqual(1)
+    expect(primary).toHaveLength(1)
+    expect(primary[0]).toBe(triplets[0])
   })
 })
