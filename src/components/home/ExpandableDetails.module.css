@@ -56,7 +56,60 @@
   border-color: var(--color-primary);
 }
 
+/*
+ * The panel grows its row from nothing to whatever the content needs, which
+ * `grid-template-rows: 0fr → 1fr` does without measuring anything. `height:
+ * auto` cannot be animated at all, a measured pixel height goes stale the
+ * moment the text reflows or a font finishes loading, and max-height either
+ * clips a long panel or makes a short one feel slow.
+ *
+ * The content inside is never hidden while the panel is open: `overflow`
+ * belongs to this element, which is fully expanded once the animation ends,
+ * so nothing is clipped, unselectable or out of reach at rest.
+ */
+.panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  /*
+   * NO FILL MODE, deliberately: `both` holds the animation's first frame —
+   * a panel collapsed to nothing — until the animation runs, and a browser
+   * does not run animations in a document it is not rendering. The rules
+   * above are the resting state; this only describes the arrival.
+   */
+  animation: details-panel-in var(--motion-slow) var(--motion-ease);
+}
+
+@keyframes details-panel-in {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+/*
+ * Collapsing has its own keyframes rather than playing the entrance in
+ * reverse, because `animation-direction: reverse` reverses the easing as
+ * well — which turned a decelerating open into a close that sat still and
+ * then snapped shut. `forwards` holds the collapsed frame for the moment
+ * between the animation ending and the element being closed.
+ */
+.leaving {
+  animation: details-panel-out var(--motion-slow) var(--motion-ease) forwards;
+}
+
+@keyframes details-panel-out {
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+
 .content {
+  overflow: hidden;
   margin-top: var(--space-4);
   padding-left: var(--space-4);
   border-left: 2px solid var(--color-border);
@@ -69,4 +122,17 @@
 
 .content p + p {
   margin-top: var(--space-3);
+}
+
+/*
+ * Reduced motion: the panel still opens and closes, it just does so at once.
+ * `animation: none` also tells useExitTransition there is nothing to wait
+ * for, so the collapse is instant rather than held open for an event that
+ * will never arrive.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .leaving {
+    animation: none;
+  }
 }

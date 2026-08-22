@@ -80,6 +80,7 @@
    */
   --motion-fast: 150ms; /* colour and small state changes */
   --motion-base: 220ms; /* card lift, page entrance */
+  --motion-slow: 300ms; /* a panel of content expanding or collapsing */
   --motion-reveal: 420ms; /* scroll reveal */
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --card-lift: -2px; /* how far an interactive card rises under a pointer */

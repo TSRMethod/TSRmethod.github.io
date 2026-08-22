@@ -38,11 +38,41 @@
  * The sizes below are therefore written to stand on their own: nothing here
  * depends on where the element sits in the document.
  */
+/*
+ * Both halves of the modal layer animate with keyframes rather than
+ * transitions, and the reason is mounting: a transition needs the element to
+ * exist in its "before" state for a frame before the class changes, which
+ * means a double requestAnimationFrame dance and a frame of the wrong state
+ * if you get it wrong. An animation simply runs when the element appears.
+ *
+ * `--motion-base` and `--motion-ease` are the site's own, so this is the same
+ * gesture as a card lifting or a page arriving — 220ms, decelerating hard at
+ * the end, no overshoot and no scaling.
+ */
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: 90;
   background-color: rgba(31, 41, 51, 0.5);
+  /*
+   * NO FILL MODE. `both` would hold the animation's first frame — a
+   * transparent scrim, a drawer parked off-screen, a collapsed panel — before
+   * the animation starts, and a browser does not start animations in a
+   * document it is not rendering. An element that mounts in a background tab
+   * would then be stuck in its "from" state, invisible, with nothing to bring
+   * it back. The rules above are the resting state; the animation only
+   * describes how it arrives.
+   */
+  animation: mobile-nav-scrim-in var(--motion-base) var(--motion-ease);
+}
+
+@keyframes mobile-nav-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .drawer {
@@ -73,6 +103,66 @@
   overscroll-behavior: contain;
   background-color: var(--color-background);
   box-shadow: var(--shadow-md);
+
+  /* In from the right, which is the edge it is anchored to. */
+  animation: mobile-nav-drawer-in var(--motion-base) var(--motion-ease);
+}
+
+@keyframes mobile-nav-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/*
+ * On the way out.
+ *
+ * Its own keyframes, played forwards, rather than the entrance reversed:
+ * `animation-direction: reverse` reverses the easing too, which turned a
+ * decelerating open into a close that sat still and then snapped. Written
+ * out, both directions use the site's own easing and behave the same way.
+ *
+ * `forwards` holds the last frame — off-screen, transparent — for the moment
+ * between the animation ending and React removing the element.
+ */
+.drawer.leaving {
+  animation: mobile-nav-drawer-out var(--motion-base) var(--motion-ease) forwards;
+  /* Nothing on its way out should take a click meant for the page beneath. */
+  pointer-events: none;
+}
+
+.backdrop.leaving {
+  animation: mobile-nav-scrim-out var(--motion-base) var(--motion-ease) forwards;
+  pointer-events: none;
+}
+
+.panel.leaving {
+  animation: mobile-nav-panel-out var(--motion-base) var(--motion-ease) forwards;
+}
+
+@keyframes mobile-nav-drawer-out {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes mobile-nav-scrim-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes mobile-nav-panel-out {
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
 }
 
 .list {
@@ -122,8 +212,37 @@
 
 /* ---- Accordion panel ---- */
 
+/*
+ * The accordion opens by growing its row from nothing to its content's
+ * height, which `grid-template-rows: 0fr → 1fr` does without anyone measuring
+ * anything. The alternatives are all worse: `height: auto` cannot be
+ * animated, a measured pixel height goes stale the moment the text reflows or
+ * a font loads, and max-height guesses either clip long panels or make short
+ * ones look sluggish.
+ *
+ * The inner element carries `overflow: hidden`, because that is what makes
+ * the row a window onto the content rather than a squashed copy of it.
+ */
 .panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: mobile-nav-panel-in var(--motion-base) var(--motion-ease);
+}
+
+.panelInner {
+  overflow: hidden;
   padding: var(--space-2) 0 var(--space-3);
+}
+
+@keyframes mobile-nav-panel-in {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
 }
 
 .group + .group {
@@ -168,4 +287,26 @@
   font-weight: 700;
   color: var(--color-primary);
   background-color: var(--color-primary-light);
+}
+
+/*
+ * Reduced motion: the drawer and its sections still open and close, they just
+ * do it at once. `animation: none` rather than a shortened duration, so no
+ * element can be caught part-way through — and useExitTransition asks the
+ * element whether it is going to animate before it waits for one, so with
+ * this rule in force the drawer is removed immediately instead of lingering.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .drawer,
+  .panel,
+  .drawer.leaving,
+  .backdrop.leaving,
+  .panel.leaving {
+    animation: none;
+  }
+
+  .chevron {
+    transition: none;
+  }
 }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink, useLocation } from 'react-router-dom'
 import useFocusTrap from '../../hooks/useFocusTrap'
+import useExitTransition from '../../hooks/useExitTransition'
 import styles from './MobileNav.module.css'
 
 const DRAWER_ID = 'mobile-nav-drawer'
@@ -49,6 +50,15 @@ export default function MobileNav({ items }) {
   const toggleRef = useRef(null)
   const drawerRef = useRef(null)
   const { pathname } = useLocation()
+
+  /*
+   * The drawer slides out rather than disappearing, so it stays mounted for
+   * one phase after it closes. Everything else — the focus trap, the scroll
+   * lock, focus restoration — keys off `isOpen` and therefore lets go at the
+   * moment of dismissal, not at the end of the animation. The panel on its
+   * way out is scenery: inert, unfocusable, and holding nothing open.
+   */
+  const drawer = useExitTransition(isOpen, drawerRef)
 
   useFocusTrap(drawerRef, isOpen)
 
@@ -173,7 +183,7 @@ export default function MobileNav({ items }) {
         {isOpen ? 'Close' : 'Menu'}
       </button>
 
-      {isOpen &&
+      {drawer.isMounted &&
         createPortal(
           <>
             {/*
@@ -182,7 +192,12 @@ export default function MobileNav({ items }) {
               does not need to be a focusable control.
             */}
             <div
-              className={styles.backdrop}
+              className={[
+                styles.backdrop,
+                drawer.isExiting ? styles.leaving : null,
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onClick={dismiss}
               aria-hidden="true"
             />
@@ -190,10 +205,19 @@ export default function MobileNav({ items }) {
             <div
               id={DRAWER_ID}
               ref={drawerRef}
-              className={styles.drawer}
+              className={[styles.drawer, drawer.isExiting ? styles.leaving : null]
+                .filter(Boolean)
+                .join(' ')}
               role="dialog"
               aria-modal="true"
               aria-label="Site menu"
+              /*
+               * While it is leaving it is a picture of a menu: out of the
+               * accessibility tree, unfocusable and unclickable. `inert` says
+               * all three to the browser, rather than to a stylesheet that
+               * may not have loaded.
+               */
+              inert={drawer.isExiting || undefined}
             >
               <nav aria-label="Main">
                 <ul className={styles.list}>
@@ -238,6 +262,10 @@ export default function MobileNav({ items }) {
 /* A collapsible section inside the drawer. */
 function AccordionItem({ item, isOpen, onToggle }) {
   const panelId = `mobile-nav-${item.id}-panel`
+  const panelRef = useRef(null)
+  /* Same treatment as the drawer: the section stays in the tree while it
+     collapses, and is taken out when the browser says the animation is over. */
+  const panel = useExitTransition(isOpen, panelRef)
 
   return (
     <li>
@@ -269,28 +297,36 @@ function AccordionItem({ item, isOpen, onToggle }) {
         </svg>
       </button>
 
-      {isOpen && (
-        <div id={panelId} className={styles.panel}>
-          {item.groups.map((group) => {
-            const groupLabelId = `mobile-nav-${item.id}-${group.id}-label`
+      {panel.isMounted && (
+        <div
+          id={panelId}
+          ref={panelRef}
+          className={[styles.panel, panel.isExiting ? styles.leaving : null]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <div className={styles.panelInner}>
+            {item.groups.map((group) => {
+              const groupLabelId = `mobile-nav-${item.id}-${group.id}-label`
 
-            return (
-              <div key={group.id} className={styles.group}>
-                <span id={groupLabelId} className={styles.groupLabel}>
-                  {group.label}
-                </span>
-                <ul className={styles.groupList} aria-labelledby={groupLabelId}>
-                  {group.items.map((link) => (
-                    <li key={link.id}>
-                      <NavLink to={link.to} className={styles.panelLink}>
-                        {link.label}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          })}
+              return (
+                <div key={group.id} className={styles.group}>
+                  <span id={groupLabelId} className={styles.groupLabel}>
+                    {group.label}
+                  </span>
+                  <ul className={styles.groupList} aria-labelledby={groupLabelId}>
+                    {group.items.map((link) => (
+                      <li key={link.id}>
+                        <NavLink to={link.to} className={styles.panelLink}>
+                          {link.label}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </li>
