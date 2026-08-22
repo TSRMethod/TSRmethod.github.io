@@ -34,7 +34,7 @@ function renderHero() {
 
 /** The decorative layer: the one element in the hero hidden from the tree. */
 const figureLayer = (container) =>
-  container.querySelector('section > div[aria-hidden="true"]')
+  container.querySelector('section div[aria-hidden="true"]')
 
 describe('the hero still says what it said', () => {
   it('keeps the group name as the page heading', () => {
@@ -106,6 +106,29 @@ describe('the figure is decoration and nothing else', () => {
     expect(
       figureLayer(container).querySelectorAll('a, button, [tabindex], input'),
     ).toHaveLength(0)
+  })
+
+  it('says what the drawing is, in text anyone can read', () => {
+    /*
+     * The caption is the one part of the figure that is NOT decorative: it
+     * credits a real structure, which is worth as much to someone using a
+     * screen reader as to anyone looking at it. So it lives outside the
+     * aria-hidden layer, and it is ordinary text — no role, no label, nothing
+     * to interact with.
+     */
+    const { container } = renderHero()
+
+    const caption = screen.getByText(
+      'Based on the real 1UBQ ubiquitin structure and its Cα coordinates.',
+    )
+
+    expect(caption).toBeInTheDocument()
+    expect(caption.closest('[aria-hidden="true"]')).toBeNull()
+    expect(caption.getAttribute('role')).toBeNull()
+    expect(caption.querySelectorAll('a, button, [tabindex]')).toHaveLength(0)
+    /* Below the drawing, inside the same region, not out in the hero text. */
+    expect(figureLayer(container).compareDocumentPosition(caption) &
+      Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('adds no text, image or landmark to the hero', () => {

@@ -8,12 +8,35 @@
  * caught halfway.
  */
 
-.layer {
+/*
+ * The whole right-hand figure: the drawing and the line that says what it is.
+ *
+ * One positioned box holds both, which is what makes the caption belong to
+ * the graphic rather than float near it — it is the same column, ending where
+ * the drawing ends, at every width. `--hero-intro` is declared here so the
+ * trace and the caption cannot drift apart: they read their duration from the
+ * same place, and changing the pace of one changes both.
+ */
+.region {
+  --hero-intro: 2.4s;
+
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
   width: min(58%, 46rem);
+  display: flex;
+  flex-direction: column;
+  /* Decorative and non-interactive as a whole; the caption opts back in below
+     so it can still be selected and copied. */
+  pointer-events: none;
+}
+
+.layer {
+  /* Fills the column above the caption. */
+  position: relative;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   /* Decorative: never takes a click meant for the hero's own links. */
   pointer-events: none;
@@ -41,6 +64,40 @@
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/*
+ * A caption, not a callout: small, muted, and set hard against the right edge
+ * under the drawing. No border, no card, no badge — the hero is a page of
+ * type with a figure on it, and this is the figure's label.
+ *
+ * It fades in over exactly the same window as the trace draws itself, from
+ * the same custom property, so the two arrive as one thing rather than as a
+ * picture followed by a line of text. Opacity only.
+ *
+ * NO FILL MODE, for the reason the rest of this file gives: `both` would hold
+ * the animation's first frame — a caption at zero opacity — until the
+ * animation runs, and a browser does not run animations in a document it is
+ * not rendering. The rule below is the resting state; the keyframe only
+ * describes the arrival.
+ */
+.caption {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-5);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+  text-align: right;
+  opacity: 1;
+  /* Selectable, unlike the drawing above it. */
+  pointer-events: auto;
+  animation: hero-caption-in var(--hero-intro) var(--motion-ease);
+}
+
+@keyframes hero-caption-in {
+  from {
+    opacity: 0;
+  }
 }
 
 /* ---- The structure ---- */
@@ -80,7 +137,7 @@
   stroke-linejoin: round;
   stroke-dasharray: 7000;
   stroke-dashoffset: 0;
-  animation: tsr-trace 2.4s ease-out both;
+  animation: tsr-trace var(--hero-intro) ease-out both;
 }
 
 /*
@@ -290,8 +347,19 @@
     animation: none;
   }
 
+  /*
+   * On a phone the column runs the full width while the DRAWING keeps to the
+   * right of it. That split is what the caption needs: given only the
+   * drawing's 62% it wrapped onto four lines and ran into the buttons, and at
+   * full width it is two lines sitting clear beneath everything.
+   */
+  .region {
+    width: 100%;
+  }
+
   .layer {
     width: 62%;
+    align-self: flex-end;
     /*
      * The mask still clears the text completely — everything left of about
      * two fifths is gone — but what survives on the right is drawn at close
@@ -341,7 +409,8 @@
   .residue,
   .triangle,
   .selected,
-  .selectedRing {
+  .selectedRing,
+  .caption {
     animation: none;
   }
 

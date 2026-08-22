@@ -13,6 +13,20 @@
   padding-block: var(--space-7);
 }
 
+/*
+ * Room at the foot of the band for the figure's caption, which is laid over
+ * the hero rather than sitting in its flow.
+ *
+ * Only on a phone. On a wide screen the caption occupies space the figure
+ * already had to itself; below the tablet breakpoint the text runs the full
+ * width, and without this the calls to action would meet it.
+ */
+@media (max-width: 767px) {
+  .hero {
+    padding-bottom: calc(var(--space-7) + 2.75rem);
+  }
+}
+
 /* Above the figure, and the only thing in the band that can be interacted
    with — the decorative layer sets `pointer-events: none`. */
 .inner {
