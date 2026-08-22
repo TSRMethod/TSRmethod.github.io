@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Local environment values. The example file is tracked; real values are not —
+# see .env.example and docs/ANALYTICS.md.
+.env
+.env.*
+!.env.example
+
 # Editor and AI-assistant tooling.
 # The project is tool-neutral: `npm run dev` is the documented workflow and no
 # assistant-specific config is tracked here.

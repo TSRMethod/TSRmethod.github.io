@@ -4,6 +4,7 @@ import { siteConfig, mailtoHref } from '../../app/siteConfig'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import { CONTACT_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
+import { EVENTS, trackEvent } from '../../lib/analytics'
 import styles from './ContactCta.module.css'
 
 const CONTACT_PATH = '/contact'
@@ -27,12 +28,21 @@ export default function ContactCta({ tone }) {
     <HomeSection id={CONTACT_SECTION_ID} heading={heading} tone={tone}>
       <p className={styles.body}>{body}</p>
       <p className={styles.action}>
-        <a className={styles.button} href={mailtoHref('TSR enquiry')}>
+        <a
+          className={styles.button}
+          href={mailtoHref('TSR enquiry')}
+          onClick={() => trackEvent(EVENTS.contact, { contact_type: 'email' })}
+        >
           {cta}
         </a>
       </p>
       <p className={styles.address}>
-        <a href={mailtoHref()}>{siteConfig.email}</a>
+        <a
+          href={mailtoHref()}
+          onClick={() => trackEvent(EVENTS.contact, { contact_type: 'email' })}
+        >
+          {siteConfig.email}
+        </a>
       </p>
       {/*
        * Appeared on its own when Stage 8 built the page: the gate is asked, so

@@ -8,6 +8,8 @@ import {
 import { isRouteImplemented } from '../../app/routeRegistry'
 import { PUBLICATIONS_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
+import Reveal from '../shared/Reveal'
+import { EVENTS, trackEvent } from '../../lib/analytics'
 import styles from './PublicationHighlights.module.css'
 
 const PUBLICATIONS_PATH = '/publications'
@@ -53,12 +55,17 @@ export default function PublicationHighlights({ tone }) {
       }
     >
       <ul className={styles.list}>
-        {recent.map((publication) => {
+        {recent.map((publication, index) => {
           const url = doiUrl(publication.doi)
           const citation = formatPublicationCitation(publication)
 
           return (
-            <li key={publication.id} className={styles.publication}>
+            <Reveal
+              as="li"
+              key={publication.id}
+              index={index}
+              className={styles.publication}
+            >
               <h3 className={styles.title}>{publication.title}</h3>
               <p className={styles.authors}>
                 {shortAuthors(publication.authors)}
@@ -66,7 +73,17 @@ export default function PublicationHighlights({ tone }) {
               {citation && <p className={styles.citation}>{citation}</p>}
               {url && (
                 <p className={styles.doi}>
-                  <a href={url} target="_blank" rel="noopener noreferrer">
+                  <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    trackEvent(EVENTS.publicationLink, {
+                      publication_id: publication.id,
+                      link_type: 'doi',
+                    })
+                  }
+                >
                     doi.org/{publication.doi}
                     <span className="visually-hidden">
                       {` — ${publication.title} (opens in a new tab)`}
@@ -74,7 +91,7 @@ export default function PublicationHighlights({ tone }) {
                   </a>
                 </p>
               )}
-            </li>
+            </Reveal>
           )
         })}
       </ul>

@@ -1,62 +1,55 @@
 import usePageMetadata from '../../hooks/usePageMetadata'
 import { pages, currentPeople, formerPeople } from '../../content'
 import OptimizedImage from '../../components/shared/OptimizedImage'
+import ProfileLinks from '../../components/people/ProfileLinks'
+import Reveal from '../../components/shared/Reveal'
 import styles from './People.module.css'
 
 /*
  * The group directory.
  *
- * Every optional field is conditional. The previous site printed "Phone:" and
- * "Email:" for nine people who had neither, and wrapped the empty address in a
- * `mailto:` link that went nowhere; the content loader now rejects an empty
- * value outright, and anything absent simply does not render here.
+ * A DIRECTORY, not a set of profiles. Each card answers "who is this and how
+ * do I reach them" — portrait, name, one role, the links that exist — and
+ * stops there. The biographies, affiliations and addresses are all still in
+ * the person records and still editable in the CMS; they are simply not what
+ * thirteen cards side by side should be made of. A paragraph on every card
+ * turned the page into a wall of text that nobody read to the end of.
+ *
+ * The email address is one of those things. It is now the accessible name of
+ * a mail icon rather than a line of text repeated down the page, so the page
+ * is shorter, the address is still one click away, and it is no longer
+ * sitting in the HTML as plain text for a scraper to lift in bulk.
  *
  * Phone numbers are not shown at all. They are not part of the person schema,
  * and a group directory is not the place to publish direct personal lines —
  * the site has one shared contact address for that.
  */
 
-function Person({ person }) {
+function Person({ person, index }) {
   return (
-    <li className={styles.person}>
-      {/*
-       * Photo and name form one row; the biography runs the full width of the
-       * card beneath them. Two flat blocks rather than a nested grid, so the
-       * card behaves the same whether or not the person has a photo.
-       */}
-      <div className={styles.identity}>
-        {person.photo && (
-          <OptimizedImage
-            className={styles.photo}
-            src={person.photo}
-            alt={`Portrait of ${person.name}`}
-            sizes="6.5rem"
-          />
-        )}
-        <div className={styles.naming}>
-          <h3 className={styles.name}>{person.name}</h3>
-          <p className={styles.role}>{person.role}</p>
-          {person.affiliation && (
-            <p className={styles.affiliation}>{person.affiliation}</p>
-          )}
-        </div>
-      </div>
-
-      {person.bio && <p className={styles.bio}>{person.bio}</p>}
-
-      {person.email && (
-        <p className={styles.contact}>
-          <a href={`mailto:${person.email}`}>
-            {/*
-             * The address is the link text, so the accessible name says who
-             * the mail goes to rather than repeating "Email" thirteen times.
-             */}
-            {person.email}
-            <span className="visually-hidden">{` — email ${person.name}`}</span>
-          </a>
-        </p>
+    <Reveal as="li" index={index} className={styles.person}>
+      {person.photo ? (
+        <OptimizedImage
+          className={styles.photo}
+          src={person.photo}
+          alt={`Portrait of ${person.name}`}
+          sizes="7.5rem"
+        />
+      ) : (
+        /*
+         * A plain tinted circle, not initials and not a stock silhouette: it
+         * holds the card's proportions steady when someone has no portrait
+         * yet, without inventing a likeness for them. Decorative, so it is
+         * hidden from assistive technology — the name is right below it.
+         */
+        <div className={styles.photoPlaceholder} aria-hidden="true" />
       )}
-    </li>
+
+      <h3 className={styles.name}>{person.name}</h3>
+      <p className={styles.role}>{person.role}</p>
+
+      <ProfileLinks person={person} />
+    </Reveal>
   )
 }
 
@@ -69,8 +62,8 @@ function PeopleSection({ id, heading, people }) {
         {heading}
       </h2>
       <ul className={styles.list}>
-        {people.map((person) => (
-          <Person key={person.id} person={person} />
+        {people.map((person, index) => (
+          <Person key={person.id} person={person} index={index} />
         ))}
       </ul>
     </section>

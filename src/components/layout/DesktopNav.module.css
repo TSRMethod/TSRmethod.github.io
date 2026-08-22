@@ -33,6 +33,7 @@
 /* Shared appearance for top-level links and dropdown triggers. */
 .link,
 .trigger {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -58,9 +59,41 @@
   background-color: var(--color-surface-raised);
 }
 
+/*
+ * The current page is marked by a rule that grows out from the centre of the
+ * label rather than by a filled pill, which would read as a button and set up
+ * a second, competing shape in a bar that is otherwise all text.
+ *
+ * Drawn as a ::after with a scale transform: transforms are composited, so the
+ * indicator costs nothing to animate, and because the link element itself
+ * stays mounted across a route change the browser has something to animate
+ * from. It is inset from the padding so it underlines the word, not the box.
+ */
+.link::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--color-primary);
+  transform: scaleX(0);
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+
 .linkActive {
   color: var(--color-primary);
-  box-shadow: inset 0 -2px 0 var(--color-primary);
+}
+
+.linkActive::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link::after {
+    transition: none;
+  }
 }
 
 .chevron {

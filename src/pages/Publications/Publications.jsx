@@ -5,6 +5,8 @@ import {
   formatPublicationCitation,
   doiUrl,
 } from '../../content'
+import Reveal from '../../components/shared/Reveal'
+import { EVENTS, trackEvent } from '../../lib/analytics'
 import styles from './Publications.module.css'
 
 /*
@@ -39,12 +41,12 @@ function yearLabel(year) {
   return year === null ? 'Undated' : String(year)
 }
 
-function Publication({ publication }) {
+function Publication({ publication, index }) {
   const citation = formatPublicationCitation(publication)
   const url = doiUrl(publication.doi)
 
   return (
-    <li className={styles.publication}>
+    <Reveal as="li" index={index} className={styles.publication}>
       <h3 className={styles.title}>{publication.title}</h3>
 
       {publication.authors?.length > 0 && (
@@ -62,7 +64,19 @@ function Publication({ publication }) {
 
       {url && (
         <p className={styles.doi}>
-          <a href={url} target="_blank" rel="noopener noreferrer">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              /* The record id, not the title: it is stable when a title is
+                 corrected, and it is what the publication file is named. */
+              trackEvent(EVENTS.publicationLink, {
+                publication_id: publication.id,
+                link_type: 'doi',
+              })
+            }
+          >
             {/*
              * The DOI itself is the link text: it is unique to this paper, so
              * a screen reader listing every link on the page gets one distinct
@@ -76,7 +90,7 @@ function Publication({ publication }) {
           </a>
         </p>
       )}
-    </li>
+    </Reveal>
   )
 }
 
@@ -104,8 +118,12 @@ export default function Publications() {
             {yearLabel(year)}
           </h2>
           <ul className={styles.list}>
-            {publications.map((publication) => (
-              <Publication key={publication.id} publication={publication} />
+            {publications.map((publication, index) => (
+              <Publication
+                key={publication.id}
+                publication={publication}
+                index={index}
+              />
             ))}
           </ul>
         </section>

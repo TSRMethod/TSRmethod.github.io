@@ -3,6 +3,7 @@ import { home, facultyPeople } from '../../content'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import { GROUP_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
+import Reveal from '../shared/Reveal'
 import OptimizedImage from '../shared/OptimizedImage'
 import styles from './GroupPreview.module.css'
 
@@ -36,8 +37,13 @@ export default function GroupPreview({ tone }) {
     >
       {facultyPeople.length > 0 && (
         <ul className={styles.list}>
-          {facultyPeople.map((person) => (
-            <li key={person.id} className={styles.person}>
+          {facultyPeople.map((person, index) => (
+            <Reveal
+              as="li"
+              key={person.id}
+              index={index}
+              className={styles.person}
+            >
               {person.photo && (
                 <OptimizedImage
                   className={styles.photo}
@@ -53,7 +59,7 @@ export default function GroupPreview({ tone }) {
                   <p className={styles.affiliation}>{person.affiliation}</p>
                 )}
               </div>
-            </li>
+            </Reveal>
           ))}
         </ul>
       )}

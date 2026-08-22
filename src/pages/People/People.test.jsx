@@ -12,6 +12,18 @@ function renderPeople() {
   )
 }
 
+/** Every person card on the page. */
+const cards = () =>
+  Array.from(screen.getByRole('main').querySelectorAll('li')).filter((li) =>
+    li.querySelector('h3'),
+  )
+
+/** The card belonging to one person, found by their name. */
+const cardFor = (person) =>
+  screen.getByRole('heading', { name: person.name }).closest('li')
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 describe('the people page', () => {
   it('renders at /people', () => {
     renderPeople()
@@ -88,7 +100,21 @@ describe('the people page', () => {
 
     for (const link of main.querySelectorAll('a[href^="mailto:"]')) {
       expect(link.getAttribute('href')).not.toBe('mailto:')
-      expect(link.textContent.trim()).not.toBe('')
+      /* Icon links carry their meaning as an accessible name, not as text. */
+      expect(link).toHaveAccessibleName()
+    }
+  })
+
+  it('leaves no profile link empty or pointing nowhere', () => {
+    renderPeople()
+
+    for (const card of cards()) {
+      for (const link of card.querySelectorAll('a')) {
+        const href = link.getAttribute('href')
+        expect(href, link.outerHTML).toBeTruthy()
+        expect(href).not.toMatch(/^(mailto:|https?:\/\/)?$/)
+        expect(link.getAttribute('aria-label')?.trim()).toBeTruthy()
+      }
     }
   })
 
@@ -106,6 +132,119 @@ describe('the people page', () => {
         .map((person) => person.email)
         .sort(),
     )
+  })
+
+  it('shows an address as an icon, never as a line of text on the card', () => {
+    /*
+     * The change this redesign is for. The address is still one click away —
+     * it is the href, and the accessible name says whose it is — but it is no
+     * longer printed thirteen times down the page, where it made the cards
+     * long and handed a scraper a tidy list.
+     */
+    renderPeople()
+
+    const main = screen.getByRole('main')
+
+    for (const person of people) {
+      if (!person.email) continue
+      expect(main.textContent, person.id).not.toContain(person.email)
+    }
+  })
+
+  it('renders an icon for each profile a person has, and none for the rest', () => {
+    renderPeople()
+
+    for (const person of people) {
+      const card = within(cardFor(person))
+
+      for (const [field, name] of [
+        ['email', `Email ${person.name}`],
+        ['scholar', `Google Scholar profile of ${person.name}`],
+        ['linkedin', `LinkedIn profile of ${person.name}`],
+      ]) {
+        const matcher = new RegExp(`^${escapeRegExp(name)}`)
+        const link = card.queryByRole('link', { name: matcher })
+
+        if (person[field]) {
+          expect(link, `${person.id}.${field}`).toBeInTheDocument()
+          expect(link).toHaveAttribute(
+            'href',
+            field === 'email' ? `mailto:${person.email}` : person[field],
+          )
+        } else {
+          expect(link, `${person.id}.${field}`).not.toBeInTheDocument()
+        }
+      }
+    }
+  })
+
+  it('names every profile link by its action and its person', () => {
+    /*
+     * Thirteen links called "Email" would be thirteen identical entries in a
+     * screen reader's link list. Each name says what it does and who it
+     * reaches, so the list stays usable on its own.
+     */
+    renderPeople()
+
+    for (const person of people) {
+      for (const link of cardFor(person).querySelectorAll('a')) {
+        const name = link.getAttribute('aria-label')
+        expect(name, person.id).toContain(person.name)
+        expect(name).toMatch(/^(Email|Google Scholar|LinkedIn)/)
+      }
+    }
+  })
+
+  it('opens external profiles safely in a new tab', () => {
+    renderPeople()
+
+    for (const person of people) {
+      for (const link of cardFor(person).querySelectorAll('a[href^="https:"]')) {
+        expect(link).toHaveAttribute('target', '_blank')
+        expect(link.getAttribute('rel')).toContain('noopener')
+        expect(link.getAttribute('aria-label')).toContain('opens in a new tab')
+      }
+    }
+  })
+
+  it('leaves the biography and affiliation off the card', () => {
+    /*
+     * Both are still in the records and still editable in the CMS — this
+     * asserts only that the public grid no longer prints them, which is what
+     * made the page a wall of text.
+     */
+    renderPeople()
+
+    /*
+     * Scoped to the cards, not to the page: the page's own introduction names
+     * the university, and that is editorial copy the CMS owns.
+     */
+    for (const person of people) {
+      const card = cardFor(person).textContent
+
+      if (person.bio) {
+        expect(card, `${person.id} bio`).not.toContain(person.bio.slice(0, 40))
+      }
+      if (person.affiliation) {
+        expect(card, `${person.id} affiliation`).not.toContain(
+          person.affiliation,
+        )
+      }
+    }
+  })
+
+  it('keeps the card to a portrait, a name, a role and its links', () => {
+    /* Structure rather than wording: nothing else may creep back onto it. */
+    renderPeople()
+
+    for (const person of people) {
+      const card = cardFor(person)
+      const paragraphs = card.querySelectorAll('p')
+
+      expect(paragraphs, person.id).toHaveLength(1)
+      expect(paragraphs[0].textContent).toBe(person.role)
+      expect(card.querySelectorAll('h3')).toHaveLength(1)
+    }
   })
 
   it('publishes no telephone number', () => {
@@ -127,8 +266,14 @@ describe('the people page', () => {
      */
     renderPeople()
 
-    for (const card of screen.getByRole('main').querySelectorAll('li')) {
-      expect(card.getAttribute('style')).toBeNull()
+    for (const card of cards()) {
+      /*
+       * A card may carry one inline custom property — its position in the
+       * reveal stagger. What it may never carry is a size: that comes from
+       * the grid, which is what lets the track collapse on a narrow screen.
+       */
+      const inline = card.getAttribute('style') ?? ''
+      expect(inline, card.textContent).not.toMatch(/(^|;)\s*(min-|max-)?width/)
       expect(card.parentElement.tagName).toBe('UL')
     }
   })

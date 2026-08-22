@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { siteConfig } from '../../app/siteConfig'
+import useScrolled from '../../hooks/useScrolled'
 import Navigation from './Navigation'
 import styles from './Header.module.css'
 
@@ -13,10 +14,23 @@ import styles from './Header.module.css'
  *
  * The mark is therefore decorative and marked as such — announcing it would
  * make a screen reader read the group's name twice on every page.
+ *
+ * ONE STATE CHANGE, and only a visual one: once the page has moved, the bar
+ * takes a translucent, blurred surface and a shadow, and the mark tightens
+ * slightly, so it reads as floating over the content rather than as part of
+ * the top of the page.
+ *
+ * ITS HEIGHT DOES NOT CHANGE. A sticky header is in the document flow, so a
+ * header that shrinks while the reader scrolls drags everything below it
+ * upwards — a layout shift, caused by scrolling, which is exactly what Core
+ * Web Vitals counts against a page. `min-height` therefore stays constant and
+ * only the surface and the mark respond.
  */
 export default function Header() {
+  const scrolled = useScrolled()
+
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-scrolled={scrolled || undefined}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
           <img

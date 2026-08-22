@@ -56,6 +56,13 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Analytics is configuration, not a credential: a GA4 measurement ID
+          # is public in the page source of every site that uses one, so it is
+          # a repository *variable* rather than a secret. Unset — in a fork, or
+          # before the variable is created — the build simply produces a site
+          # that loads no analytics at all. See docs/ANALYTICS.md.
+          VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
 
       - name: Check the SPA fallback was generated
         run: |

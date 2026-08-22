@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import usePageMetadata from '../../hooks/usePageMetadata'
 import { pages } from '../../content'
 import { siteConfig, mailtoHref } from '../../app/siteConfig'
+import { EVENTS, trackEvent } from '../../lib/analytics'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import CopyButton from '../../components/shared/CopyButton'
 import styles from './Contact.module.css'
@@ -57,7 +58,11 @@ export default function Contact() {
         <p className={styles.address}>{siteConfig.email}</p>
 
         <div className={styles.actions}>
-          <a className={styles.button} href={mailtoHref('TSR enquiry')}>
+          <a
+            className={styles.button}
+            href={mailtoHref('TSR enquiry')}
+            onClick={() => trackEvent(EVENTS.contact, { contact_type: 'email' })}
+          >
             {emailAction}
           </a>
           <CopyButton

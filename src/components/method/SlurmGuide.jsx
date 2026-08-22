@@ -1,5 +1,6 @@
 import CodeBlock from './CodeBlock'
 import MarkdownContent from './MarkdownContent'
+import Reveal from '../shared/Reveal'
 import styles from './SlurmGuide.module.css'
 
 /*
@@ -30,7 +31,7 @@ export default function SlurmGuide({ slurm, headingId = 'slurm-and-hpc' }) {
   const { intro, script, submit, resources, notes } = slurm
 
   return (
-    <section className={styles.section} aria-labelledby={headingId}>
+    <Reveal as="section" className={styles.section} aria-labelledby={headingId}>
       <h2 id={headingId} className={styles.heading}>
         Running on an HPC cluster
       </h2>
@@ -54,6 +55,6 @@ export default function SlurmGuide({ slurm, headingId = 'slurm-and-hpc' }) {
       <CodeBlock code={submit.code} language={submit.language} />
 
       {notes && <MarkdownContent>{notes}</MarkdownContent>}
-    </section>
+    </Reveal>
   )
 }

@@ -1,3 +1,4 @@
+import Reveal from '../shared/Reveal'
 import styles from './HomeSection.module.css'
 
 /*
@@ -12,6 +13,10 @@ import styles from './HomeSection.module.css'
  * `tone="muted"` gives the section a tinted background. It alternates by hand
  * in Home.jsx rather than by :nth-child, because which sections should stand
  * apart is a design decision, not an arithmetic one.
+ *
+ * The band fades in as it is scrolled to, once. Reveal renders the <section>
+ * itself rather than wrapping it, so the page's outline — a section per band,
+ * each named by its own heading — is exactly what it was before.
  */
 export default function HomeSection({
   id,
@@ -22,7 +27,8 @@ export default function HomeSection({
   children,
 }) {
   return (
-    <section
+    <Reveal
+      as="section"
       id={id}
       className={styles.section}
       data-tone={tone}
@@ -40,6 +46,6 @@ export default function HomeSection({
 
         {action && <p className={styles.action}>{action}</p>}
       </div>
-    </section>
+    </Reveal>
   )
 }

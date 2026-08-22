@@ -141,3 +141,43 @@
   padding-top: 0;
   margin-top: var(--space-3);
 }
+
+/*
+ * Interaction polish, shared by every card on the site (see --card-lift in
+ * tokens.css). Two pixels and a shadow: enough to acknowledge the pointer,
+ * not enough to move the reader's eye. No scaling — a card that grows pushes
+ * its neighbours' text around and makes a grid feel unstable.
+ *
+ * Movement is asked for only where a pointer can hover. On a touch screen the
+ * hover state sticks after a tap, which would leave one card looking raised
+ * until something else is touched.
+ */
+.repository {
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .repository:hover {
+    transform: translateY(var(--card-lift));
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Keyboard focus is treated as deliberately as hover: same surface change,
+   in the accent colour, whenever focus lands on a link inside the card. */
+.repository:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .repository,
+  .repository:hover {
+    transform: none;
+    transition: none;
+  }
+}
