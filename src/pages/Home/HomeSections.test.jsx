@@ -110,6 +110,29 @@ describe('research vision', () => {
     expect(details.open).toBe(true)
   })
 
+  it('opens and closes on the click, repeatedly', async () => {
+    /*
+     * The disclosure is the browser's own: the `open` attribute follows the
+     * click, with nothing deferring it. Everything drawn from `[open]` — the
+     * marker included — therefore turns at the same moment the content
+     * appears, and the second opening behaves exactly like the first.
+     */
+    renderHome()
+
+    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
+    const details = summary.closest('details')
+
+    await userEvent.click(summary)
+    expect(details.open).toBe(true)
+
+    await userEvent.click(summary)
+    expect(details.open).toBe(false)
+
+    /* And again: opening twice must behave the same both times. */
+    await userEvent.click(summary)
+    expect(details.open).toBe(true)
+  })
+
   it('names the disclosure meaningfully', () => {
     renderHome()
 

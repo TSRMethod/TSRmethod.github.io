@@ -1,0 +1,454 @@
+/*
+ * The hero figure: appearance, and a story told in one 24-second loop.
+ *
+ * THE BASE STATE IS A FINISHED PICTURE — the protein, its residues, and one
+ * completed TSR triangle. Every keyframe below cycles around that rather than
+ * building it from nothing, which is what makes the reduced-motion state at
+ * the bottom of this file a deliberate composition instead of an animation
+ * caught halfway.
+ */
+
+/*
+ * The whole right-hand figure: the drawing and the line that says what it is.
+ *
+ * One positioned box holds both, which is what makes the caption belong to
+ * the graphic rather than float near it — it is the same column, ending where
+ * the drawing ends, at every width. `--hero-intro` is declared here so the
+ * trace and the caption cannot drift apart: they read their duration from the
+ * same place, and changing the pace of one changes both.
+ */
+.region {
+  --hero-intro: 2.4s;
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: min(58%, 46rem);
+  display: flex;
+  flex-direction: column;
+  /* Decorative and non-interactive as a whole; the caption opts back in below
+     so it can still be selected and copied. */
+  pointer-events: none;
+}
+
+.layer {
+  /* Fills the column above the caption. */
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  /* Decorative: never takes a click meant for the hero's own links. */
+  pointer-events: none;
+  /*
+   * Fades out towards the text. The heading and lede sit on the left, so the
+   * figure is masked away under them rather than being drawn at an opacity
+   * low enough to be safe everywhere — this way the structure can be properly
+   * legible on the right and completely absent behind the words.
+   */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 34%,
+    #000 62%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 34%,
+    #000 62%
+  );
+}
+
+.figure {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/*
+ * A caption, not a callout: small, muted, and set hard against the right edge
+ * under the drawing. No border, no card, no badge — the hero is a page of
+ * type with a figure on it, and this is the figure's label.
+ *
+ * It fades in over exactly the same window as the trace draws itself, from
+ * the same custom property, so the two arrive as one thing rather than as a
+ * picture followed by a line of text. Opacity only.
+ *
+ * NO FILL MODE, for the reason the rest of this file gives: `both` would hold
+ * the animation's first frame — a caption at zero opacity — until the
+ * animation runs, and a browser does not run animations in a document it is
+ * not rendering. The rule below is the resting state; the keyframe only
+ * describes the arrival.
+ */
+.caption {
+  margin: 0;
+  /*
+   * The right inset is proportional, not the flat gutter the rest of the page
+   * uses, and that is the whole of this rule's purpose: the drawing is fitted
+   * inside the column and stops short of its right edge, so a caption set
+   * against that edge ran PAST the figure and read as belonging to the
+   * viewport rather than to the picture. At 1280 it ended 15px beyond the
+   * drawing; with this it ends about 15px inside it, and its centre lands
+   * within a few pixels of the drawing's own. Clamped so the effect holds
+   * from the tablet breakpoint up without squeezing the line into a wrap on
+   * the narrowest of those widths.
+   */
+  padding: 0 clamp(var(--space-4), 6%, 4.5rem) var(--space-5) var(--space-4);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+  text-align: right;
+  opacity: 1;
+  /* Selectable, unlike the drawing above it. */
+  pointer-events: auto;
+  animation: hero-caption-in var(--hero-intro) var(--motion-ease);
+}
+
+@keyframes hero-caption-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---- The structure ---- */
+
+/*
+ * A breath of movement, applied to the whole molecule at once — never to its
+ * parts. Two degrees over three quarters of a minute is not a spinning model;
+ * it is the difference between a diagram and something alive. Because every
+ * point, edge and triangle is inside this one group, nothing can drift out of
+ * register with anything else.
+ */
+.structure {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tsr-sway 46s ease-in-out infinite alternate;
+}
+
+@keyframes tsr-sway {
+  from {
+    transform: rotate(-1.1deg) translateY(-2px);
+  }
+  to {
+    transform: rotate(1.1deg) translateY(2px);
+  }
+}
+
+/*
+ * PHASE A — the fold resolves. Once, on load, over a little over two seconds:
+ * the trace draws itself along the chain from the N-terminus, which is the
+ * order the structure is actually written in.
+ */
+.backbone,
+.backboneNear {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 7000;
+  stroke-dashoffset: 0;
+  animation: tsr-trace var(--hero-intro) ease-out both;
+}
+
+/*
+ * The three layers are deliberately an order apart in weight: the fold is
+ * context, the residues are the points a key is built from, and the triangle
+ * is the thing being said. Drawn at similar strengths, the relationship
+ * disappeared into the chain — the one thing this figure must not do.
+ */
+.backbone {
+  stroke-width: 1.5;
+  opacity: 0.14;
+}
+
+/* The near half, drawn over the whole trace: thicker and a little stronger,
+   which is the entire depth cue. */
+.backboneNear {
+  stroke-width: 2.1;
+  opacity: 0.24;
+}
+
+/*
+ * The trace draws itself along the chain, from the N-terminus, over a little
+ * over two seconds. `opacity` is left out of the keyframes on purpose so each
+ * pass keeps its own — the animation is about the line arriving, not about
+ * how strongly it is drawn.
+ */
+@keyframes tsr-trace {
+  from {
+    stroke-dashoffset: 7000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/*
+ * PHASE B — residues appear along the resolved trace, in chain order. The
+ * stagger is small: this is a structure being read, not a queue.
+ */
+.residue {
+  fill: var(--color-primary);
+  opacity: var(--residue-depth);
+  animation: tsr-residue-in 900ms ease-out both;
+  animation-delay: calc(1.4s + var(--residue-index) * 45ms);
+}
+
+@keyframes tsr-residue-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--residue-depth);
+  }
+}
+
+/* ---- The TSR relationships ---- */
+
+/*
+ * PHASES C–F, one 24-second cycle per triplet, each starting eight seconds
+ * after the last: a triplet is picked out, its triangle draws, it is held
+ * long enough to read, and it fades as the next is chosen elsewhere on the
+ * fold. Only one is ever prominent.
+ */
+.triplet {
+  /* `--cycle` is set by the component from the number of triplets; the
+     fallback keeps this file readable on its own. */
+  --start: calc(2.6s + var(--turn) * 9s);
+}
+
+/*
+ * PHASE D — the triangle draws between the three selected α-carbons, then
+ * PHASE E holds it. `stroke-dasharray` is the polygon's own perimeter, so one
+ * "dash" is the whole outline and the offset draws it edge by edge.
+ */
+.triangle {
+  fill: var(--color-primary);
+  fill-opacity: 0.06;
+  stroke: var(--color-primary);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  opacity: 0;
+  stroke-dashoffset: 0;
+  animation: tsr-triangle var(--cycle, 18s) linear infinite;
+  animation-delay: var(--start);
+}
+
+@keyframes tsr-triangle {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: var(--outline);
+  }
+  4% {
+    opacity: 0.82;
+    stroke-dashoffset: var(--outline);
+  }
+  20% {
+    opacity: 0.82;
+    stroke-dashoffset: 0;
+  }
+  /* Held: long enough to be understood as one relationship. */
+  33% {
+    opacity: 0.82;
+    stroke-dashoffset: 0;
+  }
+  40% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: var(--outline);
+  }
+}
+
+/*
+ * PHASE C — the three residues of the active triplet come forward slightly
+ * before their triangle is drawn, so the eye is told which points the
+ * relationship is between before the relationship appears.
+ */
+.selected {
+  fill: var(--color-primary);
+  opacity: 0;
+  animation: tsr-selected var(--cycle, 18s) linear infinite;
+  animation-delay: var(--start);
+}
+
+@keyframes tsr-selected {
+  0% {
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.85;
+  }
+  33% {
+    opacity: 0.85;
+  }
+  42% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/*
+ * The ring is drawn on the residue's own centre and only ever scales about
+ * that centre, so however it pulses the point it marks — and the triangle
+ * corner sitting on it — stay exactly where they are.
+ */
+.selectedRing {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.1;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tsr-selected-ring var(--cycle, 18s) linear infinite;
+  animation-delay: var(--start);
+}
+
+@keyframes tsr-selected-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  3% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+  10% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  33% {
+    opacity: 0.24;
+    transform: scale(1);
+  }
+  42% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+}
+
+/* ---- Responsive simplification ---- */
+
+/*
+ * On a phone the figure keeps the protein and one relationship. Half the
+ * residue points and two of the three triplets are not drawn at all, the
+ * whole thing is enlarged and cropped to the right of the text rather than
+ * shrunk to fit beside it, and the sway is dropped — at that size it is
+ * movement without a picture to read.
+ */
+@media (max-width: 767px) {
+  .residue:nth-child(2n) {
+    display: none;
+  }
+
+  .triplet:not(.primaryTriplet) {
+    display: none;
+  }
+
+  .structure {
+    animation: none;
+  }
+
+  /*
+   * On a phone the column runs the full width while the DRAWING keeps to the
+   * right of it. That split is what the caption needs: given only the
+   * drawing's 62% it wrapped onto four lines and ran into the buttons, and at
+   * full width it is two lines sitting clear beneath everything.
+   */
+  .region {
+    width: 100%;
+  }
+
+  .layer {
+    width: 62%;
+    align-self: flex-end;
+    /*
+     * The mask still clears the text completely — everything left of about
+     * two fifths is gone — but what survives on the right is drawn at close
+     * to full strength. At a phone's line lengths a figure faint enough to be
+     * safe everywhere is a figure nobody can see at all, so the safety comes
+     * from where it is, not from how faint it is.
+     */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.12) 42%,
+      #000 80%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.12) 42%,
+      #000 80%
+    );
+    opacity: 0.9;
+  }
+
+  /* The CSS equivalent of `slice`, which is an attribute and cannot be set
+     per breakpoint: enlarge, anchor to the right, let the layer crop. A
+     smaller factor than it looks — enough to keep the residues and their
+     triangle legible without cropping the fold down to a corner. */
+  .figure {
+    transform: scale(1.4);
+    transform-origin: 100% 50%;
+  }
+}
+
+/* ---- Reduced motion ---- */
+
+/*
+ * A composition, not a frozen frame: the fold, its residues, and one
+ * completed TSR triangle with its three residues marked. Nothing draws,
+ * nothing pulses, nothing sways, and nothing is left at zero opacity waiting
+ * for a keyframe that will not run — the two spare triplets are removed
+ * outright rather than hidden, because one clear relationship is the whole
+ * point being made.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .structure,
+  .backbone,
+  .backboneNear,
+  .residue,
+  .triangle,
+  .selected,
+  .selectedRing,
+  .caption {
+    animation: none;
+  }
+
+  .backbone,
+  .backboneNear {
+    stroke-dashoffset: 0;
+  }
+
+  .residue {
+    opacity: var(--residue-depth);
+  }
+
+  .triplet:not(.primaryTriplet) {
+    display: none;
+  }
+
+  .primaryTriplet .triangle {
+    opacity: 0.82;
+    stroke-dashoffset: 0;
+  }
+
+  .primaryTriplet .selected {
+    opacity: 0.85;
+  }
+
+  .primaryTriplet .selectedRing {
+    opacity: 0.26;
+    transform: scale(1);
+  }
+}

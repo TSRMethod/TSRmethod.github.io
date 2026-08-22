@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -189,6 +189,195 @@ describe('mobile navigation', () => {
     expect(
       screen.queryByRole('link', { name: 'Publications' }),
     ).not.toBeInTheDocument()
+  })
+
+  it('renders the open drawer outside the header, not inside it', async () => {
+    /*
+     * THE STAGE 10 REGRESSION, in one assertion.
+     *
+     * `position: fixed` resolves against the viewport only while no ancestor
+     * establishes a containing block, and the scrolled header's
+     * `backdrop-filter` does establish one. Nested inside the header, the
+     * drawer and its scrim were sized against the header's 73px box — a
+     * strip of dark overlay across the top of the page with most of the menu
+     * clipped away.
+     *
+     * The drawer is therefore portalled to <body>. This asserts the
+     * structural property that fix depends on, so nobody can move it back
+     * under the header — where it would look correct until someone scrolls.
+     */
+    const user = userEvent.setup()
+    /* The whole shell, because the header is what the drawer must escape. */
+    setViewport('mobile')
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+
+    const drawer = screen.getByRole('dialog', { name: 'Site menu' })
+    const header = screen
+      .getAllByRole('banner')
+      .find((element) => !element.closest('main'))
+
+    expect(header).toBeTruthy()
+    expect(header.contains(drawer)).toBe(false)
+    expect(drawer.parentElement).toBe(document.body)
+
+    /* The scrim has to escape with it, or it is the strip instead. */
+    const backdrop = drawer.previousElementSibling
+    expect(backdrop).toBeTruthy()
+    expect(header.contains(backdrop)).toBe(false)
+
+    /* The button that owns it stays in the header, and still owns it: the
+       association is by id, which does not care about the DOM distance. */
+    const toggle = screen.getByRole('button', { name: 'Close' })
+    expect(header.contains(toggle)).toBe(true)
+    expect(document.getElementById(toggle.getAttribute('aria-controls'))).toBe(
+      drawer,
+    )
+  })
+
+  it('restores focus without letting the browser scroll the page', async () => {
+    /*
+     * The whole of the fix, in the one place jsdom can actually see it.
+     *
+     * `focus()` asks the browser to reveal the element, and revealing it
+     * means scrolling the document — which is why closing the menu used to
+     * nudge the page upwards. The toggle is in a sticky header and is
+     * already on screen, so the request is never wanted. jsdom has no
+     * viewport and cannot model the scrolling itself, but it can hold this
+     * component to the contract that prevents it.
+     */
+    const user = userEvent.setup()
+    renderMobile()
+
+    const toggle = screen.getByRole('button', { name: 'Menu' })
+    const focus = vi.spyOn(toggle, 'focus')
+
+    await user.click(toggle)
+    await user.keyboard('{Escape}')
+
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+    expect(screen.getByRole('button', { name: 'Menu' })).toHaveFocus()
+  })
+
+  it('asks for the same treatment however the drawer is dismissed', async () => {
+    const user = userEvent.setup()
+    renderMobile()
+
+    for (const dismiss of [
+      async () => user.click(screen.getByRole('button', { name: 'Close' })),
+      async () => {
+        /* The scrim, which is presentational and has no accessible name. */
+        const drawer = screen.getByRole('dialog')
+        await user.click(drawer.previousElementSibling)
+      },
+    ]) {
+      const toggle = screen.getByRole('button', { name: 'Menu' })
+      const focus = vi.spyOn(toggle, 'focus')
+
+      await user.click(toggle)
+      await dismiss()
+
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+      focus.mockRestore()
+    }
+  })
+
+  it('puts the page back if unlocking it moved the page', async () => {
+    /*
+     * Taking `overflow: hidden` off a scrolled document is a layout change,
+     * and a browser may settle the scroll position differently afterwards.
+     * The component compares and corrects; here the browser is made to
+     * misbehave on purpose so the correction can be observed.
+     */
+    const user = userEvent.setup()
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+
+    /*
+     * The page reads as 1500 while the user is dismissing, and as 1460 once
+     * the lock has been taken off — which is the slip, expressed as the only
+     * thing the component can actually observe.
+     */
+    let reads = 0
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      get: () => (reads++ === 0 ? 1500 : 1460),
+    })
+
+    renderMobile()
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    await user.keyboard('{Escape}')
+
+    expect(scrollTo).toHaveBeenCalledWith(
+      expect.objectContaining({ top: 1500, behavior: 'instant' }),
+    )
+
+    scrollTo.mockRestore()
+    delete window.scrollY
+  })
+
+  it('leaves a well-behaved browser alone', async () => {
+    const user = userEvent.setup()
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      get: () => 900,
+    })
+
+    renderMobile()
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    await user.keyboard('{Escape}')
+
+    /* The position never moved, so nothing is corrected. */
+    expect(scrollTo).not.toHaveBeenCalled()
+
+    scrollTo.mockRestore()
+    delete window.scrollY
+  })
+
+  it('leaves the scroll position alone when a link was followed', async () => {
+    /*
+     * The case this must not touch. Following a link closes the drawer too,
+     * but there the reader is going somewhere new and ScrollToTop takes them
+     * to the top of it. Restoring the old offset would undo that.
+     */
+    const user = userEvent.setup()
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      get: () => 1200,
+    })
+
+    renderMobile()
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+
+    const drawer = screen.getByRole('dialog')
+    await user.click(within(drawer).getByRole('link', { name: 'Publications' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(scrollTo).not.toHaveBeenCalledWith(
+      expect.objectContaining({ top: 1200 }),
+    )
+
+    scrollTo.mockRestore()
+    delete window.scrollY
+  })
+
+  it('leaves nothing of the drawer behind after it closes', async () => {
+    /* A portal that is not cleaned up is a scrim nobody can remove. */
+    const user = userEvent.setup()
+    renderMobile()
+
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.body.querySelector('[aria-modal="true"]')).toBeNull()
   })
 
   it('opens a modal drawer and moves focus into it', async () => {

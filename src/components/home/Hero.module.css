@@ -1,14 +1,37 @@
 /*
  * Restrained on purpose: a tinted band with type in it, not a full-viewport
- * splash. The research content starts within the first screenful.
+ * splash. The research content starts within the first screenful, and adding
+ * the figure behind it did not change that — the band's height is still set
+ * by its own padding and the text inside it.
  */
 .hero {
+  position: relative;
+  /* The figure is cropped by the band rather than the band growing for it. */
+  overflow: hidden;
   background-color: var(--color-primary-light);
   border-bottom: 1px solid var(--color-border);
   padding-block: var(--space-7);
 }
 
+/*
+ * Room at the foot of the band for the figure's caption, which is laid over
+ * the hero rather than sitting in its flow.
+ *
+ * Only on a phone. On a wide screen the caption occupies space the figure
+ * already had to itself; below the tablet breakpoint the text runs the full
+ * width, and without this the calls to action would meet it.
+ */
+@media (max-width: 767px) {
+  .hero {
+    padding-bottom: calc(var(--space-7) + 2.75rem);
+  }
+}
+
+/* Above the figure, and the only thing in the band that can be interacted
+   with — the decorative layer sets `pointer-events: none`. */
 .inner {
+  position: relative;
+  z-index: 1;
   max-width: var(--layout-max);
   margin-inline: auto;
   padding-inline: var(--space-4);
