@@ -83,7 +83,18 @@
  */
 .caption {
   margin: 0;
-  padding: 0 var(--space-4) var(--space-5);
+  /*
+   * The right inset is proportional, not the flat gutter the rest of the page
+   * uses, and that is the whole of this rule's purpose: the drawing is fitted
+   * inside the column and stops short of its right edge, so a caption set
+   * against that edge ran PAST the figure and read as belonging to the
+   * viewport rather than to the picture. At 1280 it ended 15px beyond the
+   * drawing; with this it ends about 15px inside it, and its centre lands
+   * within a few pixels of the drawing's own. Clamped so the effect holds
+   * from the tablet breakpoint up without squeezing the line into a wrap on
+   * the narrowest of those widths.
+   */
+  padding: 0 clamp(var(--space-4), 6%, 4.5rem) var(--space-5) var(--space-4);
   font-size: var(--text-xs);
   line-height: var(--leading-normal);
   color: var(--color-text-muted);
