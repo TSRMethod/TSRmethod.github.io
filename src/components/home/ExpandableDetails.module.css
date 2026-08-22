@@ -41,10 +41,9 @@
 }
 
 /*
- * The marker turns the moment the element opens, with no transition of its
- * own and nothing scheduling it: it is drawn from `[open]`, which is the same
- * attribute the panel's transition below keys off, so the arrow and the
- * content can never disagree about which way round the disclosure is.
+ * No transition on the marker and no height animation on the panel. An
+ * animated disclosure fights the browser's own behaviour, breaks find-in-page
+ * and is one more thing to disable for reduced motion.
  */
 .details[open] .summary::before {
   border-left: 4px solid transparent;
@@ -57,50 +56,10 @@
   border-color: var(--color-primary);
 }
 
-/*
- * The expansion, done by the browser rather than by React.
- *
- * `::details-content` is the box a disclosure's content lives in, and it is
- * the only place this can be animated correctly: a closed <details> stops
- * rendering its content altogether, so anything animated from the outside has
- * to keep the element open artificially and then decide when to let go. That
- * is what the previous version did, and it is where both of its bugs came
- * from — an entrance that had already "started" before the first click, and a
- * collapse that finished in a second step once a JavaScript timer agreed.
- *
- * Here the `open` attribute flips immediately, so the arrow and the layout
- * follow at once, and the transition below is simply how the box gets from
- * one state to the other.
- *
- * `grid-template-rows: 0fr → 1fr` rather than a height: no measuring, nothing
- * to go stale when the text reflows or a font loads, and it works from the
- * very first open because the collapsed state is a real state the element is
- * already in rather than a frame that has to be painted first.
- *
- * `content-visibility` is transitioned with `allow-discrete` so that the
- * browser keeps the content rendered until the collapse has finished. That is
- * also what keeps a collapsed panel out of the tab order and off a screen
- * reader: at rest it is `hidden`, exactly as the browser intends, and only
- * during the animation is it anything else.
- *
- * Where `::details-content` is not supported the disclosure simply opens and
- * closes at once, which is what it did before any of this.
- */
-.details::details-content {
-  display: grid;
-  grid-template-rows: 0fr;
-  /* The window the row opens into; without it the content sets the height. */
-  overflow: hidden;
-  opacity: 0;
-  transition:
-    grid-template-rows var(--motion-slow) var(--motion-ease),
-    opacity var(--motion-slow) var(--motion-ease),
-    content-visibility var(--motion-slow) allow-discrete;
-}
-
-.details[open]::details-content {
-  grid-template-rows: 1fr;
-  opacity: 1;
+.content {
+  margin-top: var(--space-4);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-border);
 }
 
 .content p {
@@ -110,15 +69,4 @@
 
 .content p + p {
   margin-top: var(--space-3);
-}
-
-/*
- * Reduced motion: the disclosure changes state at once. There is no cleanup
- * to schedule and nothing waiting on an event, because the browser was doing
- * all of it — `transition: none` simply means the state change is instant.
- */
-@media (prefers-reduced-motion: reduce) {
-  .details::details-content {
-    transition: none;
-  }
 }

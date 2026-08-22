@@ -19,18 +19,6 @@ import styles from './ExpandableDetails.module.css'
  * pre-formatted text is what stops an editor having to build a layout out of
  * line breaks in a text box.
  *
- * IT OPENS AND CLOSES SMOOTHLY, and there is no JavaScript in that at all.
- * The expansion is a CSS transition on `::details-content` — the box the
- * browser itself wraps a disclosure's content in — so the browser owns the
- * state, the timing and the order of events. An earlier version animated
- * this from React by holding the `open` attribute on during the collapse,
- * and it bought two bugs with it: the first opening after a page load did
- * not animate, because the entrance animation had been attached to the
- * panel since mount rather than started by the opening; and the collapse
- * finished in two steps, because the attribute — and therefore the arrow and
- * the last of the layout — only came off once an animation event said so.
- * Neither is possible here: there is nothing to keep in step.
- *
  * Renders NOTHING when there is nothing behind the label. That is the whole
  * reason this is a component rather than markup repeated twice: an editor who
  * clears the content in the CMS should get no disclosure, not a control that

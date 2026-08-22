@@ -110,17 +110,12 @@ describe('research vision', () => {
     expect(details.open).toBe(true)
   })
 
-  it('opens and closes in one step, with nothing deferred', async () => {
+  it('opens and closes on the click, repeatedly', async () => {
     /*
-     * Both of the disclosure's animation bugs came from managing its state in
-     * JavaScript, and both are pinned here.
-     *
-     * The collapse used to finish in two moves: the panel shrank, and then —
-     * once an animation event said so — the `open` attribute came off, taking
-     * the arrow and the last of the layout with it. So this asserts that the
-     * attribute follows the click itself, with nothing waiting on a timer, an
-     * animation or an unmount. Everything drawn from `[open]`, the marker
-     * included, therefore turns at the same moment as the content moves.
+     * The disclosure is the browser's own: the `open` attribute follows the
+     * click, with nothing deferring it. Everything drawn from `[open]` — the
+     * marker included — therefore turns at the same moment the content
+     * appears, and the second opening behaves exactly like the first.
      */
     renderHome()
 
@@ -133,36 +128,9 @@ describe('research vision', () => {
     await userEvent.click(summary)
     expect(details.open).toBe(false)
 
-    /* And again, because the first open used to be the one that misbehaved. */
+    /* And again: opening twice must behave the same both times. */
     await userEvent.click(summary)
     expect(details.open).toBe(true)
-  })
-
-  it('leaves the disclosure entirely to the browser', async () => {
-    /*
-     * The other bug: an entrance animation attached to the panel when it
-     * mounted rather than started by the opening, which the browser treated
-     * as already run the first time anyone clicked. Nothing here may hold the
-     * element open, mark it as leaving, or hide it behind a React flag — the
-     * expansion is a CSS transition on ::details-content and the state is the
-     * `open` attribute, so there is nothing to fall out of step.
-     */
-    renderHome()
-
-    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
-    const details = summary.closest('details')
-    const panel = details.querySelector(':scope > div')
-
-    const classesThrough = new Set()
-    for (let i = 0; i < 4; i += 1) {
-      await userEvent.click(summary)
-      classesThrough.add(panel.getAttribute('class') ?? '')
-      expect(details.open).toBe(i % 2 === 0)
-    }
-
-    /* One class, all the way through: no "leaving", no "closing", no state. */
-    expect(classesThrough.size).toBe(1)
-    expect(details.querySelectorAll(':scope > div')).toHaveLength(1)
   })
 
   it('names the disclosure meaningfully', () => {
