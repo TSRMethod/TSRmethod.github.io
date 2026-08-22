@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { siteConfig } from '../../app/siteConfig'
 import { home } from '../../content'
 import { METHODS_SECTION_ID } from './sectionIds'
+import HeroGeometry from './HeroGeometry'
 import styles from './Hero.module.css'
 
 /*
@@ -15,12 +16,20 @@ import styles from './Hero.module.css'
  * methods index, which does not exist. A native <a href="#…"> is used so the
  * browser handles the jump; React Router would push a new history entry
  * without scrolling anywhere.
+ *
+ * The figure behind all of this is decorative and is described where it is
+ * drawn. It is rendered first and sits underneath: the words are the hero,
+ * and nothing about them — their wording, their source in the CMS, or the
+ * fact that this is the page's only <h1> — changes because there is now a
+ * picture behind them.
  */
 export default function Hero() {
   const { lede, primaryCta, secondaryCta } = home.hero
 
   return (
     <section className={styles.hero} aria-labelledby="hero-heading">
+      <HeroGeometry />
+
       <div className={styles.inner}>
         <h1 id="hero-heading" className={styles.heading}>
           {siteConfig.name}

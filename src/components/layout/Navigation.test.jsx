@@ -191,6 +191,67 @@ describe('mobile navigation', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('renders the open drawer outside the header, not inside it', async () => {
+    /*
+     * THE STAGE 10 REGRESSION, in one assertion.
+     *
+     * `position: fixed` resolves against the viewport only while no ancestor
+     * establishes a containing block, and the scrolled header's
+     * `backdrop-filter` does establish one. Nested inside the header, the
+     * drawer and its scrim were sized against the header's 73px box — a
+     * strip of dark overlay across the top of the page with most of the menu
+     * clipped away.
+     *
+     * The drawer is therefore portalled to <body>. This asserts the
+     * structural property that fix depends on, so nobody can move it back
+     * under the header — where it would look correct until someone scrolls.
+     */
+    const user = userEvent.setup()
+    /* The whole shell, because the header is what the drawer must escape. */
+    setViewport('mobile')
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+
+    const drawer = screen.getByRole('dialog', { name: 'Site menu' })
+    const header = screen
+      .getAllByRole('banner')
+      .find((element) => !element.closest('main'))
+
+    expect(header).toBeTruthy()
+    expect(header.contains(drawer)).toBe(false)
+    expect(drawer.parentElement).toBe(document.body)
+
+    /* The scrim has to escape with it, or it is the strip instead. */
+    const backdrop = drawer.previousElementSibling
+    expect(backdrop).toBeTruthy()
+    expect(header.contains(backdrop)).toBe(false)
+
+    /* The button that owns it stays in the header, and still owns it: the
+       association is by id, which does not care about the DOM distance. */
+    const toggle = screen.getByRole('button', { name: 'Close' })
+    expect(header.contains(toggle)).toBe(true)
+    expect(document.getElementById(toggle.getAttribute('aria-controls'))).toBe(
+      drawer,
+    )
+  })
+
+  it('leaves nothing of the drawer behind after it closes', async () => {
+    /* A portal that is not cleaned up is a scrim nobody can remove. */
+    const user = userEvent.setup()
+    renderMobile()
+
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.body.querySelector('[aria-modal="true"]')).toBeNull()
+  })
+
   it('opens a modal drawer and moves focus into it', async () => {
     const user = userEvent.setup()
     renderMobile()

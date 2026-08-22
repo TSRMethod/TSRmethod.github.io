@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink, useLocation } from 'react-router-dom'
 import useFocusTrap from '../../hooks/useFocusTrap'
 import styles from './MobileNav.module.css'
@@ -17,6 +18,30 @@ const DRAWER_ID = 'mobile-nav-drawer'
  *   - the drawer closes after following a link
  *   - Escape closes it and focus goes back to the toggle
  *   - the page behind cannot be scrolled or tabbed into while it is open
+ *
+ * THE MODAL LAYER IS PORTALLED TO <body>. The button stays in the header;
+ * the backdrop and the drawer do not.
+ *
+ * This is not tidiness, it is the fix for a real bug. `position: fixed`
+ * resolves against the viewport only while no ancestor establishes a
+ * containing block, and a `filter`, `transform`, `perspective`,
+ * `will-change` or `backdrop-filter` on any ancestor does exactly that. The
+ * scrolled header applies `backdrop-filter: blur(10px)`, so once the page had
+ * been scrolled, a drawer nested inside the header measured itself against
+ * the header's 73px box instead of the viewport: a 72px-tall scrim and a
+ * drawer with almost all of the menu clipped out of it. Measured at 1026px:
+ * 72px tall with the blur, 760px without it.
+ *
+ * Rendering the modal layer as a child of <body> puts it out of reach of any
+ * ancestor effect the header may grow in future, which is what makes this a
+ * fix rather than a workaround — the alternative, dropping the blur, would
+ * have left the same trap set for the next person who adds one.
+ *
+ * Nothing else moves. React events still propagate through the React tree, so
+ * the backdrop's onClick works as before; `aria-controls` refers to an id,
+ * which is document-wide; and the focus trap works on the drawer element and
+ * a document-level keydown listener, neither of which cares where the element
+ * sits in the DOM.
  */
 export default function MobileNav({ items }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -105,62 +130,64 @@ export default function MobileNav({ items }) {
         {isOpen ? 'Close' : 'Menu'}
       </button>
 
-      {isOpen && (
-        <>
-          {/*
-            Presentational scrim. Dismissal is also available from the Close
-            button and the Escape key, so this is not the only way out and it
-            does not need to be a focusable control.
-          */}
-          <div
-            className={styles.backdrop}
-            onClick={dismiss}
-            aria-hidden="true"
-          />
+      {isOpen &&
+        createPortal(
+          <>
+            {/*
+              Presentational scrim. Dismissal is also available from the Close
+              button and the Escape key, so this is not the only way out and it
+              does not need to be a focusable control.
+            */}
+            <div
+              className={styles.backdrop}
+              onClick={dismiss}
+              aria-hidden="true"
+            />
 
-          <div
-            id={DRAWER_ID}
-            ref={drawerRef}
-            className={styles.drawer}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site menu"
-          >
-            <nav aria-label="Main">
-              <ul className={styles.list}>
-                {items.map((item) =>
-                  item.groups ? (
-                    <AccordionItem
-                      key={item.id}
-                      item={item}
-                      isOpen={openGroupId === item.id}
-                      onToggle={() =>
-                        setOpenGroupId(
-                          openGroupId === item.id ? null : item.id,
-                        )
-                      }
-                    />
-                  ) : (
-                    <li key={item.id}>
-                      <NavLink
-                        to={item.to}
-                        end={item.to === '/'}
-                        className={({ isActive }) =>
-                          isActive
-                            ? `${styles.link} ${styles.linkActive}`
-                            : styles.link
+            <div
+              id={DRAWER_ID}
+              ref={drawerRef}
+              className={styles.drawer}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+            >
+              <nav aria-label="Main">
+                <ul className={styles.list}>
+                  {items.map((item) =>
+                    item.groups ? (
+                      <AccordionItem
+                        key={item.id}
+                        item={item}
+                        isOpen={openGroupId === item.id}
+                        onToggle={() =>
+                          setOpenGroupId(
+                            openGroupId === item.id ? null : item.id,
+                          )
                         }
-                      >
-                        {item.label}
-                      </NavLink>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </nav>
-          </div>
-        </>
-      )}
+                      />
+                    ) : (
+                      <li key={item.id}>
+                        <NavLink
+                          to={item.to}
+                          end={item.to === '/'}
+                          className={({ isActive }) =>
+                            isActive
+                              ? `${styles.link} ${styles.linkActive}`
+                              : styles.link
+                          }
+                        >
+                          {item.label}
+                        </NavLink>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </nav>
+            </div>
+          </>,
+          document.body,
+        )}
     </>
   )
 }

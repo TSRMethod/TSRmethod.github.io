@@ -28,6 +28,16 @@
   flex-shrink: 0;
 }
 
+/*
+ * The modal layer. Both of these are rendered into <body> through a portal
+ * (see MobileNav.jsx) rather than inside the header, because `position:
+ * fixed` is only relative to the viewport while no ancestor establishes a
+ * containing block — and the scrolled header's `backdrop-filter` does exactly
+ * that. Nested in the header, these two were being clipped to its 73px box.
+ *
+ * The sizes below are therefore written to stand on their own: nothing here
+ * depends on where the element sits in the document.
+ */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -39,10 +49,26 @@
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0;
   z-index: 100;
   width: min(20rem, 85vw);
+
+  /*
+   * Height is stated explicitly rather than inferred from `bottom: 0`, and
+   * `dvh` is the unit that matters on a phone: `vh` is the height the
+   * viewport has with the browser's address bar retracted, so a 100vh drawer
+   * runs underneath the bar and its last menu item cannot be reached. `dvh`
+   * follows the bar as it comes and goes. The `vh` line above it is the
+   * fallback for anything that does not understand `dvh` — it is overridden
+   * wherever the second line is supported.
+   */
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+
   padding: var(--space-6) var(--space-4) var(--space-5);
+  /* The menu scrolls inside itself; `contain` stops that scroll continuing
+     into the page behind once the drawer's own end is reached. */
   overflow-y: auto;
   overscroll-behavior: contain;
   background-color: var(--color-background);
