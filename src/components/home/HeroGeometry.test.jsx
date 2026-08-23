@@ -118,9 +118,13 @@ describe('the figure is decoration and nothing else', () => {
      */
     const { container } = renderHero()
 
-    const caption = screen.getByText(
-      'Based on the real 1UBQ ubiquitin structure and its Cα coordinates.',
-    )
+    /*
+     * The exact string, asserted rather than matched loosely. Its whole job
+     * is to name a real Protein Data Bank entry; a caption that drifted into
+     * describing the method again — which is what the animation is for —
+     * would still pass a substring check for "1UBQ".
+     */
+    const caption = screen.getByText('PDB ID: 1UBQ')
 
     expect(caption).toBeInTheDocument()
     expect(caption.closest('[aria-hidden="true"]')).toBeNull()
@@ -248,6 +252,70 @@ describe('the figure is built from the real structure', () => {
       /* Mutually different, not merely the extremes. */
       expect(sides[2] / sides[1]).toBeGreaterThan(1.1)
     }
+  })
+})
+
+describe('the figure below the tablet breakpoint', () => {
+  /*
+   * jsdom has no layout engine, so a media query cannot be exercised by
+   * rendering. The stylesheet is read instead — which is the right level
+   * anyway, because what is being protected here is a decision rather than a
+   * computed pixel: below 768px the hero is text only, and someone reinstating
+   * a "simplified" phone figure should have to delete a test that says why not.
+   */
+  const stylesheet = (name) =>
+    readFileSync(resolve(root, 'src/components/home', name), 'utf8')
+
+  /** The body of the one `max-width: 767px` block in a stylesheet, or ''. */
+  function phoneBlock(css) {
+    const start = css.indexOf('@media (max-width: 767px)')
+    if (start === -1) return ''
+    let depth = 0
+    for (let i = css.indexOf('{', start); i < css.length; i += 1) {
+      if (css[i] === '{') depth += 1
+      else if (css[i] === '}') {
+        depth -= 1
+        if (depth === 0) return css.slice(css.indexOf('{', start) + 1, i)
+      }
+    }
+    return ''
+  }
+
+  it('hides the whole figure — drawing, triangle and caption alike', () => {
+    const block = phoneBlock(stylesheet('HeroGeometry.module.css'))
+
+    /*
+     * `.region` is the single box holding the SVG and the caption, so hiding
+     * it is what makes "no protein lines, no residues, no triangle, no
+     * caption" one rule rather than four that can fall out of step.
+     */
+    expect(block).toMatch(/\.region\s*\{[^}]*display:\s*none/)
+  })
+
+  it('reserves no space for what it is no longer drawing', () => {
+    /*
+     * The hero band used to carry phone-only bottom padding to sit clear of
+     * the caption. With the caption gone that padding would be a blank strip
+     * under the buttons — the empty-looking hero this change exists to fix.
+     */
+    expect(phoneBlock(stylesheet('Hero.module.css'))).toBe('')
+  })
+
+  it('hides it whatever the visitor’s motion preference is', () => {
+    /*
+     * The figure is hidden on a phone because it is too small to read, not
+     * because it moves. Nesting the rule inside a motion query — or letting
+     * the reduced-motion block put it back — would leave a reduced-motion
+     * phone showing the faint, unreadable still this change removed.
+     */
+    const css = stylesheet('HeroGeometry.module.css')
+    const start = css.indexOf('@media (max-width: 767px)')
+
+    expect(start).toBeGreaterThan(-1)
+    expect(css.lastIndexOf('@media', start)).toBe(start)
+
+    const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion'))
+    expect(reduced).not.toMatch(/\.region\s*\{[^}]*display:\s*(?!none)/)
   })
 })
 

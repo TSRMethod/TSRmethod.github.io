@@ -87,6 +87,40 @@ Two further guards, both in `src/lib/analytics.js`:
 after the page has set the document title; otherwise every view would be
 reported under the previous page's title.
 
+## How commands reach gtag
+
+`gtag()` in `src/lib/analytics.js` pushes the **`arguments` object** onto
+`window.dataLayer`. That is not a stylistic hangover from Google's copy-paste
+snippet — it is a requirement, and writing the modern-looking equivalent
+breaks analytics completely and silently:
+
+    function gtag(...args) { dataLayer.push(args) }   // WRONG: sends nothing
+
+gtag.js only treats a `dataLayer` entry as a command when it is a real
+Arguments object (`Object.prototype.toString.call(entry) === '[object
+Arguments]'`). A plain Array is ignored, and everything that would normally
+tell you something is wrong keeps looking healthy:
+
+- `gtag/js?id=…` still loads with a 200;
+- `window.google_tag_manager['G-…']` still exists;
+- `window.dataLayer` still fills with entries that read as `js`, `config` and
+  `event` with the right measurement ID in them.
+
+But no destination is ever configured, so **no `/g/collect` request is ever
+sent, no `_ga` cookie is ever set, and GA4 Realtime stays empty.** This was a
+real outage of this site's analytics.
+
+The quickest way to tell the two states apart, in the browser on the live
+site:
+
+    Object.prototype.toString.call(window.dataLayer[0])  // '[object Arguments]'
+    document.cookie                                      // contains _ga
+
+An `[object Array]` in the first, or no `_ga` in the second, means commands
+are not being processed. `src/lib/analytics.test.js` asserts the type of every
+queued entry, because asserting the *contents* cannot catch this — spreading
+an Arguments object and spreading an Array give identical results.
+
 ## Custom events
 
 The taxonomy is deliberately small — a handful of interpretable
@@ -147,10 +181,31 @@ After a deployment with the variable set:
    appear within a few seconds.
 2. Navigate between pages. Each navigation should produce **one** `page_view`.
    If you see two per navigation, enhanced measurement's history events are on
-   — turn them off.
+   — turn them off. **They were on when this was last checked**; see below.
 3. For custom events, use **Admin → DebugView** with the GA Debugger extension
    enabled, then click a person's mail icon, a DOI and a repository link, and
    check the parameters that arrive.
+
+Realtime is a slow way to find out that nothing is being sent, and a green
+`gtag/js` request in DevTools proves only that the library downloaded. The
+check that actually distinguishes working from broken is whether a
+`https://www.google-analytics.com/g/collect?…&tid=G-…` request goes out, and
+whether a `_ga` cookie exists — see *How commands reach gtag* above.
+
+### The stream setting that doubles page views
+
+GA4 **Admin → Data streams → the web stream → Enhanced measurement → Page
+changes based on browser history events** must be **off** for this site.
+
+It is a single-page application that sends its own page views, so with that
+setting on, every React Router navigation is measured twice: once by
+`trackPageView`, and once by GA4 reacting to the `pushState`. The duplicate is
+recognisable because it carries no `page_path` (`dp`) parameter, while ours
+always does. The first landing is unaffected either way.
+
+Nothing in the code can prevent this — `send_page_view: false` suppresses
+gtag's own view at configuration time, not enhanced measurement's history
+trigger — so it has to be turned off in the GA4 admin.
 
 To confirm the disabled path, open the deployed site's page source and search
 for `googletagmanager`: with no variable set, it is not there.

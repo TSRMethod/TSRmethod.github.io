@@ -14,18 +14,18 @@
 }
 
 /*
- * Room at the foot of the band for the figure's caption, which is laid over
- * the hero rather than sitting in its flow.
+ * No phone-only padding here, and that is load-bearing rather than an
+ * omission. There used to be extra room at the foot of the band for the
+ * figure's caption, which on a phone ran the full width under the buttons.
+ * The figure and its caption are now hidden outright below 768px — see
+ * HeroGeometry.module.css — so that reserved strip would be empty space under
+ * the calls to action with nothing in it, which is exactly the "unfinished"
+ * look hiding the figure was meant to remove.
  *
- * Only on a phone. On a wide screen the caption occupies space the figure
- * already had to itself; below the tablet breakpoint the text runs the full
- * width, and without this the calls to action would meet it.
+ * Nothing else has to change for the band to collapse: the figure's own
+ * region is absolutely positioned and never contributed height, so the hero's
+ * height on a phone is now its padding and its text, and nothing else.
  */
-@media (max-width: 767px) {
-  .hero {
-    padding-bottom: calc(var(--space-7) + 2.75rem);
-  }
-}
 
 /* Above the figure, and the only thing in the band that can be interacted
    with — the decorative layer sets `pointer-events: none`. */

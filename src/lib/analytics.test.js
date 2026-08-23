@@ -89,6 +89,55 @@ describe('with a measurement ID configured', () => {
     expect(config[2]).toMatchObject({ send_page_view: false })
   })
 
+  it('pushes every command as an Arguments object, not an Array', async () => {
+    /*
+     * The regression test for a silent, total analytics outage.
+     *
+     * gtag.js only acts on a dataLayer entry when it is a genuine Arguments
+     * object; a real Array — what `(...args) => dataLayer.push(args)` builds —
+     * is ignored. The symptom is that everything looks correct: gtag/js loads
+     * with a 200, the container registers, and dataLayer fills with entries
+     * that read as `js`, `config` and `event`. Nothing is ever configured and
+     * no measurement request is ever sent.
+     *
+     * Asserting the contents cannot catch this, because spreading an
+     * Arguments object and spreading an Array produce identical tuples. Only
+     * the entry's own type distinguishes them, so that is what is asserted.
+     */
+    const analytics = await loadAnalytics({ id: ID })
+    analytics.initializeAnalytics()
+    analytics.trackPageView('/people')
+    analytics.trackEvent('contact_click', { contact_type: 'email' })
+
+    const entries = Array.from(window.dataLayer)
+    expect(entries.length).toBeGreaterThan(0)
+
+    for (const entry of entries) {
+      expect(Object.prototype.toString.call(entry)).toBe('[object Arguments]')
+      expect(Array.isArray(entry)).toBe(false)
+    }
+  })
+
+  it('configures the tag before it sends anything through it', async () => {
+    /*
+     * gtag ignores events for a destination it has not been configured for,
+     * so `js` and `config` must be queued ahead of the first event — and the
+     * script tag may only be added once the queue holds them, since gtag.js
+     * drains dataLayer as soon as it runs.
+     */
+    const analytics = await loadAnalytics({ id: ID })
+    analytics.initializeAnalytics()
+    analytics.trackPageView('/')
+
+    const kinds = calls().map(([kind]) => kind)
+    expect(kinds[0]).toBe('js')
+    expect(kinds[1]).toBe('config')
+    expect(kinds.indexOf('event')).toBeGreaterThan(kinds.indexOf('config'))
+
+    /* Exactly one config: a second would re-register the same destination. */
+    expect(kinds.filter((kind) => kind === 'config')).toHaveLength(1)
+  })
+
   it('records one page view per route, and never the same one twice', async () => {
     const analytics = await loadAnalytics({ id: ID })
     analytics.initializeAnalytics()
