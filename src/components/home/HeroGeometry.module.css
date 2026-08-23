@@ -336,70 +336,31 @@
   }
 }
 
-/* ---- Responsive simplification ---- */
+/* ---- Below the tablet breakpoint: no figure at all ---- */
 
 /*
- * On a phone the figure keeps the protein and one relationship. Half the
- * residue points and two of the three triplets are not drawn at all, the
- * whole thing is enlarged and cropped to the right of the text rather than
- * shrunk to fit beside it, and the sway is dropped — at that size it is
- * movement without a picture to read.
+ * On a phone the figure is removed outright.
+ *
+ * It used to be kept and simplified — half the residues dropped, two of the
+ * three triplets dropped, the rest enlarged and cropped to the right of the
+ * text. At a phone's width that left the one thing the figure exists to show,
+ * a triangle being drawn between three residues, either off the crop or too
+ * small to follow, so what a visitor actually got was a few faint blue lines
+ * behind the heading: not a diagram of the method, just texture that read as
+ * an unfinished page. A hero that says less deliberately is worth more than
+ * one that says the same thing badly.
+ *
+ * `display: none` rather than `visibility` or `opacity`, because it is also
+ * the performance fix: an element that is not displayed does not run its
+ * animations, so none of the trace, residue, triangle, ring or sway keyframes
+ * below are ever started on a phone, and no part of this SVG is painted.
+ *
+ * This is deliberately not conditioned on reduced motion — see the note at
+ * the foot of this file.
  */
 @media (max-width: 767px) {
-  .residue:nth-child(2n) {
-    display: none;
-  }
-
-  .triplet:not(.primaryTriplet) {
-    display: none;
-  }
-
-  .structure {
-    animation: none;
-  }
-
-  /*
-   * On a phone the column runs the full width while the DRAWING keeps to the
-   * right of it. That split is what the caption needs: given only the
-   * drawing's 62% it wrapped onto four lines and ran into the buttons, and at
-   * full width it is two lines sitting clear beneath everything.
-   */
   .region {
-    width: 100%;
-  }
-
-  .layer {
-    width: 62%;
-    align-self: flex-end;
-    /*
-     * The mask still clears the text completely — everything left of about
-     * two fifths is gone — but what survives on the right is drawn at close
-     * to full strength. At a phone's line lengths a figure faint enough to be
-     * safe everywhere is a figure nobody can see at all, so the safety comes
-     * from where it is, not from how faint it is.
-     */
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(0, 0, 0, 0.12) 42%,
-      #000 80%
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(0, 0, 0, 0.12) 42%,
-      #000 80%
-    );
-    opacity: 0.9;
-  }
-
-  /* The CSS equivalent of `slice`, which is an attribute and cannot be set
-     per breakpoint: enlarge, anchor to the right, let the layer crop. A
-     smaller factor than it looks — enough to keep the residues and their
-     triangle legible without cropping the fold down to a corner. */
-  .figure {
-    transform: scale(1.4);
-    transform-origin: 100% 50%;
+    display: none;
   }
 }
 
@@ -452,3 +413,15 @@
     transform: scale(1);
   }
 }
+
+/*
+ * The two rules do not interact, and that is intentional.
+ *
+ * Reduced motion decides HOW the figure is drawn where it is drawn at all —
+ * above 768px, as a still composition. The phone rule decides WHETHER it is
+ * drawn, and the answer is no at every motion preference: the reason it is
+ * hidden is that it is illegible at that width, which switching the animation
+ * off does not improve. A reduced-motion phone therefore gets the same clean
+ * text-first hero as every other phone, not a static version of a figure too
+ * small to read.
+ */

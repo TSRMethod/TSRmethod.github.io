@@ -156,10 +156,14 @@ export default function HeroGeometry() {
        * than in the CMS because it describes the figure, and the figure is
        * code — an editor changing this line could make the page claim the
        * drawing is something it is not.
+       *
+       * A bare accession and nothing else. The animation already explains the
+       * method — a sentence restating it underneath was the figure explaining
+       * its own joke. What the drawing cannot say for itself is that these are
+       * measured coordinates rather than an illustrator's idea of a protein,
+       * and a PDB ID says exactly that to the people who would ask.
        */}
-      <p className={styles.caption}>
-        Based on the real 1UBQ ubiquitin structure and its Cα coordinates.
-      </p>
+      <p className={styles.caption}>PDB ID: 1UBQ</p>
     </div>
   )
 }

@@ -44,10 +44,28 @@ export function currentPath() {
 let initialized = false
 let lastPageViewPath = null
 
-/** The global gtag function, once the script has been installed. */
-function gtag(...args) {
+/**
+ * Queue one gtag command.
+ *
+ * The `arguments` object here is load-bearing and must not be "modernised"
+ * into rest parameters. gtag.js scans dataLayer and treats an entry as a
+ * command only when it is a genuine Arguments object — internally the check
+ * is `Object.prototype.toString.call(entry) === '[object Arguments]'`. A real
+ * Array, which is what `(...args) => dataLayer.push(args)` produces, is not
+ * that, so every command pushed as one is silently ignored: the container
+ * still loads and registers, gtag/js still returns 200, `window.dataLayer`
+ * still fills up with plausible-looking `js`/`config`/`event` entries — and
+ * nothing is ever configured and no measurement request is ever sent.
+ *
+ * That was a real outage of this site's analytics, invisible to every test
+ * that only inspects what reached dataLayer, because spreading an Arguments
+ * object and spreading an Array give the same result. The tests now assert
+ * the entry's type, not just its contents.
+ */
+function gtag() {
   window.dataLayer = window.dataLayer ?? []
-  window.dataLayer.push(args)
+  /* Not `...args`: gtag.js requires an Arguments object. See above. */
+  window.dataLayer.push(arguments)
 }
 
 /**
