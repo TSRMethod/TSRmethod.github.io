@@ -26,8 +26,7 @@ const skeleton = [
   {
     id: 'methods',
     label: 'TSR-Based Methods',
-    source: 'method',
-    groups: [{ id: 'one-molecule', label: 'One Molecule' }],
+    groups: [{ id: 'one-molecule-menu', label: 'One Molecule', sources: ['one-molecule'] }],
   },
 ]
 
@@ -143,9 +142,22 @@ describe('isRouteImplemented', () => {
   })
 
   it('accepts every hand-built page', () => {
-    for (const path of ['/publications', '/people', '/software', '/contact']) {
+    for (const path of [
+      '/publications',
+      '/people',
+      '/software',
+      '/software/get-started',
+      '/research',
+      '/research/earlier-implementations',
+      '/contact',
+    ]) {
       expect(isRouteImplemented(path), path).toBe(true)
     }
+  })
+
+  it('judges a link to a section by the page it is on', () => {
+    expect(isRouteImplemented('/software#research-code')).toBe(true)
+    expect(isRouteImplemented('/nothing-here#section')).toBe(false)
   })
 
   it('leaves the retired legacy pages unavailable', () => {
@@ -180,9 +192,87 @@ describe('live navigation', () => {
     }
   })
 
-  it('labels the analysis menu "Key Analysis & Visualization"', () => {
-    const entry = navigationSkeleton.find((item) => item.id === 'analysis')
-    expect(entry.label).toBe('Key Analysis & Visualization')
+  it('has six top-level entries: home, the science, BioTSR, methods & research, papers, the group', () => {
+    expect(getVisibleNavigation().map((item) => item.label)).toEqual([
+      'Home',
+      'Understand TSR',
+      'BioTSR',
+      'Methods & research',
+      'Publications',
+      'About',
+    ])
+  })
+
+  it('starts with a plain Home link, as well as the header brand', () => {
+    const [first] = navigationSkeleton
+    expect(first).toMatchObject({ id: 'home', label: 'Home', to: '/' })
+    expect(first.groups).toBeUndefined()
+  })
+
+  it('makes Understand TSR a plain link to the core method', () => {
+    const science = getVisibleNavigation().find((item) => item.id === 'science')
+    expect(science.groups).toBeUndefined()
+    expect(science.to).toBe('/tsr')
+  })
+
+  it('holds only the two BioTSR pages in the BioTSR menu', () => {
+    const biotsr = getVisibleNavigation().find((item) => item.id === 'biotsr')
+    const links = biotsr.groups.flatMap((group) => group.items)
+
+    expect(links.map((link) => [link.label, link.to])).toEqual([
+      ['Overview', '/software'],
+      ['Getting started', '/software/get-started'],
+    ])
+  })
+
+  it('puts every method, analysis page and the earlier code under Methods & research', () => {
+    const research = getVisibleNavigation().find((item) => item.id === 'research')
+    expect(research.groups.map((group) => group.label)).toEqual([
+      'Scientific methods',
+      'Analysis and research applications',
+      'Earlier implementations',
+      'Overview',
+    ])
+
+    const pages = research.groups.flatMap((group) => group.items.map((link) => link.to))
+    for (const method of publishedMethods.filter((m) => m.category !== 'core')) {
+      expect(pages, method.slug).toContain(method.path)
+    }
+    expect(pages).toContain('/research/earlier-implementations')
+    expect(pages).toContain('/research')
+    // Each page appears exactly once.
+    expect(new Set(pages).size).toBe(pages.length)
+  })
+
+  it('keeps the methods in their content order: one molecule, nucleotide, two molecules', () => {
+    const research = getVisibleNavigation().find((item) => item.id === 'research')
+    const [methods] = research.groups
+    const groups = methods.items.map(
+      (link) => publishedMethods.find((m) => m.path === link.to).group,
+    )
+    const order = ['one-molecule', 'nucleotide', 'two-molecules']
+    expect([...groups].sort((a, b) => order.indexOf(a) - order.indexOf(b))).toEqual(groups)
+  })
+
+  it('calls no scientific method legacy', () => {
+    /* The methods are current science; only their first software is old. */
+    const research = navigationSkeleton.find((item) => item.id === 'research')
+    for (const group of research.groups) {
+      expect(group.label).not.toMatch(/legacy/i)
+    }
+  })
+
+  it('has no menu entry pointing at a section of a page', () => {
+    /*
+     * One menu entry per page is what keeps exactly one entry current: when
+     * /software and /software#install were both entries, both lit up.
+     */
+    const links = getVisibleNavigation().flatMap((item) =>
+      item.groups ? item.groups.flatMap((group) => group.items) : [item],
+    )
+    for (const link of links) {
+      expect(link.to, link.label).not.toContain('#')
+    }
   })
 })
 

@@ -10,9 +10,52 @@
     "formerHeading": "Former members"
   },
   "software": {
-    "title": "Software",
-    "intro": "The code behind the methods documented on this site. Some of it is an installable Python package; the rest is research code written alongside a particular paper, and is described as such. Each entry links to the repository, which is the authoritative source for the code and its installation instructions.",
-    "note": "The software is spread across several repositories, some under individual accounts. A single, consolidated package is planned; until it exists, the repository linked from each entry is the one to use."
+    "title": "BioTSR",
+    "eyebrow": "Software",
+    "intro": "BioTSR is the unified software implementation of the Triangular Spatial Relationship (TSR) methodology. One Python package and one command line compute TSR keys for protein structures, amino acids, ligands, carbohydrates and nucleotides, and for the interfaces between them, and compare structures by the keys they share.",
+    "getStartedAction": "Get started",
+    "helpHeading": "Questions and problems",
+    "helpBody": "For a reproducible bug in BioTSR, open an issue on its GitHub repository and include the command you ran and the message it printed. For questions about which method to use or what a result means, email the group.",
+    "contactAction": "Contact the group",
+    "citeHeading": "Cite BioTSR",
+    "citeIntro": "Please cite BioTSR and the relevant method publication(s).",
+    "citeNote": "The “Cite this repository” button on BioTSR's GitHub page gives the same reference in other formats. Each method page on this site links the paper that describes the method.",
+    "licenceNote": "BioTSR is distributed under the Apache License 2.0, and its notices file lists the third-party code it includes. This licence covers BioTSR only; the earlier implementations and research tools each have their own terms.",
+    "figuresHeading": "Technical figures",
+    "figuresIntro": "Two reference figures for BioTSR 1.0.0, drawn from its released documentation: which method supports what, and how the package is organised.",
+    "matrixTitle": "Figure: BioTSR 1.0.0 methods and capabilities",
+    "matrixAlt": "Table of the 20 BioTSR 1.0.0 methods in four families: 2 protein Cα, 5 atomic protein, 8 atomic ligand, carbohydrate and nucleotide, and 5 cross methods. For each method it marks the type of vertex (Cα or heavy atom), the scope (pooled, one calculation per residue, or two-sided cross) and which options it supports. Amino-acid grouping and SSE annotation are available for the two protein Cα methods only. Mirror images are available for all 15 Cα and atomic single-structure methods and for no cross method. Size filtering is available for all 20 methods.",
+    "matrixCaption": "Read from the capability matrix released with BioTSR 1.0.0.",
+    "architectureTitle": "Figure: how BioTSR 1.0.0 is organised",
+    "architectureAlt": "Diagram of BioTSR 1.0.0. Inputs are PDB-format structure files, either your own or downloaded from the RCSB with biotsr fetch, and a request: one biotsr run, or a CSV manifest run by biotsr batch. The command line and the Python API both call one shared core, which reads the structure, selects points, forms candidate triangles, orders each triangle's vertices, measures it, bins the angle and the longest edge, and encodes one integer key. Modifiers apply within that core: amino-acid grouping and SSE annotation for Cα methods, mirror images for Cα and atomic methods, and size filtering for every method. Every method runs under one standard profile. Each result is written as four files and records two fingerprints, for the key space and for how triangles were drawn. Analysis offers common keys from the command line, and similarity, clustering and the heat map from Python.",
+    "architectureCaption": "Drawn for this site from BioTSR 1.0.0's released documentation.",
+    "researchCodeHeading": "Earlier implementations",
+    "researchCodeIntro": "The programs the TSR methods were first published with, and the separate tools written for particular papers, now have their own page under Methods & research, with each repository and its licence.",
+    "researchCodeAction": "Earlier implementations"
+  },
+  "research": {
+    "title": "Methods & research",
+    "intro": "TSR began as a way of describing a protein structure and has been extended to amino acids, drugs, ligands, nucleotides and the interfaces between molecules. Each page below explains one method or analysis and the paper that describes it, and says how to run it with BioTSR where BioTSR implements it.",
+    "coreNote": "Every method here builds on the core representation:",
+    "coreAction": "the TSR method",
+    "methodsHeading": "Scientific methods",
+    "methodsIntro": "Extensions of the core representation, grouped by what is being described: one molecule, nucleotides, or the interface between two molecules.",
+    "analysisHeading": "Analysis and research applications",
+    "analysisIntro": "What can be done with keys once they are computed: finding the keys structures share, comparing and clustering structures by their keys, and research models trained on key frequencies. Some of this is built into BioTSR and some is separate research code; each page says which.",
+    "earlierHeading": "Earlier implementations",
+    "earlierIntro": "The programs the methods were first published with, and the tools written alongside particular papers, are kept unchanged for provenance and for work that depends on them.",
+    "earlierAction": "Earlier implementations"
+  },
+  "earlierImplementations": {
+    "title": "Earlier implementations and research code",
+    "intro": "These repositories hold the code the TSR methods were first developed and published with, and tools written alongside particular papers. They are kept unchanged, for provenance and for work that depends on them.",
+    "biotsrNote": "For new calculations with a method that BioTSR implements, use BioTSR. Where supported, method pages link to BioTSR instructions.",
+    "biotsrAction": "Go to BioTSR",
+    "historicalHeading": "Earlier implementations of methods now in BioTSR",
+    "historicalIntro": "The first implementations of methods that BioTSR now runs. Where BioTSR's definition of a method differs from one of these programs, the method's page describes the difference.",
+    "toolsHeading": "Separate research tools and workflows",
+    "toolsIntro": "Code written alongside particular papers, including analyses that are not part of BioTSR 1.0: the deep neural network, the per-chain and percentage common-key scripts, and the feature-selection options of the hsp70/actin comparison. The clustering workflow used in the papers is here too; BioTSR's own clustering runs from Python.",
+    "licenceNote": "Each repository's licence is shown as the repository states it on GitHub. BioTSR's Apache License 2.0 does not extend to any of them, and a repository with no licence stated gives no permission to reuse its code beyond reading it; ask its authors."
   },
   "contact": {
     "title": "Contact",
@@ -22,7 +65,7 @@
     "collaborationHeading": "Research and collaboration",
     "collaborationBody": "For questions about the method, requests to collaborate, or enquiries about studying with the group, email us. Please say which method or paper you are asking about — it helps us send your message to the right person.",
     "softwareHeading": "Software problems",
-    "softwareBody": "For a reproducible bug or a technical problem with the code, an issue on the repository that provides the tool is better than an email: it reaches whoever wrote it, and other people hit the same problem. Each entry on the software page links to its repository. For anything less definite — which tool to use, what an output file means — email is fine.",
+    "softwareBody": "For a reproducible bug or a technical problem with the code, an issue on the repository that provides the tool is better than an email: it reaches whoever wrote it, and other people who hit the same problem can find it. BioTSR's issues are on GitHub; each earlier implementation and research tool links to its own repository. For anything less definite — which tool to use, what an output file means — email is fine.",
     "affiliationHeading": "Affiliation"
   }
 }

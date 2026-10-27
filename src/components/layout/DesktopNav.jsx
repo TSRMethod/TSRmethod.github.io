@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import NavDropdown from './NavDropdown'
+import MenuLink from './MenuLink'
 import styles from './DesktopNav.module.css'
 
 /*
@@ -56,15 +57,14 @@ export default function DesktopNav({ items }) {
             />
           ) : (
             <li key={item.id} className={styles.item}>
-              <NavLink
+              <MenuLink
                 to={item.to}
-                end={item.to === '/'}
                 className={({ isActive }) =>
                   isActive ? `${styles.link} ${styles.linkActive}` : styles.link
                 }
               >
                 {item.label}
-              </NavLink>
+              </MenuLink>
             </li>
           ),
         )}

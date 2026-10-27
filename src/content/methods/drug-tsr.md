@@ -36,11 +36,17 @@ paper:
   doi: 10.1016/j.compbiolchem.2024.108117
 
 repositories:
+  - name: BioTSR
+    url: https://github.com/TSRMethod/BioTSR
+    description: >-
+      Used by the examples on this page.
+    language: Python
   - name: TSR-Package
     url: https://github.com/pooryakhajouie/TSR-Package
     description: >-
-      Python package for downloading PDB files and generating TSR keys and
-      triplets. DrugTSR is provided by the `DrugTSR()` entry point.
+      DrugTSR was first implemented here, as the DrugTSR() function. It is
+      kept unchanged for provenance and for work that depends on it; its
+      README has its own installation instructions.
     language: Python
 ---
 
@@ -67,101 +73,78 @@ Results indicate that DrugTSR can improve clustering accuracy for drug families
 and predict interaction profiles across similar drugs, with applications
 ranging from virtual screening to drug design.
 
-## Installation
+## Run it with BioTSR
 
-Clone the repository:
-
-```bash
-git clone https://github.com/pooryakhajouie/TSR-Package.git
-cd TSR-Package
-```
-
-Create a virtual environment and activate it:
+BioTSR computes the two kinds of key at the centre of DrugTSR: keys within a
+ligand, and atomic cross keys whose triangles span a ligand and its protein.
+For the benzamidine (BEN) bound to trypsin in PDB entry 3PTB:
 
 ```bash
-python3 -m venv tsrenv
-source tsrenv/bin/activate   # macOS / Linux
-tsrenv\Scripts\activate      # Windows
+python -m pip install "biotsr==1.0.0"
+biotsr fetch 3PTB --pdb-dir structures
+biotsr run --method drug --pdb structures/3PTB.pdb --chain A --entity-name BEN --entity-id 1 --output results
+biotsr run --method drug_protein_cross --pdb structures/3PTB.pdb --chain A --chain-2 A --entity-name BEN --entity-id 1 --output results
 ```
 
-Install the package:
+The first command gives the ligand's own keys (84 triangles, 38 distinct keys,
+prefix `results/3PTB_A_drug_BEN_1`). The second gives the cross keys between
+the ligand and the protein chain (84 triangles, 72 distinct keys, prefix
+`results/3PTB_A_A_drug_protein_cross_BEN_1`). `--chain` is the ligand's chain
+and `--chain-2` the protein's; both are always required.
 
-```bash
-pip install .
-```
+![](diagram:cross-triangles?example=drug)
 
-Install the required dependencies:
+- **Which atoms take part in a cross:** a ligand atom is kept if a protein
+  heavy atom lies within the contact cutoff of it, and a protein atom if a
+  ligand heavy atom does. The reference cutoff is 3.5 Å, set with
+  `--contact-cutoff`, and the cutoff used is recorded with every result.
+- **One copy or every copy:** with `--entity-id` the ligand is that one copy;
+  without it, every copy of that name on the chain is taken together.
+  `biotsr.list_entity_targets` lists the ligands on a chain.
+- **Other methods:** `drug_atom_selection` uses ligand atoms you name, and the
+  protein's own keys come from the protein Cα and amino-acid methods. The
+  paper's named key types (CA, CABS, ATOMBS, CATOM, CATOM2) are not BioTSR
+  method names, and BioTSR's documentation does not map them to its methods.
+- **Options:** the `drug` method takes mirror images and size filtering; the
+  cross method takes size filtering only.
+- **From Python:** `biotsr.analyze(..., method="drug", ...)` and
+  `biotsr.analyze_cross(..., method="drug_protein_cross", ...)`.
 
-```bash
-pip install -r requirements.txt
-```
+The [user guide, §7](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md#7-drug-ligand-tsr)
+covers the ligand methods,
+[tutorial 04](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/04_cross.md)
+the cross methods, and the
+[cross-TSR method record](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/methods/CROSS_TSR.md)
+defines them.
 
-## Usage
+### How BioTSR's cross keys differ from the earlier programs
 
-DrugTSR has its own entry point, `DrugTSR()`, which needs to know which drug
-to look for in addition to the structure and chain.
+The earlier cross-key programs differ from BioTSR in ways its
+[cross-TSR record, §10](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/methods/CROSS_TSR.md#10-relationship-to-the-historical-implementations)
+lists one by one, among them:
 
-### Retrieve PDB files
+- **contact filtering:** one earlier program narrowed only the protein side by
+  the cutoff and admitted the whole ligand; BioTSR narrows both sides. On 6G9M
+  with ligand ESW 404 at 3.5 Å, that is 37 ligand atoms against 10, and 8,325
+  triangles against 900;
+- **atom identity:** two earlier programs identified pooled atoms by name, so
+  two same-named atoms of different residues became one;
+- **alternate locations, distance classes and the angle divisor:** BioTSR reads
+  alternate location blank or `A` only, uses 18 atomic distance classes, and
+  divides by π rather than 3.14.
 
-```python
-from tsr_package import PDB_DL
+Matching the cutoff alone therefore does not reproduce an earlier program's
+selection.
 
-# Retrieve PDB files for the specified PDB IDs
-pdb_files = ['4CI2', '4ci1']
-PDB_DL(pdb_files, 'Dataset')
-```
+### Earlier settings and BioTSR's
 
-This downloads the PDB files into the specified `Dataset/` directory, which is
-also the default if no directory is given.
+The DrugTSR study represented a binding site in two ways, by its Cα atoms and
+by all of its atoms; its Figure 3 uses both. The group's earlier studies used
+contact cutoffs between 3 and 5 Å, most often 3.5 Å. This page does not say
+which cutoff a particular published figure used, which program produced it, or
+whether an all-atom binding site took only the atoms within the cutoff or every
+atom of the residues the cutoff selected.
 
-### Generate drug keys and triplets
-
-```python
-from tsr_package import DrugTSR
-
-# Define the directory where PDB files are stored
-data_dir = "Dataset"
-pdb_files = ['4CI2', '4ci1']
-chain = ['B', 'B']              # specify chains for each PDB file
-drug_name = ['LVY', 'EF2']      # ligand code in the PDB entry
-drug_id = ['1429', '21429']
-
-# Process protein data to generate key files
-DrugTSR(data_dir, input_files=pdb_files, chain=chain, drug_name=drug_name,
-        drug_id=drug_id, output_option='both')
-```
-
-Protein chains are case-sensitive and must match the chain IDs in the PDB file.
-
-### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `data_dir` | `str` | — | Directory containing the downloaded PDB files. |
-| `input_files` | `list[str]` or `str` | — | List of PDB IDs, or the path to a CSV file. |
-| `chain` | `list[str]` | `None` | Chain ID for each input file. Case-sensitive. |
-| `drug_name` | `list[str]` | `None` | Ligand code for each input file, as it appears in the PDB entry. |
-| `drug_id` | `list[str]` | `None` | Identifier for each drug. |
-| `output_option` | `str` | `'both'` | One of `'keys'`, `'triplets'` or `'both'`. |
-| `output_subdir` | `str` | `'lexicographic'` | Subdirectory of `data_dir` for the generated files. |
-
-### Using a CSV file as input
-
-```python
-from tsr_package import DrugTSR
-
-# Define the directory and CSV file path
-data_dir = "Dataset"
-csv_file = "sample_details.csv"
-
-# Process the CSV input
-DrugTSR(data_dir, input_files=csv_file, output_option='both')
-```
-
-Unlike the core TSR method, the CSV needs four columns, because the drug has
-to be identified as well as the chain:
-
-| protein | chain | drug_name | drug_id |
-| --- | --- | --- | --- |
-| 5L2I | B | LVY | 1429 |
-| 5XYZ | A | LQQ | 21429 |
+BioTSR 1.0.0's settings are its own, not a record of earlier work: a reference
+cutoff of 3.5 Å that `--contact-cutoff` changes, applied to both sides of the
+cross and recorded with every result.

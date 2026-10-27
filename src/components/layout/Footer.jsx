@@ -12,8 +12,10 @@ import styles from './Footer.module.css'
  * what the site documents, and who is behind it.
  */
 const EXPLORE = [
-  { to: '/tsr', label: 'TSR Method' },
-  { to: '/software', label: 'Software' },
+  { to: '/tsr', label: 'Understand TSR' },
+  { to: '/software', label: 'BioTSR' },
+  { to: '/software/get-started', label: 'Getting started with BioTSR' },
+  { to: '/research', label: 'Methods & research' },
   { to: '/publications', label: 'Publications' },
 ]
 

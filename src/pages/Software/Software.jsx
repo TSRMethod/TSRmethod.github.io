@@ -1,199 +1,293 @@
 import { Link } from 'react-router-dom'
 import usePageMetadata from '../../hooks/usePageMetadata'
-import {
-  pages,
-  getRepositoriesByCategory,
-  getPagesForRepository,
-  repositoryPath,
-} from '../../content'
-import Reveal from '../../components/shared/Reveal'
-import { EVENTS, trackEvent } from '../../lib/analytics'
+import { pages, softwarePages, softwareRelease } from '../../content'
+import { isRouteImplemented } from '../../app/routeRegistry'
+import MarkdownContent from '../../components/method/MarkdownContent'
+import SectionNavigation from '../../components/method/SectionNavigation'
+import CopyButton from '../../components/shared/CopyButton'
+import ExternalLink from '../../components/software/ExternalLink'
+import trackRepositoryLink from '../../components/software/trackRepositoryLink'
+import layout from '../../components/method/MethodPage.module.css'
 import styles from './Software.module.css'
 
 /*
- * The software catalogue.
+ * The BioTSR page: what the package is, how to install it, what it computes,
+ * where its documentation is, how to get help and how to cite it.
  *
- * A directory, not a manual. Each entry says what a repository is for and
- * sends the reader to it; the installation commands, the input formats and the
- * worked examples stay on the method pages, which is where they were verified.
- * Repeating them here would mean two copies to keep in step, and the packages
- * are expected to be consolidated into a single one later — at which point a
- * second copy of today's import paths would be actively misleading.
+ * Two sources, and neither of them is this file:
  *
- * Nothing about any repository is written in this file. Names, URLs, owners,
- * descriptions and grouping all come from src/content/repositories, and the
- * links to documentation are derived from the method pages themselves. When a
- * consolidated package arrives, taking over the `core` group is an edit to one
- * JSON file: no JSX changes, and no GitHub account name to find in the layout.
+ *   - the release record (src/content/repositories/biotsr.json, read through
+ *     `softwareRelease`) — version, dates, licence, citation, and every
+ *     version-specific link, derived in one place;
+ *   - the page's prose (src/content/software/biotsr.md) and its labels in
+ *     pages.json — installation, the method families, the command-line /
+ *     Python split and the documentation list, as text an editor can change.
  *
- * Section labels are here rather than in content for the same reason the
- * navigation's are: they are the site's taxonomy, not editorial copy, and an
- * editor renaming them would silently change how the page is organised.
+ * The layout is the method pages': a sticky "On this page" sidebar on
+ * desktop, a collapsed list on a phone. Installation, documentation and
+ * citation are sections listed there, not entries in the site menu, so the
+ * menu marks one page as current and the sidebar marks one section.
+ *
+ * The earlier implementations and research tools used to be listed here.
+ * They now have their own page under Methods & research, and the last
+ * section of this one links there — under the ids old links used, so
+ * /software#research-code still lands on the way to them.
  */
-const SECTIONS = [
-  {
-    category: 'core',
-    label: 'Core TSR software',
-    blurb: 'The main implementation of the method and its variants.',
-  },
-  {
-    category: 'method',
-    label: 'Specialised TSR software',
-    blurb:
-      'Separate repositories for structures the core package does not cover: individual amino acids, nucleotides, and nucleotide–protein contacts.',
-  },
-  {
-    category: 'analysis',
-    label: 'Analysis and visualisation',
-    blurb:
-      'Code that works on keys once they have been generated — summarising them, clustering by them, and learning from them.',
-  },
-]
+
+const BODY = softwarePages.biotsr
+
+const EARLIER_PATH = '/research/earlier-implementations'
+
+const dateFormat = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
 
 /*
- * One place decides what a repository click is called and what identifies it.
+ * The two technical figures, collapsed by default.
  *
- * The id comes from the record, so the event survives a repository being
- * renamed or moved — which is the whole reason repositories are records
- * rather than URLs written into a page.
+ * They are reference material, dense by nature: a capability table and an
+ * architecture diagram. The page's own text already says what they show, so
+ * they sit behind a labelled disclosure with a full-size link, and their alt
+ * text summarises them rather than transcribing every cell.
  */
-function trackRepositoryLink(repository, linkType) {
-  trackEvent(EVENTS.repositoryLink, {
-    repository_id: repository.id,
-    link_type: linkType,
-  })
-}
+/* Files are named after the release they describe, so a new release adds
+   new figures rather than silently changing what an old link shows. */
+const FIGURES = [
+  { id: 'capability-matrix', copy: 'matrix' },
+  { id: 'architecture', copy: 'architecture' },
+]
 
-/** What the reader is actually getting, in two words. */
-const KIND_LABEL = {
-  package: 'Installable Python package',
-  scripts: 'Research scripts',
-}
+const figureSrc = (figure, release) =>
+  `/images/figures/biotsr-${release.version}-${figure.id}.svg`
 
-function Repository({ repository, index }) {
-  const path = repositoryPath(repository.url)
-  const documentation = getPagesForRepository(repository.url)
-
+function TechnicalFigure({ figure, copy, release }) {
+  const title = copy[`${figure.copy}Title`]
+  const src = figureSrc(figure, release)
   return (
-    <Reveal as="li" index={index} className={styles.repository}>
-      <h3 className={styles.name}>
-        <a
-          href={repository.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackRepositoryLink(repository, 'repository')}
-        >
-          {repository.name}
-          <span className="visually-hidden">
-            {` — ${path ?? repository.url} on GitHub (opens in a new tab)`}
-          </span>
-        </a>
-      </h3>
-
-      <p className={styles.meta}>
-        <span className={styles.kind}>{KIND_LABEL[repository.kind]}</span>
-        {repository.language && (
-          <span className={styles.language}>{repository.language}</span>
-        )}
-      </p>
-
-      <p className={styles.description}>{repository.description}</p>
-
-      {/*
-       * The owner is shown, not hidden, because these repositories sit under
-       * different accounts and a reader deciding whether to depend on one
-       * should be able to see whose it is. Read from the URL, so it follows a
-       * repository that moves.
-       */}
-      {path && <p className={styles.path}>github.com/{path}</p>}
-
-      {documentation.length > 0 && (
-        <div className={styles.documentation}>
-          <h4 className={styles.documentationHeading}>Documented on this site</h4>
-          <ul className={styles.documentationList}>
-            {documentation.map((method) => (
-              <li key={method.slug}>
-                <Link
-                  to={method.path}
-                  onClick={() =>
-                    /*
-                     * Not ordinary navigation: someone looking at a package
-                     * and choosing to read its tutorial is the engagement
-                     * this site exists to produce, so it is worth a name.
-                     */
-                    trackEvent(EVENTS.tutorialLink, {
-                      method_slug: method.slug,
-                      repository_id: repository.id,
-                      link_type: 'documentation',
-                    })
-                  }
-                >
-                  {method.shortTitle ?? method.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {repository.issuesUrl && (
-        <p className={styles.issues}>
-          <a
-            href={repository.issuesUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackRepositoryLink(repository, 'issues')}
-          >
-            Report a problem
-            <span className="visually-hidden">
-              {` with ${repository.name} on GitHub (opens in a new tab)`}
-            </span>
+    <details className={styles.figureDetails}>
+      <summary className={styles.figureSummary}>{title}</summary>
+      <figure className={styles.figure}>
+        <img
+          src={src}
+          alt={copy[`${figure.copy}Alt`]}
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption>
+          {copy[`${figure.copy}Caption`]}{' '}
+          <a href={src} target="_blank" rel="noopener noreferrer">
+            Open the full-size figure (SVG)
+            <span className="visually-hidden">{`: ${title} (opens in a new tab)`}</span>
           </a>
-        </p>
-      )}
-    </Reveal>
+        </figcaption>
+      </figure>
+    </details>
   )
 }
 
+/* Anchors the old listing had, which should still land somewhere useful. */
+const MOVED_ANCHORS = ['software-core', 'software-analysis', 'software-historical']
+
 export default function Software() {
-  const { title, intro, note } = pages.software
+  const copy = pages.software
+  const release = softwareRelease
 
-  usePageMetadata({ title, description: intro })
+  usePageMetadata({ title: copy.title, description: BODY.summary })
 
-  const sections = SECTIONS.map((section) => ({
-    ...section,
-    repositories: getRepositoriesByCategory(section.category),
-  })).filter((section) => section.repositories.length > 0)
+  /* One continuous table of contents: Markdown sections, then the rest. */
+  const sections = [
+    ...BODY.headings.filter((heading) => heading.depth === 2),
+    { id: 'help', text: copy.helpHeading },
+    ...(release
+      ? [
+          { id: 'cite', text: copy.citeHeading },
+          { id: 'figures', text: copy.figuresHeading },
+        ]
+      : []),
+    { id: 'research-code', text: copy.researchCodeHeading },
+  ].map(({ id, text }) => ({ id, text, depth: 2 }))
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <h1>{title}</h1>
-        <p className={styles.intro}>{intro}</p>
-        <p className={styles.note}>{note}</p>
+    <article className={layout.page}>
+      <header className={layout.header}>
+        <p className={styles.eyebrow}>{copy.eyebrow}</p>
+        <h1 className={layout.title}>{copy.title}</h1>
+        <p className={styles.intro}>{copy.intro}</p>
+
+        {release && (
+          <>
+            <dl className={styles.facts}>
+              <div>
+                <dt>Version</dt>
+                <dd>{release.version}</dd>
+              </div>
+              <div>
+                <dt>Released</dt>
+                <dd>
+                  <time dateTime={release.date}>
+                    {dateFormat.format(new Date(`${release.date}T00:00:00Z`))}
+                  </time>
+                </dd>
+              </div>
+              <div>
+                <dt>Licence</dt>
+                <dd>{release.licence}</dd>
+              </div>
+              <div>
+                <dt>Python</dt>
+                <dd>{release.pythonVersions}</dd>
+              </div>
+              <div>
+                <dt>Platforms</dt>
+                <dd>{release.platforms}</dd>
+              </div>
+            </dl>
+
+            <div className={styles.actions}>
+              <Link to="/software/get-started" className={styles.primary}>
+                {copy.getStartedAction}
+              </Link>
+              <ExternalLink
+                label="Documentation"
+                href={release.docUrl('docs/README.md')}
+                className={styles.secondary}
+                context={`for ${release.name} ${release.version}`}
+                onClick={() => trackRepositoryLink(release.id, 'documentation')}
+              />
+            </div>
+
+            <ul className={styles.links}>
+              <li>
+                <ExternalLink
+                  label="GitHub repository"
+                  href={release.repositoryUrl}
+                  context={`for ${release.name}`}
+                  onClick={() => trackRepositoryLink(release.id, 'repository')}
+                />
+              </li>
+              <li>
+                <ExternalLink
+                  label={`Release ${release.version}`}
+                  href={release.releaseUrl}
+                  context={`of ${release.name}, on GitHub`}
+                  onClick={() => trackRepositoryLink(release.id, 'release')}
+                />
+              </li>
+              <li>
+                <ExternalLink
+                  label="PyPI"
+                  href={release.pypiUrl}
+                  context={`page for ${release.name} ${release.version}`}
+                  onClick={() => trackRepositoryLink(release.id, 'pypi')}
+                />
+              </li>
+            </ul>
+          </>
+        )}
       </header>
 
-      {sections.map((section) => (
-        <section
-          key={section.category}
-          className={styles.section}
-          aria-labelledby={`software-${section.category}`}
-        >
-          <h2 id={`software-${section.category}`} className={styles.sectionHeading}>
-            {section.label}
-          </h2>
-          <p className={styles.blurb}>{section.blurb}</p>
-          <ul className={styles.list}>
-            {section.repositories.map((repository, index) => (
-              <Repository
-                key={repository.id}
-                repository={repository}
-                index={index}
+      <div className={layout.body}>
+        <SectionNavigation sections={sections} />
+
+        <div className={layout.content}>
+          <MarkdownContent>{BODY.body}</MarkdownContent>
+
+          <section className={styles.section} aria-labelledby="help">
+            <h2 id="help" className={styles.sectionHeading}>
+              {copy.helpHeading}
+            </h2>
+            <p>{copy.helpBody}</p>
+            <ul className={styles.helpLinks}>
+              {release?.issuesUrl && (
+                <li>
+                  <ExternalLink
+                    label="Report a problem"
+                    href={release.issuesUrl}
+                    context={`with ${release.name} on GitHub`}
+                    onClick={() => trackRepositoryLink(release.id, 'issues')}
+                  />
+                </li>
+              )}
+              <li>
+                <Link to="/contact">{copy.contactAction}</Link>
+              </li>
+            </ul>
+          </section>
+
+          {release && (
+            <section className={styles.section} aria-labelledby="cite">
+              <h2 id="cite" className={styles.sectionHeading}>
+                {copy.citeHeading}
+              </h2>
+              <p className={styles.citeLead}>{copy.citeIntro}</p>
+              <blockquote className={styles.citation}>
+                <p>
+                  {release.citationLead}
+                  <cite>{release.citationTitle}</cite>
+                  {release.citationTail}
+                </p>
+              </blockquote>
+              <CopyButton
+                value={release.citation}
+                label="Copy the citation"
+                copiedLabel="Citation copied"
+                failedLabel="Copying failed. Select the citation and copy it."
               />
+              <p className={styles.citeNote}>{copy.citeNote}</p>
+              <p className={styles.citeNote}>
+                {copy.licenceNote}{' '}
+                <ExternalLink
+                  label="Licence"
+                  href={release.docUrl('LICENSE')}
+                  context={`of ${release.name}`}
+                />
+                {' · '}
+                <ExternalLink
+                  label="Notices"
+                  href={release.docUrl('NOTICE')}
+                  context={`of ${release.name}`}
+                />
+              </p>
+            </section>
+          )}
+
+          {release && (
+            <section className={styles.section} aria-labelledby="figures">
+              <h2 id="figures" className={styles.sectionHeading}>
+                {copy.figuresHeading}
+              </h2>
+              <p>{copy.figuresIntro}</p>
+              {FIGURES.map((figure) => (
+                <TechnicalFigure
+                  key={figure.id}
+                  figure={figure}
+                  copy={copy}
+                  release={release}
+                />
+              ))}
+            </section>
+          )}
+
+          <section className={styles.section} aria-labelledby="research-code">
+            {/* Empty targets for the anchors the old repository listing had. */}
+            {MOVED_ANCHORS.map((id) => (
+              <span key={id} id={id} className={styles.anchor} />
             ))}
-          </ul>
-        </section>
-      ))}
-    </div>
+            <h2 id="research-code" className={styles.sectionHeading}>
+              {copy.researchCodeHeading}
+            </h2>
+            <p>{copy.researchCodeIntro}</p>
+            {isRouteImplemented(EARLIER_PATH) && (
+              <p>
+                <Link to={EARLIER_PATH}>{copy.researchCodeAction}</Link>
+              </p>
+            )}
+          </section>
+        </div>
+      </div>
+    </article>
   )
 }

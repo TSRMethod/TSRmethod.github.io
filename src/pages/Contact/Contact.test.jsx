@@ -82,12 +82,17 @@ describe('the contact page', () => {
     ).toHaveAttribute('href', 'https://www.louisiana.edu/')
   })
 
-  it('sends software problems to the software page', () => {
+  it('sends a BioTSR problem to BioTSR’s issues, and other code to its listing', () => {
     renderContact()
 
     expect(
-      screen.getByRole('link', { name: /find the right repository/i }),
-    ).toHaveAttribute('href', '/software')
+      screen.getByRole('link', { name: /^Report a BioTSR problem on GitHub/ }),
+    ).toHaveAttribute('href', 'https://github.com/TSRMethod/BioTSR/issues')
+    expect(
+      screen.getByRole('link', { name: 'Earlier implementations' }),
+    ).toHaveAttribute('href', '/research/earlier-implementations')
+    // The BioTSR overview holds no repository list any more.
+    expect(screen.queryByRole('link', { name: /find the right repository/i })).toBeNull()
   })
 })
 

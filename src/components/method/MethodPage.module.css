@@ -51,6 +51,12 @@
   color: var(--color-text-muted);
 }
 
+.credit {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+}
+
 /*
  * Single column on small screens; sidebar plus content on desktop.
  *
@@ -81,6 +87,12 @@
 
 .section {
   margin-top: var(--space-7);
+}
+
+/* An empty target for an old section link (see RETIRED_SECTION_IDS). */
+.anchor {
+  display: block;
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
 .sectionHeading {

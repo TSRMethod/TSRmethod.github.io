@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../../app/App'
 import MethodPage from './MethodPage'
-import { getPublishedMethod, methods } from '../../content'
+import { getPublishedMethod, methods, buildMethod } from '../../content'
+import kitSource from '../../test/fixtures/method-kit.md?raw'
 import { setViewport } from '../../test/viewport'
 
 function renderApp(path) {
@@ -15,10 +16,24 @@ function renderApp(path) {
   )
 }
 
+/*
+ * The page the component-level tests render: a fixture that carries every
+ * kind of block the method template supports — fenced code in two languages,
+ * tables, a Slurm guide and a repository list. No published page does any
+ * more: they moved to BioTSR, and none carries a job script or an earlier
+ * package's walk-through. The fixture is that walk-through, kept as test data
+ * (src/test/fixtures/method-kit.md) and passed to MethodPage as its entry, so the template keeps its coverage without a real page having to
+ * carry outdated instructions.
+ */
+const KIT = 'method-kit'
+
+const kit = buildMethod('./methods/method-kit.md', kitSource)
+const fixture = (slug) => (slug === KIT ? kit : getPublishedMethod(slug))
+
 function renderMethod(slug = 'tsr') {
   return render(
     <MemoryRouter>
-      <MethodPage slug={slug} />
+      <MethodPage slug={slug} entry={slug === KIT ? kit : undefined} />
     </MemoryRouter>,
   )
 }
@@ -50,10 +65,10 @@ describe('/tsr route', () => {
     renderApp('/')
 
     const nav = screen.getByRole('navigation', { name: 'Main' })
-    await user.click(within(nav).getByRole('link', { name: 'TSR Method' }))
+    await user.click(within(nav).getByRole('link', { name: 'Understand TSR' }))
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /Triangular Spatial/ }),
+      await screen.findByRole('heading', { level: 1, name: /Triangular Spatial/ }),
     ).toBeInTheDocument()
   })
 })
@@ -110,7 +125,7 @@ describe('markdown body', () => {
   })
 
   it('renders fenced code through CodeBlock, with a language label', () => {
-    renderMethod()
+    renderMethod(KIT)
 
     expect(screen.getAllByText('python').length).toBeGreaterThan(0)
     expect(screen.getAllByText('bash').length).toBeGreaterThan(0)
@@ -133,7 +148,7 @@ describe('markdown body', () => {
      * also makes the assertion about behaviour rather than the call.
      */
     const user = userEvent.setup()
-    renderMethod()
+    renderMethod(KIT)
 
     const [copyButton] = screen.getAllByRole('button', { name: /^Copy/ })
     await user.click(copyButton)
@@ -143,7 +158,7 @@ describe('markdown body', () => {
   })
 
   it('names each copy button after the block it copies', () => {
-    renderMethod()
+    renderMethod(KIT)
 
     // Several copy buttons on one page must be distinguishable by name alone.
     /*
@@ -152,8 +167,9 @@ describe('markdown body', () => {
      * announcing as "Copytsr_keys.sbatch" — the name algorithm joins child
      * text with no separator.
      */
+    const { filename } = fixture(KIT).slurm.script
     expect(
-      screen.getByRole('button', { name: 'Copy tsr_keys.sbatch' }),
+      screen.getByRole('button', { name: `Copy ${filename}` }),
     ).toBeInTheDocument()
 
     /*
@@ -175,10 +191,10 @@ describe('markdown body', () => {
   })
 
   it('renders tables with column-scoped headers inside a scroll region', () => {
-    const { container } = renderMethod()
+    const { container } = renderMethod(KIT)
 
     const tables = Array.from(container.querySelectorAll('table'))
-    expect(tables.length).toBe(2) // parameters, and the input CSV layout
+    expect(tables.length).toBeGreaterThanOrEqual(2)
 
     for (const table of tables) {
       for (const th of table.querySelectorAll('th')) {
@@ -191,7 +207,7 @@ describe('markdown body', () => {
   })
 
   it('renders the parameter table content', () => {
-    renderMethod()
+    renderMethod(KIT)
 
     expect(screen.getByRole('columnheader', { name: 'Parameter' })).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: 'output_option' })).toBeInTheDocument()
@@ -201,7 +217,7 @@ describe('markdown body', () => {
 describe('section navigation', () => {
   it('lists the body sections as a sidebar on desktop', () => {
     setViewport('desktop')
-    renderMethod()
+    renderMethod(KIT)
 
     const toc = screen.getByRole('navigation', { name: 'On this page' })
     expect(within(toc).getByRole('link', { name: 'Overview' })).toHaveAttribute(
@@ -241,7 +257,7 @@ describe('section navigation', () => {
 
   it('includes the component-rendered sections, not just the markdown ones', () => {
     setViewport('desktop')
-    renderMethod()
+    renderMethod(KIT)
 
     const toc = screen.getByRole('navigation', { name: 'On this page' })
     expect(
@@ -257,8 +273,8 @@ describe('SlurmGuide', () => {
   beforeEach(() => setViewport('desktop'))
 
   it('renders the job script from content, verbatim', () => {
-    const { container } = renderMethod()
-    const slurm = getPublishedMethod('tsr').slurm
+    const { container } = renderMethod(KIT)
+    const slurm = fixture(KIT).slurm
 
     const script = Array.from(container.querySelectorAll('pre')).find((pre) =>
       pre.textContent.includes('#SBATCH'),
@@ -269,27 +285,28 @@ describe('SlurmGuide', () => {
   })
 
   it('preserves the multiline shape of the script', () => {
-    const slurm = getPublishedMethod('tsr').slurm
+    const slurm = fixture(KIT).slurm
 
     expect(slurm.script.code.split('\n').length).toBeGreaterThan(10)
     expect(slurm.script.code).toContain('#SBATCH -t 72:00:00')
-    expect(slurm.script.code).toContain('source tsrenv/bin/activate')
+    expect(slurm.script.code).toContain('source myenv/bin/activate')
   })
 
   it('labels the script with its filename and shows the submit command', () => {
-    const { container } = renderMethod()
+    const { container } = renderMethod(KIT)
+    const slurm = fixture(KIT).slurm
 
     // The filename also appears in the copy button's accessible name, so
     // this checks the visible caption specifically.
     const captions = Array.from(container.querySelectorAll('figcaption')).map(
       (node) => node.firstChild.textContent,
     )
-    expect(captions).toContain('tsr_keys.sbatch')
+    expect(captions).toContain(slurm.script.filename)
 
     const submit = Array.from(container.querySelectorAll('pre')).find((pre) =>
       pre.textContent.startsWith('sbatch '),
     )
-    expect(submit.textContent).toBe('sbatch tsr_keys.sbatch')
+    expect(submit.textContent).toBe(slurm.submit.code)
   })
 
   it('hard-codes no cluster values of its own', async () => {
@@ -305,12 +322,14 @@ describe('SlurmGuide', () => {
   })
 
   it('renders nothing when a method has no slurm block', () => {
+    // /tsr points to BioTSR's HPC guide instead of carrying a job script.
+    expect(getPublishedMethod('tsr').slurm).toBeNull()
     const { container } = render(
       <MemoryRouter>
         <MethodPage slug="tsr" />
       </MemoryRouter>,
     )
-    expect(container.querySelector('#slurm-and-hpc')).toBeInTheDocument()
+    expect(container.querySelector('#slurm-and-hpc')).not.toBeInTheDocument()
 
     // And the guard itself, exercised directly.
     const withoutSlurm = methods.find((m) => !m.slurm)
@@ -326,12 +345,26 @@ describe('source code section', () => {
   it('lists each repository from frontmatter', () => {
     renderMethod()
 
-    const link = screen.getByRole('link', { name: /TSR-Package/ })
-    expect(link).toHaveAttribute(
+    const section = screen.getByRole('region', { name: 'Source code' })
+    const links = within(section).getAllByRole('link')
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(
+      getPublishedMethod('tsr').repositories.map((repository) => repository.url),
+    )
+    for (const link of links) {
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    }
+  })
+
+  it('lists BioTSR first, and keeps the earlier implementation', () => {
+    renderMethod()
+
+    const section = screen.getByRole('region', { name: 'Source code' })
+    const [first, second] = within(section).getAllByRole('link')
+    expect(first).toHaveAttribute('href', 'https://github.com/TSRMethod/BioTSR')
+    expect(second).toHaveAttribute(
       'href',
       'https://github.com/pooryakhajouie/TSR-Package',
     )
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 })
 
@@ -346,5 +379,112 @@ describe('draft protection', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: /page not found/i }),
     ).toBeInTheDocument()
+  })
+})
+
+describe('/tsr runs with BioTSR', () => {
+  beforeEach(() => setViewport('desktop'))
+
+  it('replaces the old walk-through with a BioTSR section', () => {
+    renderMethod()
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Run it with BioTSR' }),
+    ).toBeInTheDocument()
+    const commands = Array.from(document.querySelectorAll('pre')).map(
+      (pre) => pre.textContent,
+    )
+    expect(commands.join('\n')).toContain('python -m pip install "biotsr==1.0.0"')
+    expect(commands.join('\n')).toContain(
+      'biotsr run --method protein --pdb structures/1UBQ.pdb --chain A --output results',
+    )
+
+    // The TSR-Package installation, its Windows activation line and its job
+    // script are gone; the earlier implementation is a link, not a manual.
+    expect(screen.queryByRole('heading', { name: 'Installation' })).not.toBeInTheDocument()
+    expect(commands.join('\n')).not.toMatch(/git clone|tsrenv|requirements\.txt/)
+    expect(
+      screen.getByRole('heading', {
+        level: 3,
+        name: 'How BioTSR differs from the earlier implementation',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('reads Overview, figure, worked example, then the rest, as the sidebar lists it', () => {
+    const { container } = renderMethod()
+
+    const order = Array.from(container.querySelectorAll('article h2, article h3, article figure')).map((el) =>
+      el.tagName === 'FIGURE' ? `figure:${el.getAttribute('aria-labelledby') ?? ''}` : el.textContent.trim(),
+    )
+    const at = (entry) => order.indexOf(entry)
+    expect(at('Overview')).toBeGreaterThan(-1)
+    expect(at('Overview')).toBeLessThan(at('figure:tsr-overview-caption-full'))
+    expect(at('figure:tsr-overview-caption-full')).toBeLessThan(at('Worked example'))
+    expect(at('Worked example')).toBeLessThan(at('Distinguishing features'))
+
+    // The sidebar is built from the same headings, in the same order.
+    const [nav] = screen.getAllByRole('navigation', { name: /on this page/i })
+    const listed = within(nav)
+      .getAllByRole('link')
+      .map((link) => link.textContent.trim())
+    expect(listed.slice(0, 5)).toEqual([
+      'Overview',
+      'Key generation process',
+      'Worked example',
+      'Distinguishing features',
+      'Applications',
+    ])
+    expect(within(nav).getByRole('link', { name: 'Worked example' })).toHaveAttribute(
+      'href',
+      '#worked-example',
+    )
+  })
+
+  it('keeps old #earlier-implementation links landing on the source code', () => {
+    renderMethod()
+    const anchor = document.getElementById('earlier-implementation')
+    expect(anchor).not.toBeNull()
+    expect(anchor.closest('section')).toHaveAttribute('aria-labelledby', 'source-code')
+  })
+
+  it('keeps the published labelling and says what BioTSR adds', () => {
+    renderMethod()
+
+    // The paper's description is not rewritten...
+    expect(screen.getByText(/ranging\s+from 4 to 23/)).toBeInTheDocument()
+    // ...and the difference is stated separately, where it is explained.
+    const labels = screen.getByRole('heading', { name: 'Residue labels in BioTSR' })
+    expect(labels).toBeInTheDocument()
+    expect(screen.getByText(/three labels of a triangle are encoded at radix 30/)).toBeInTheDocument()
+    // The differences from the earlier package are listed, not summarised as
+    // "results differ".
+    expect(screen.getByText(/divided by π, where the earlier program used/)).toBeInTheDocument()
+  })
+
+  it('shows the published figure as published, and the overview as BioTSR output', () => {
+    renderMethod()
+
+    expect(screen.getByText(/as published \(Kondra et al\., 2021\)/)).toBeInTheDocument()
+    const overview = screen.getByRole('figure', { name: /From a structure to TSR keys/ })
+    expect(within(overview).getByText(/Computed with BioTSR 1\.0\.0/)).toBeInTheDocument()
+    expect(within(overview).getByText(/Step 6 is schematic/)).toBeInTheDocument()
+  })
+})
+
+describe('source-code cards', () => {
+  it('say what each repository is to the method, and its licence, from its record', () => {
+    renderMethod('mirror-image')
+
+    const section = document.querySelector('section[aria-labelledby="source-code"]')
+    const cards = within(section).getAllByRole('listitem')
+    expect(cards).toHaveLength(2)
+    expect(cards[0]).toHaveTextContent(/Current software/)
+    expect(cards[0]).toHaveTextContent(/Licence\s*Apache License 2\.0/)
+    expect(cards[1]).toHaveTextContent(/Earlier implementation/)
+    expect(cards[1]).toHaveTextContent(/Licence\s*MIT License/)
+    // The earlier implementation is described on its card, not again above it.
+    expect(cards[1]).toHaveTextContent(/mirror_image argument/)
+    expect(screen.queryByRole('heading', { name: 'Earlier implementation' })).toBeNull()
   })
 })

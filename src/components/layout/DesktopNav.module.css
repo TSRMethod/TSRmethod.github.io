@@ -9,8 +9,6 @@
 
 .nav {
   display: flex;
-  /* Positioning context for the dropdown panels — see .panel. */
-  position: relative;
 }
 
 .list {
@@ -22,12 +20,9 @@
   padding: 0;
 }
 
-/*
- * Deliberately NOT position:relative. Panels anchor to the nav, not to their
- * own menu item — see .panel for why.
- */
+/* Positioning context for a dropdown panel, so it opens under its trigger. */
 .item {
-  position: static;
+  position: relative;
 }
 
 /* Shared appearance for top-level links and dropdown triggers. */
@@ -108,26 +103,27 @@
 /* ---- Dropdown panel ---- */
 
 /*
- * Panels are anchored to the RIGHT EDGE OF THE NAV, not to the menu item that
- * opened them.
+ * A panel opens directly under the trigger that opened it, its left edge on
+ * the trigger's left edge.
  *
- * Anchoring each panel to its own item is the obvious approach and it is what
- * caused a real bug: the three-column "TSR-Based Methods" panel is ~667px
- * wide and its trigger sits partway along the bar, so at 1280px the panel ran
- * 74px past the viewport and gave the whole document a horizontal scrollbar.
- *
- * Right-aligning to the nav means the widest possible panel still ends exactly
- * where the nav ends, so no panel can ever overflow, at any viewport width,
- * without any JavaScript measurement. The panels are wide enough that they
- * still sit under their trigger.
+ * Panels used to be anchored to the right edge of the whole nav, so that the
+ * widest one could never run off the screen. That kept the page from
+ * scrolling sideways, but a narrow panel such as BioTSR's then opened
+ * hundreds of pixels to the right of its button, under Publications and
+ * About. Now each panel starts under its own trigger. Only if it would then
+ * overflow the window does NavDropdown move it (--panel-shift): to end where
+ * its trigger ends, or failing that, just inside the window. On a typical
+ * laptop that moves Methods & research and About; BioTSR never moves.
  */
 .panel {
   position: absolute;
   top: calc(100% + var(--space-2));
-  right: 0;
+  left: 0;
+  transform: translateX(var(--panel-shift, 0px));
   z-index: 100;
   display: flex;
   gap: var(--space-5);
+  width: max-content;
   max-width: calc(100vw - 2 * var(--space-4));
   padding: var(--space-4);
   background-color: var(--color-background);
@@ -174,4 +170,15 @@
   font-weight: 700;
   color: var(--color-primary);
   background-color: var(--color-primary-light);
+}
+
+/* A column of groups inside a panel, for menus that stack several short
+   groups rather than giving each one a column of its own. */
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  /* Wide enough that "One-molecule methods" and "Amino Acid Grouping TSR"
+     stay on one line: three columns are ~750px, inside the 1150px bar. */
+  min-width: 14.5rem;
 }

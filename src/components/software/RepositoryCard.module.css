@@ -1,0 +1,159 @@
+/*
+ * The repository cards, on the Earlier implementations and research code page.
+ * Moved here with the component when the listing left the BioTSR page.
+ */
+
+/*
+ * `min(100%, 22rem)` so the track collapses to the container on a narrow
+ * screen instead of forcing the document to scroll sideways.
+ */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+}
+
+.repository {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.name {
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+  margin: 0 0 var(--space-2);
+  /* Repository names are long, unspaced and underscored. */
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+}
+
+.kind,
+.language {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-muted);
+}
+
+.description {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.path {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.licence {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+}
+
+.licenceLabel {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.documentation {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.documentationHeading {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-2);
+}
+
+.documentationList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.issues {
+  /* Pushed to the bottom so the action sits on the card edge whatever the
+     description length, and the row of cards reads evenly. */
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.documentation + .issues {
+  border-top: none;
+  padding-top: 0;
+  margin-top: var(--space-3);
+}
+
+/*
+ * Interaction polish, shared by every card on the site (see --card-lift in
+ * tokens.css). Two pixels and a shadow: enough to acknowledge the pointer,
+ * not enough to move the reader's eye. No scaling — a card that grows pushes
+ * its neighbours' text around and makes a grid feel unstable.
+ *
+ * Movement is asked for only where a pointer can hover. On a touch screen the
+ * hover state sticks after a tap, which would leave one card looking raised
+ * until something else is touched.
+ */
+.repository {
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .repository:hover {
+    transform: translateY(var(--card-lift));
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Keyboard focus is treated as deliberately as hover: same surface change,
+   in the accent colour, whenever focus lands on a link inside the card. */
+.repository:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .repository,
+  .repository:hover {
+    transform: none;
+    transition: none;
+  }
+}
+

@@ -26,50 +26,18 @@ paper:
   doi: 10.1002/prot.70005
 
 repositories:
+  - name: BioTSR
+    url: https://github.com/TSRMethod/BioTSR
+    description: >-
+      Used by the examples on this page.
+    language: Python
   - name: TSR_NUCLEOTIDE_PACKAGE
     url: https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE
     description: >-
-      Standalone Python package for nucleotide TSR key and triplet generation.
-      Separate from the core TSR-Package.
+      The method's first implementation. It is kept unchanged for provenance
+      and for work that depends on it; its README has its own installation
+      instructions.
     language: Python
-
-slurm:
-  intro: >-
-    Key generation over a large structure set is best run as a batch job. Put
-    the Python from the Usage section into a script, then submit the job below.
-  script:
-    filename: nucleotide_keys.sbatch
-    code: |
-      #!/bin/bash
-      #SBATCH -p workq
-      #SBATCH -N 1
-      #SBATCH -n 64
-      #SBATCH -t 72:00:00
-      #SBATCH -A loni_tsr_4
-      #SBATCH -J pdb
-      #SBATCH -o output_pdb.out
-      #SBATCH -e error_pdb.err
-
-      git clone https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE.git
-      cd TSR_NUCLEOTIDE_PACKAGE
-
-      python3 -m venv myenv
-      source myenv/bin/activate
-      pip install --upgrade pip
-      pip install -e .
-      pip install -r requirements.txt
-
-      cd nucleotide_tsr_package
-      python3 your_script.py
-  submit:
-    code: sbatch nucleotide_keys.sbatch
-  resources: >-
-    Requests one node with 64 tasks for up to 72 hours on the `workq`
-    partition, under the group's `loni_tsr_4` allocation. Substitute your own
-    allocation, and scale the wall time to your dataset.
-  notes: >-
-    Replace `your_script.py` with your own script containing the `PDB_DL` and
-    `NucleotideTSR` calls from the Usage section.
 ---
 
 ## Overview
@@ -99,108 +67,55 @@ Guanine and adenine are purine bases; cytosine, uracil and thymine are
 pyrimidines. The deoxy- forms distinguish DNA from RNA during filtering.
 
 Keys and triplets are generated for all eight residue types, and mirror-image
-keys can be produced as well through an argument to the generation function.
+keys can be produced as well.
 
-## Installation
+## Run it with BioTSR
 
-Clone the repository:
-
-```bash
-git clone https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE.git
-cd TSR_NUCLEOTIDE_PACKAGE
-```
-
-Create a virtual environment and activate it:
+BioTSR's `nucleotide` method computes TSR keys from the heavy atoms of one
+nucleotide residue, each atom labelled by its element. For the deoxycytidine
+DC 3 of the Dickerson–Drew dodecamer, PDB entry 1BNA:
 
 ```bash
-python -m venv tsrenv
-source tsrenv/bin/activate   # macOS / Linux
-tsrenv\Scripts\activate      # Windows
+python -m pip install "biotsr==1.0.0"
+biotsr fetch 1BNA --pdb-dir structures
+biotsr run --method nucleotide --pdb structures/1BNA.pdb --chain A --entity-name DC --entity-id 3 --output results
 ```
 
-Install the package and its dependencies:
+Its 19 heavy atoms form 969 triangles, with 654 distinct keys, written under
+the prefix `results/1BNA_A_nucleotide_DC_3`.
 
-```bash
-pip install -e .
-pip install -r requirements.txt
-```
+- **The expected lengths:** BioTSR keeps this method's rule, with the counts in
+  the table above. A residue whose heavy-atom count does not match is refused
+  with the reason; in 1BNA, the 5′ DC 1 has no phosphate group and is refused
+  with "expected exactly 19 atoms, got 16".
+- **One copy or every copy:** with `--entity-id` the calculation is that one
+  residue. With `--entity-name` alone it is every residue of that name on the
+  chain, taken together as one set of points, so triangles may join atoms of
+  different residues; the prefix then ends in `_allcopies`.
+- **A whole strand:** `nucleotide_chain` pools the nucleotides of one chain
+  into one calculation. It has no expected-length rule, and names each
+  nucleotide whose atoms differ from the standard set in a warning.
+- **Nucleotides in contact with a protein:** the two-molecule method
+  [Nucleotide–Protein TSR](/methods/nucleotide-protein) forms cross triangles
+  from the atoms where a nucleic acid and a protein are in contact.
+- **Options:** mirror images and size filtering.
+- **From Python:** `biotsr.analyze(..., method="nucleotide", entity_name="DC",
+  entity_id="3")`.
 
-Then change into the package directory to run the commands below:
+The [user guide, §9](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md#9-nucleotide-tsr)
+covers the nucleotide methods, and
+[tutorial 02](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/02_atomic.md#one-copy-or-every-copy-on-the-chain)
+compares one copy with every copy. For many structures, `biotsr batch` runs a
+CSV manifest
+([tutorial 05](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/05_batch_manifest.md)),
+and the
+[command-line guide, §12](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/CLI_GUIDE.md#12-scripts-and-hpc)
+has example Slurm job scripts for an HPC cluster.
 
-```bash
-cd nucleotide_tsr_package
-```
+### Comparing with the earlier package
 
-## Usage
-
-### Retrieve PDB files
-
-```python
-from nucleotide_tsr_package.PDB_DL import PDB_DL
-
-# Retrieve PDB files for the specified PDB IDs
-pdb_ids = ["1GTA", "1GTB", "1lbe"]
-PDB_DL(pdb_ids, 'Dataset/')
-```
-
-Protein IDs are not case-sensitive. A CSV file can be used instead of a list:
-
-```python
-from nucleotide_tsr_package.PDB_DL import PDB_DL
-
-data_dir = "Dataset/"
-csv_file = "sample_details.csv"
-PDB_DL(csv_file, data_dir)
-```
-
-### Generate keys and triplets
-
-```python
-from nucleotide_tsr_package.Nucleotide import NucleotideTSR
-
-# Define the directory where PDB files are stored
-data_dir = "Dataset/"
-input_files = ["1GTA", "1GTB", "1LBE"]
-chain = ["A", "A", "A"]        # specify chains for each PDB file
-output_option = "keys"          # 'keys', 'triplets', or 'both'
-
-NucleotideTSR(data_dir, input_files, chain=chain,
-              output_option=output_option, mirror_image=True)
-```
-
-Chains are case-sensitive, since chain IDs may be upper or lower case.
-
-### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `data_dir` | `str` | — | Directory where the PDB files are, or will be downloaded to. |
-| `input_files` | `list[str]` or `str` | — | List of PDB IDs, or the path to a CSV file. |
-| `chain` | `list[str]` | `None` | Chain for each input file. Optional when a CSV is used. |
-| `output_option` | `str` | `'both'` | One of `'keys'`, `'triplets'` or `'both'`. |
-| `output_subdir` | `str` | `'nucleotide_results'` | Subdirectory of `data_dir` for the generated files. |
-| `mirror_image` | `bool` | `False` | Set true to distinguish mirror-image triangles. |
-
-### Using a CSV file as input
-
-```python
-from nucleotide_tsr_package.Nucleotide import NucleotideTSR
-
-data_dir = "Dataset/"
-csv_file = "sample_details.csv"
-
-NucleotideTSR(data_dir, csv_file, output_option="keys", mirror_image=True)
-```
-
-The CSV file should have two columns:
-
-| protein | chain |
-| --- | --- |
-| 1GTA | A |
-| 1GTB | A |
-| 1LBE | A |
-
-## Output
-
-Keys and triplet frequency files are written to `nucleotide_results/`, a
-directory created inside `data_dir`.
+BioTSR's expected lengths are the earlier package's own. It reads alternate
+location blank or `A` only, where the earlier analyser applied no
+alternate-location test, and the whole-strand method has no earlier
+counterpart. BioTSR has no option to reproduce the earlier package's output
+files.

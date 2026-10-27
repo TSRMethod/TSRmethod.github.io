@@ -1,0 +1,94 @@
+{
+ "source": "BioTSR 1.0.0",
+ "examples": {
+  "nucleotide": {
+   "label": "DG 8 of 2AC0 chain E against protein chain B",
+   "structure": "2AC0",
+   "runs": [
+    {
+     "cutoff": 3.5,
+     "roleA": "nucleotide",
+     "roleB": "protein",
+     "offeredA": 22,
+     "offeredB": 1545,
+     "poolA": 4,
+     "poolB": 7,
+     "contactPairs": 7,
+     "atomsA": [
+      "DG 8 N7",
+      "DG 8 O6",
+      "DG 8 OP1",
+      "DG 8 OP2"
+     ],
+     "atomsB": [
+      "ALA 276 N",
+      "ARG 280 NH1",
+      "ARG 280 NH2",
+      "CYS 275 CA",
+      "CYS 275 CB",
+      "SER 241 CB",
+      "SER 241 OG"
+     ],
+     "triangles": 126,
+     "distinctKeys": 117
+    },
+    {
+     "cutoff": 3.0,
+     "roleA": "nucleotide",
+     "roleB": "protein",
+     "offeredA": 22,
+     "offeredB": 1545,
+     "poolA": 4,
+     "poolB": 4,
+     "contactPairs": 4,
+     "atomsA": [
+      "DG 8 N7",
+      "DG 8 O6",
+      "DG 8 OP1",
+      "DG 8 OP2"
+     ],
+     "atomsB": [
+      "ALA 276 N",
+      "ARG 280 NH1",
+      "ARG 280 NH2",
+      "SER 241 OG"
+     ],
+     "triangles": 48,
+     "distinctKeys": 44
+    }
+   ]
+  },
+  "drug": {
+   "label": "benzamidine BEN 1 of 3PTB against chain A",
+   "structure": "3PTB",
+   "runs": [
+    {
+     "cutoff": 3.5,
+     "roleA": "protein",
+     "roleB": "drug",
+     "offeredA": 1629,
+     "offeredB": 9,
+     "poolA": 7,
+     "poolB": 3,
+     "contactPairs": 9,
+     "atomsA": [
+      "ASP 189 CG",
+      "ASP 189 OD1",
+      "ASP 189 OD2",
+      "GLY 219 O",
+      "GLY 226 CA",
+      "SER 190 O",
+      "SER 190 OG"
+     ],
+     "atomsB": [
+      "BEN 1 C",
+      "BEN 1 N1",
+      "BEN 1 N2"
+     ],
+     "triangles": 84,
+     "distinctKeys": 72
+    }
+   ]
+  }
+ }
+}

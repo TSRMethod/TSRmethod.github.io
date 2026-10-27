@@ -48,6 +48,11 @@ export const DESKTOP_QUERY = '(min-width: 1024px)'
  *   mark 40 + gap 12 + "TSR Research Group" 177 + gap 16 + nav 833 + padding 32
  *   = 1110px
  *
+ * (Re-measured for the BioTSR navigation, which has five items where there
+ * were six: the nav is 654px and the row 931px, so the bar now has ~220px of
+ * slack at 1150px. The threshold was left where it is; lowering it is a
+ * separate decision, and the figures above are why it was set.)
+ *
  * Below that the group's own name is the thing that gives way, because it is
  * the only flexible item in the row: at 1100px it was ellipsised, and at
  * 1024px — exactly where the desktop navigation used to switch on — it

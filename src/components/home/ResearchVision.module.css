@@ -29,15 +29,7 @@
 
 .body {
   max-width: var(--content-measure);
-  margin-top: var(--space-5);
-}
-
-.body p {
-  margin: 0;
-}
-
-.body p + p {
-  margin-top: var(--space-3);
+  margin: var(--space-5) 0 0;
 }
 
 @media (min-width: 768px) {

@@ -3,15 +3,16 @@ import { lazy, Suspense } from 'react'
 /*
  * The one route component that is loaded on demand.
  *
- * Measured, not assumed. Method and analysis pages are the only pages that
- * render Markdown, and react-markdown with its remark / rehype / micromark
+ * Measured, not assumed. Method and analysis pages render Markdown, and
+ * react-markdown with its remark / rehype / micromark
  * pipeline is 163 kB of the bundle — more than a quarter of it. Splitting it
  * out takes the initial download from 590 kB to 427 kB raw (178 kB to 129 kB
  * gzipped), a saving every visitor landing on the home page, publications,
  * people, software or contact now gets.
  *
- * NOTHING ELSE IS SPLIT, and that is also measured. The content registry is
- * eagerly bundled by design (see src/content/index.js) and is reached through
+ * The two software pages render Markdown too, and are split the same way
+ * (LazySoftwarePages.jsx). NOTHING ELSE IS SPLIT, and that is also
+ * measured. The content registry is eagerly bundled by design (see src/content/index.js) and is reached through
  * the navigation on every page, so lazy-loading the other route components
  * would move almost nothing out of the initial chunk while adding Suspense
  * boundaries to reason about. One split that pays for itself, rather than a

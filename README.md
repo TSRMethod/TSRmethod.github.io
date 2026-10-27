@@ -68,8 +68,9 @@ scripts/        Build-time tooling — image optimisation, sitemap routes
 assets/brand/   Logo masters. NOT served; see its README for what is derived
 ```
 
-Every public page now exists: the home page, the method and analysis tutorials,
-`/publications`, `/people`, `/software` and `/contact`. The navigation and the
+Every public page now exists: the home page, the method and analysis pages,
+`/research` and `/research/earlier-implementations`, `/publications`,
+`/people`, `/software`, `/software/get-started` and `/contact`. The navigation and the
 footer still ask the router whether a path resolves before showing it, so a
 page can never be advertised before it is built — that is what let each of them
 appear on its own as it was added.
@@ -176,10 +177,11 @@ Where to look, depending on what you need to do:
    keeps its last good version.
 
 4. **Nothing about a repository is written in a component.** Names, URLs,
-   owners and descriptions live in `src/content/repositories/`. When the
-   planned consolidated TSR package arrives, pointing the site at it is an edit
-   to one JSON file — a test fails if a GitHub account name ever appears in the
-   software page's JSX.
+   owners and descriptions live in `src/content/repositories/`. BioTSR's
+   version, citation and licence are in `biotsr.json`, and every install
+   command, release link and pinned documentation link is derived from that
+   record or held to it by `src/content/biotsr-claims.test.js`. A test fails if
+   a GitHub account name ever appears in the software page's JSX.
 
 5. **Run it on Node 24.** `nvm use`. On an older Node the test suite fails with
    an error that looks like a broken dependency and is really a version
@@ -187,8 +189,7 @@ Where to look, depending on what you need to do:
 
 ### Deliberately not done
 
-Documenting the current Python packages' APIs in any depth. They are expected
-to be consolidated into a single package, and a second copy of today's import
-paths would be wrong the day that happens. The method pages carry verified
-usage; the software page is a directory that points at the authoritative
-repositories.
+Documenting BioTSR's options in depth. Its eight tutorials are executed by its
+own test suite, so the site explains each step and links the version-pinned
+tutorial or guide that owns the detail (`/software/get-started`), rather than
+keeping a second copy that could fall out of step with a release.

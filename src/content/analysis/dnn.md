@@ -27,6 +27,23 @@ feed-forward neural network to classify structures from them.
 It runs in two steps: build the feature table from triplet files, then train
 on it.
 
+> **Separate research code, not part of BioTSR.** BioTSR 1.0.0 does not train
+> or run this model; machine-learning pipelines are outside the package. The
+> instructions below are for the research scripts in
+> [Nucleotide_Analysis](https://github.com/KrishnaRauniyar/Nucleotide_Analysis),
+> which are kept as they were published.
+
+## BioTSR and this model
+
+BioTSR can compute the keys and write a key-frequency table from Python:
+`biotsr.analysis.feature_matrix(samples).to_header_csv()` gives a `sample_id`
+column followed by one column per key, as in
+[tutorial 08, §3](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/08_similarity_clustering.md#3-the-feature-matrix).
+That table is not the one this model reads: `key_frequency_drug.py` writes
+different columns, including the `residue_type` class column the model trains
+on, and the two have not been tested together. To reproduce the published
+model, use the research scripts as described below.
+
 ## Installation
 
 ```bash

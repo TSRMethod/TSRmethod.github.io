@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import MenuLink from './MenuLink'
 import useFocusTrap from '../../hooks/useFocusTrap'
 import useExitTransition from '../../hooks/useExitTransition'
 import styles from './MobileNav.module.css'
@@ -235,9 +236,8 @@ export default function MobileNav({ items }) {
                       />
                     ) : (
                       <li key={item.id}>
-                        <NavLink
+                        <MenuLink
                           to={item.to}
-                          end={item.to === '/'}
                           className={({ isActive }) =>
                             isActive
                               ? `${styles.link} ${styles.linkActive}`
@@ -245,7 +245,7 @@ export default function MobileNav({ items }) {
                           }
                         >
                           {item.label}
-                        </NavLink>
+                        </MenuLink>
                       </li>
                     ),
                   )}
@@ -317,9 +317,9 @@ function AccordionItem({ item, isOpen, onToggle }) {
                   <ul className={styles.groupList} aria-labelledby={groupLabelId}>
                     {group.items.map((link) => (
                       <li key={link.id}>
-                        <NavLink to={link.to} className={styles.panelLink}>
+                        <MenuLink to={link.to} className={styles.panelLink}>
                           {link.label}
-                        </NavLink>
+                        </MenuLink>
                       </li>
                     ))}
                   </ul>

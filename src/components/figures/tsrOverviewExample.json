@@ -1,0 +1,104 @@
+{
+  "source": "BioTSR 1.0.0, biotsr run --method protein --pdb 1UBQ.pdb --chain A",
+  "structure": "1UBQ",
+  "chain": "A",
+  "points": 76,
+  "triangles": 70300,
+  "distinctKeys": 45349,
+  "labelRadix": 30,
+  "thetaClasses": 29,
+  "distanceClasses": 35,
+  "vertices": [
+    {
+      "residue": "VAL",
+      "number": 70,
+      "label": 20
+    },
+    {
+      "residue": "ILE",
+      "number": 44,
+      "label": 10
+    },
+    {
+      "residue": "LEU",
+      "number": 8,
+      "label": 8
+    }
+  ],
+  "base": 7.78,
+  "edge13": 6.56,
+  "edge23": 11.96,
+  "maxDistance": 11.96,
+  "thetaRaw": 136.7,
+  "theta": 43.3,
+  "thetaClass": 11,
+  "distanceClass": 5,
+  "thetaClassRange": [
+    42.64,
+    45.17
+  ],
+  "distanceClassRange": [
+    11.0,
+    14.0
+  ],
+  "key": 17637781,
+  "keyFrequency": 4,
+  "sameKey": [
+    {
+      "residues": [
+        "VAL5",
+        "ILE61",
+        "LEU56"
+      ],
+      "edges": [
+        12.24,
+        13.22,
+        5.6
+      ],
+      "maxDistance": 13.22,
+      "theta": 43.7
+    },
+    {
+      "residues": [
+        "VAL70",
+        "ILE44",
+        "LEU8"
+      ],
+      "edges": [
+        7.78,
+        6.56,
+        11.96
+      ],
+      "maxDistance": 11.96,
+      "theta": 43.3
+    },
+    {
+      "residues": [
+        "VAL17",
+        "ILE61",
+        "LEU15"
+      ],
+      "edges": [
+        10.63,
+        6.2,
+        13.11
+      ],
+      "maxDistance": 13.11,
+      "theta": 44.4
+    },
+    {
+      "residues": [
+        "VAL70",
+        "ILE36",
+        "LEU71"
+      ],
+      "edges": [
+        11.02,
+        3.83,
+        8.7
+      ],
+      "maxDistance": 11.02,
+      "theta": 44.0
+    }
+  ]
+}

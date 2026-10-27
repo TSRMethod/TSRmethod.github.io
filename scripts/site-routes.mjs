@@ -32,6 +32,9 @@ export const STATIC_PATHS = [
   '/publications',
   '/people',
   '/software',
+  '/software/get-started',
+  '/research',
+  '/research/earlier-implementations',
   '/contact',
 ]
 

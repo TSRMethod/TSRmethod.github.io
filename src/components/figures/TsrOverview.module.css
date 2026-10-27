@@ -1,0 +1,439 @@
+/*
+ * The TSR overview figure.
+ *
+ * Every colour is a site token, so the figure matches the pages around it.
+ * Nothing is told apart by colour alone: the followed triangle is thicker and
+ * its corners larger, the base is the heaviest line, the longest edge is drawn
+ * double, the median is dashed, and the shared bars in step 6 are solid while
+ * the others are outlined.
+ */
+
+.figure {
+  margin: var(--space-6) 0;
+}
+
+/*
+ * The home page's four steps sit in one row on a wide screen and two on a
+ * tablet; on a phone they stack, as the full figure's do.
+ */
+.compact {
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .compact .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .compact .steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.steps {
+  counter-reset: step;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+/*
+ * /tsr places this figure inside its Markdown, whose list and paragraph rules
+ * (.prose ol, .prose li, .prose p) would otherwise indent the grid and space
+ * out the cards. These resets are one class more specific than those rules,
+ * so they hold whatever order the stylesheets load in.
+ */
+.figure .steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.figure .step {
+  margin: 0;
+}
+
+/*
+ * The full figure's six cards: two rows of three where its column is wide
+ * enough, three rows of two below that, one column on a phone. Measured on
+ * the figure rather than the window, because on /tsr it shares the width with
+ * the page's navigation. Every card holds a drawing and a sentence or two,
+ * so the rows come out the same height.
+ */
+.full {
+  container-type: inline-size;
+}
+
+@container (min-width: 30rem) {
+  .full .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 44rem) {
+  .full .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.step {
+  counter-increment: step;
+  min-width: 0;
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.figure .step p {
+  margin: 0;
+}
+
+.figure .step p + p {
+  margin-top: var(--space-2);
+}
+
+.figure .step .title {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  color: var(--color-heading);
+}
+
+/* The step number is part of the heading's visual, from the list counter, so
+   the order is announced by the list itself rather than repeated in text. */
+.title::before {
+  content: counter(step) '. ';
+  color: var(--color-text-muted);
+}
+
+.drawing {
+  display: block;
+  width: 100%;
+  height: 8.5rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Structure panels ---- */
+
+.trace,
+.traceFaint {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.traceFaint {
+  stroke: var(--color-border);
+}
+
+.point {
+  fill: var(--color-accent);
+  stroke: var(--color-background);
+  stroke-width: 1.5;
+}
+
+.otherTriangle {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.triangle {
+  fill: var(--color-primary-light);
+  fill-opacity: 0.8;
+  stroke: var(--color-primary);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.vertex {
+  fill: var(--color-primary);
+  stroke: var(--color-background);
+  stroke-width: 2;
+}
+
+/* ---- Geometry panel ---- */
+
+.base {
+  stroke: var(--color-primary);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.edge {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.longestEdge {
+  stroke: var(--color-primary-dark);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.longestEdgeInner {
+  stroke: var(--color-background);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.median {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.arc {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+.midpoint {
+  fill: var(--color-background);
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+/*
+ * Sizes in the drawing's own units. The geometry drawing is scaled to the
+ * card, to about two-thirds of its size, so these come out at 13–15px on the
+ * page: no smaller than the card's text.
+ */
+.symbol,
+.vertexLabel {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 700;
+  fill: var(--color-text);
+}
+
+.symbol {
+  font-style: italic;
+}
+
+.edgeLabel {
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+}
+
+/* ---- Key panel ---- */
+
+.keyPanel {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  /* At least the height of the drawings, so the titles line up. It may grow,
+     so nothing in it can ever be cut off. */
+  min-height: 8.5rem;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+}
+
+.keyTerm {
+  color: var(--color-text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.keyValue {
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* The key on a row of its own, under the three things it is built from. */
+.key {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 700;
+  white-space: nowrap;
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Profiles panel ---- */
+
+.axis {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--font-sans);
+  /* About 13px on the page at the narrowest card, like the other labels. */
+  font-size: 15px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+}
+
+.sharedBar {
+  fill: var(--color-primary);
+}
+
+.ownBar {
+  fill: var(--color-background);
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.caption {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---- Worked example ---- */
+
+/*
+ * Placed in the Markdown under its own heading. Its paragraphs and
+ * disclosures are spaced here, one element more specific than .prose p, and
+ * the block ends with the same space as a paragraph, so the next heading sits
+ * as far below the last disclosure as it would below text.
+ */
+.worked {
+  margin: 0 0 var(--space-4);
+}
+
+div.worked > p {
+  max-width: var(--content-measure);
+  margin: var(--space-3) 0 0;
+}
+
+div.worked > p:first-child {
+  margin-top: 0;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: var(--space-4) 0 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fact:last-child {
+  border-bottom: none;
+}
+
+.fact dt {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.fact dd {
+  margin: 0;
+  min-width: 0;
+}
+
+/* The key itself, set as it is in the figure. */
+.fact:last-child dd {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .fact {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+}
+
+.more {
+  margin-top: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.moreSummary {
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.moreBody {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+div.moreBody > p {
+  margin: var(--space-3) 0 0;
+}
+
+div.moreBody > p:first-child {
+  margin-top: 0;
+}
+
+/* A formula wraps between its terms, never inside a number. */
+.formula {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.scroll {
+  position: relative;
+  overflow-x: auto;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.scroll:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table thead th {
+  background-color: var(--color-surface);
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: none;
+}

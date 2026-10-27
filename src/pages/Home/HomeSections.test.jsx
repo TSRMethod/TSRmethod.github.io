@@ -53,15 +53,26 @@ function sectionOrder() {
 }
 
 describe('research vision', () => {
-  it('appears between the hero and the TSR introduction', () => {
+  it('comes straight after the hero, ahead of BioTSR and the method', () => {
+    /* Why, then what to use, then how it works. */
     renderHome()
 
     const order = sectionOrder()
-    const vision = order.indexOf(home.researchVision.heading)
-    const introduction = order.indexOf(home.introduction.heading)
+    expect(order.slice(0, 4)).toEqual([
+      home.researchVision.heading,
+      home.software.heading,
+      home.introduction.heading,
+      home.research.heading,
+    ])
+  })
 
-    expect(vision).toBe(0) /* first section after the hero */
-    expect(vision).toBeLessThan(introduction)
+  it('appears once on the page', () => {
+    renderHome()
+
+    expect(
+      screen.getAllByRole('heading', { level: 2, name: home.researchVision.heading }),
+    ).toHaveLength(1)
+    expect(screen.getAllByText(asWritten(home.researchVision.question))).toHaveLength(1)
   })
 
   it('takes its heading and question from content', () => {
@@ -86,61 +97,18 @@ describe('research vision', () => {
     expect(home.researchVision.question.trim()).toMatch(/\?$/)
   })
 
-  it('shows the short explanation and direction without expanding anything', () => {
+  it('is the question and one short paragraph, with nothing to expand', () => {
     renderHome()
 
-    expect(screen.getByText(asWritten(home.researchVision.intro))).toBeInTheDocument()
-    expect(screen.getByText(asWritten(home.researchVision.direction))).toBeInTheDocument()
-  })
+    const heading = screen.getByRole('heading', {
+      level: 2,
+      name: home.researchVision.heading,
+    })
+    const section = heading.closest('section')
 
-  it('keeps the long explanation inside a closed disclosure', async () => {
-    renderHome()
-
-    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
-    const details = summary.closest('details')
-
-    expect(details).not.toBeNull()
-    expect(details.open).toBe(false)
-
-    for (const paragraph of home.researchVision.details) {
-      expect(within(details).getByText(asWritten(paragraph))).toBeInTheDocument()
-    }
-
-    await userEvent.click(summary)
-    expect(details.open).toBe(true)
-  })
-
-  it('opens and closes on the click, repeatedly', async () => {
-    /*
-     * The disclosure is the browser's own: the `open` attribute follows the
-     * click, with nothing deferring it. Everything drawn from `[open]` — the
-     * marker included — therefore turns at the same moment the content
-     * appears, and the second opening behaves exactly like the first.
-     */
-    renderHome()
-
-    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
-    const details = summary.closest('details')
-
-    await userEvent.click(summary)
-    expect(details.open).toBe(true)
-
-    await userEvent.click(summary)
-    expect(details.open).toBe(false)
-
-    /* And again: opening twice must behave the same both times. */
-    await userEvent.click(summary)
-    expect(details.open).toBe(true)
-  })
-
-  it('names the disclosure meaningfully', () => {
-    renderHome()
-
-    const summary = screen.getByText(asWritten(home.researchVision.detailsLabel))
-    expect(summary.tagName).toBe('SUMMARY')
-    expect(summary.textContent.trim().length).toBeGreaterThan(10)
-    /* Native disclosure semantics, not a button inside a summary. */
-    expect(summary.querySelector('button')).toBeNull()
+    expect(within(section).getByText(asWritten(home.researchVision.body))).toBeInTheDocument()
+    expect(section.querySelectorAll('p')).toHaveLength(2)
+    expect(section.querySelector('details')).toBeNull()
   })
 
   it('writes none of its prose in the component', () => {
@@ -150,11 +118,7 @@ describe('research vision', () => {
     )
 
     expect(source).not.toContain(home.researchVision.question)
-    expect(source).not.toContain(home.researchVision.intro)
-    expect(source).not.toContain(home.researchVision.direction)
-    for (const paragraph of home.researchVision.details) {
-      expect(source).not.toContain(paragraph)
-    }
+    expect(source).not.toContain(home.researchVision.body)
   })
 })
 
@@ -382,7 +346,7 @@ describe('the home page outline is still correct', () => {
     renderHome()
 
     const all = screen.getByRole('main').querySelectorAll('details')
-    expect(all.length).toBeGreaterThanOrEqual(2)
+    expect(all.length).toBeGreaterThanOrEqual(1)
 
     for (const details of all) {
       const summary = details.querySelector(':scope > summary')
@@ -402,8 +366,7 @@ describe('content validation for the new sections', () => {
     for (const [section, field] of [
       ['researchVision', 'heading'],
       ['researchVision', 'question'],
-      ['researchVision', 'intro'],
-      ['researchVision', 'direction'],
+      ['researchVision', 'body'],
       ['funding', 'heading'],
       ['funding', 'primarySupport'],
       ['funding', 'computingSupport'],
@@ -437,12 +400,6 @@ describe('content validation for the new sections', () => {
     const withoutAwards = clone()
     withoutAwards.funding.awards = []
     expect(() => validateHome(withoutAwards), 'acknowledgments only').not.toThrow()
-  })
-
-  it('rejects a label with nothing behind it', () => {
-    const data = clone()
-    data.researchVision.details = []
-    expect(() => validateHome(data)).toThrow(ContentError)
   })
 
   it('rejects funding detail with no label to reveal it', () => {
@@ -499,7 +456,7 @@ describe('content validation for the new sections', () => {
   it('rejects a blank entry inside a list', () => {
     /* The CMS list widget adds an empty row the moment "add" is clicked. */
     const data = clone()
-    data.researchVision.details = [...data.researchVision.details, '  ']
+    data.funding.acknowledgments = [...data.funding.acknowledgments, '  ']
     expect(() => validateHome(data)).toThrow(ContentError)
   })
 })
@@ -548,8 +505,7 @@ describe('an ordinary CMS edit does not need a developer', () => {
     ]
 
     data.researchVision.question = 'Does molecular recognition follow rules?'
-    data.researchVision.direction = 'A different long-term direction.'
-    data.researchVision.details = ['One rewritten paragraph.']
+    data.researchVision.body = 'A different long-term direction.'
 
     return data
   }
