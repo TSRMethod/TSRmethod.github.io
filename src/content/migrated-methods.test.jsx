@@ -10,6 +10,7 @@ import {
   buildMethod,
   formatCitation,
   softwarePages,
+  publications,
 } from './index'
 import { getVisibleNavigation, getContentGroups } from '../app/navigation'
 import { isRouteImplemented } from '../app/routeRegistry'
@@ -167,12 +168,41 @@ describe('the migrated methods parse', () => {
   it('keeps DrugTSR’s historical settings apart from BioTSR’s', () => {
     const text = getPublishedMethod('drug-tsr').body.replace(/\s+/g, ' ')
     const history = text.slice(text.indexOf("### Earlier settings and BioTSR's"))
-    expect(history).toMatch(/by its Cα atoms and by all of its atoms/)
-    expect(history).toMatch(/between 3 and 5 Å, most often 3\.5 Å/)
+    // The binding-site definitions the authors confirmed.
+    expect(history).toMatch(
+      /one Cα atom from each binding-site residue, a residue with an atom within the cutoff of the drug\. The Cα itself need not lie within the cutoff\./,
+    )
+    expect(history).toMatch(
+      /only the protein atoms within the cutoff of the drug, not every atom of the residues they belong to/,
+    )
+    expect(history).toMatch(/ranged from 3 to 5 Å, most often 3\.5 Å/)
     // Nothing assigned that the evidence does not give.
-    expect(history).toMatch(/does not say which cutoff a particular published figure used/)
-    expect(history).toMatch(/only the atoms within the cutoff or every atom of the residues/)
-    expect(history).toMatch(/BioTSR 1\.0\.0's settings are its own, not a record of earlier work/)
+    expect(history).toMatch(/does not say which cutoff each published figure used or which program produced it/)
+    expect(history).not.toMatch(/whether an all-atom binding site took only/)
+    // BioTSR 1.0.0 described as it behaves, separately.
+    expect(history).toMatch(/BioTSR 1\.0\.0's behaviour is its own, not a record of earlier work/)
+    expect(history).toMatch(/builds only cross triangles, with atoms on both sides, and computes no keys over the binding-site atoms alone/)
+    expect(history).toMatch(/No BioTSR method selects a ligand's binding-site residues or atoms/)
+  })
+
+  it('gives the DNA–p53 paper’s confirmed figure cutoffs without naming a script version', () => {
+    const text = getPublishedMethod('nucleotide-protein').body.replace(/\s+/g, ' ')
+    expect(text).toMatch(/Its Figure 8 used a cutoff of 3\.0 Å and its Figures 9 and 10 used 3\.5 Å/)
+    expect(text).toMatch(/which version of that code was used has not been identified/)
+    expect(text).not.toMatch(/for one analysis and 3\.5 Å for others/)
+  })
+
+  it('cites the spike–antibody paper on Amino Acid TSR from the publication record', () => {
+    const page = getPublishedMethod('amino-acid')
+    const record = publications.find(({ id }) => id === 'milon-2025-spike-antibody')
+    const text = page.body.replace(/\s+/g, ' ')
+    expect(text).toContain(`(https://doi.org/${record.doi})`)
+    expect(text).toContain(record.authors.slice(0, -1).join(', ') + ' and ' + record.authors.at(-1))
+    expect(text).toMatch(/Amino Acid TSR was reported in the 2025 study/)
+    // Reported in it; not claimed to be the first publication of the method.
+    expect(text).not.toMatch(/first (?:reported|published|introduced)|first publication/i)
+    // The page's own paper link is unchanged.
+    expect(page.paper.doi).toBe('10.2174/0115748936306625240724102438')
   })
 
   it('points HPC users at BioTSR’s Slurm examples instead of the old scripts', () => {

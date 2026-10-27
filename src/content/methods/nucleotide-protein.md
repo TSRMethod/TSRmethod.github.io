@@ -71,9 +71,11 @@ distance between a nucleotide atom and a protein atom, with a cutoff.
 
 - **The DNA–p53 study** (see [Related research](#related-research)) describes
   the amino acids surrounding a nucleotide as those with an atom within the
-  cutoff of a DNA atom. Its figure legends give 3.0 Å for one analysis and
-  3.5 Å for others. The authors confirm that its raw data were generated with
-  Krishna Rauniyar's cross-key code, with the cutoff given as an argument.
+  cutoff of a DNA atom. Its Figure 8 used a cutoff of 3.0 Å and its Figures 9
+  and 10 used 3.5 Å, as the figure legends state and the authors confirm. The
+  authors also confirm that its raw data were generated with Krishna
+  Rauniyar's cross-key code, with the cutoff given as an argument; which
+  version of that code was used has not been identified.
 - **The earlier scripts**, in
   [Nucleotide-Protein](https://github.com/KrishnaRauniyar/Nucleotide-Protein),
   list every pair of a nucleotide atom and a protein atom from the `ATOM`

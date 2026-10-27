@@ -15,8 +15,9 @@ figure:
   alt: >-
     Three schematic panels of a ligand bound in a protein pocket. The first
     labels CA TSR keys between Cα atoms, Ligand/Drug TSR keys inside the ligand
-    and CABS TSR keys at the binding site. The second labels CATOM TSR keys,
-    formed by triangles spanning ligand and protein atoms, and ATOMBS TSR keys.
+    and CABS TSR keys between the Cα atoms of binding-site residues. The second
+    labels CATOM TSR keys, formed by triangles spanning ligand and protein
+    atoms, and ATOMBS TSR keys between binding-site atoms.
     The third shows CATOM and CATOM2 keys across two overlapping structures.
   caption: >-
     The key types DrugTSR introduces: keys within the drug, keys within the
@@ -138,13 +139,29 @@ selection.
 
 ### Earlier settings and BioTSR's
 
-The DrugTSR study represented a binding site in two ways, by its Cα atoms and
-by all of its atoms; its Figure 3 uses both. The group's earlier studies used
-contact cutoffs between 3 and 5 Å, most often 3.5 Å. This page does not say
-which cutoff a particular published figure used, which program produced it, or
-whether an all-atom binding site took only the atoms within the cutoff or every
-atom of the residues the cutoff selected.
+The DrugTSR study represented a binding site in two ways, both used in its
+Figure 3:
 
-BioTSR 1.0.0's settings are its own, not a record of earlier work: a reference
-cutoff of 3.5 Å that `--contact-cutoff` changes, applied to both sides of the
-cross and recorded with every result.
+- **Cα binding site (CABS keys):** one Cα atom from each binding-site residue,
+  a residue with an atom within the cutoff of the drug. The Cα itself need not
+  lie within the cutoff.
+- **All-atom binding site (ATOMBS keys):** only the protein atoms within the
+  cutoff of the drug, not every atom of the residues they belong to.
+
+Contact cutoffs in the group's earlier work ranged from 3 to 5 Å, most often
+3.5 Å. This page does not say which cutoff each published figure used or which
+program produced it.
+
+BioTSR 1.0.0's behaviour is its own, not a record of earlier work:
+
+- `drug_protein_cross` applies the same atom-level rule as the all-atom binding
+  site, and to both sides: a protein heavy atom is kept when a ligand heavy
+  atom lies within the cutoff of it, and a ligand atom when a protein heavy
+  atom does. It builds only cross triangles, with atoms on both sides, and
+  computes no keys over the binding-site atoms alone.
+- No BioTSR method selects a ligand's binding-site residues or atoms for keys
+  of the protein alone. `aa_selection` and `amino_acid_atom_selection` compute
+  Cα or atomic keys over residues or atoms you list, but choosing them by their
+  distance from the ligand is left to you.
+- The reference cutoff is 3.5 Å, changed with `--contact-cutoff`, and the
+  cutoff used is recorded with every result.

@@ -71,6 +71,20 @@ Applying these conditions ensures only relevant residues are processed, which
 supports identification of structural motifs and functional characteristics
 within protein chains at triplet level.
 
+### Publications
+
+Amino Acid TSR was reported in the 2025 study of spike protein and monoclonal
+antibody interactions:
+
+Tarikul I. Milon, Titli Sarkar, Yixin Chen, Jordan M. Grider, Feng Chen,
+Jun-Yuan Ji, Seetharama D. Jois, Konstantin G. Kousoulas, Vijay Raghavan and
+Wu Xu.
+[Development of the TSR-based computational method to investigate spike and monoclonal antibody interactions](https://doi.org/10.3389/fchem.2025.1395374).
+*Frontiers in Chemistry*, 2025, 13, 1395374.
+
+The paper linked at the top of this page, Chen et al. (2025), describes a
+parallel implementation of TSR comparisons for proteins and amino acids.
+
 ## Run it with BioTSR
 
 BioTSR's `amino_acid_atomic` method computes TSR keys from the heavy atoms of
