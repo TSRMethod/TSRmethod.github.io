@@ -189,9 +189,11 @@ stays as it was until it is corrected.
 ## 9. Changing the words on the home page
 
 1. Click **Home page**.
-2. Each section of the page is a group of fields — the opening section, the
-   research vision, what TSR is, the methods, the software, the publications,
-   the group, funding & support, and the closing invitation.
+2. Each section of the page is a group of fields — the opening section,
+   the research vision, BioTSR, what TSR is, Methods & research, the
+   publications, the group, funding & support, and the closing invitation.
+   The diagram under "What TSR is" is drawn from a BioTSR calculation and has
+   no field here.
 3. Rewrite whatever you like and click **Save**.
 
 Two things are worth knowing.
@@ -200,7 +202,8 @@ Two things are worth knowing.
 methods, the tools, the packages, the papers or the people, because none of
 them are typed in here. They are read from the Method pages, the Software
 collection, Publications and People. Publish a method and it appears on the
-home page; add a paper and it becomes one of the three recent papers shown.
+Methods & research page, and the count on the home page's card goes up; add a
+paper and it becomes one of the three recent papers shown.
 
 **Do not leave a field empty.** Every field here is text that appears on the
 page, so a blank one would show as a gap or an unlabelled button. Emptying one
@@ -208,28 +211,21 @@ stops the website rebuilding, and the live site stays as it was until it is
 filled in again.
 
 **Page introductions** works the same way, for the wording on the Publications,
-People, Software and Contact pages. The contact page has no field for the email
+People, BioTSR, Methods & research, Earlier implementations and research code, and
+Contact pages. The contact page has no field for the email
 address — it uses the one in **Site settings**, so there is only ever one to
 change.
 
 ### Research vision
 
-Under **Home page** you will also find **Research vision** — the section near
-the top of the home page with the scientific question in it. The heading, the
-question, the two short sentences and the longer explanation behind the
-"Read more" button are all editable here.
+Under **Home page** you will also find **Research vision** — the first
+section under the opening one, with the scientific question in it. The
+heading, the question and one short paragraph are editable here.
 
-Two things to keep in mind. **Keep the question a question**: it is what the
-research is trying to find out, and the site should not read as though the
-answer is already known. And the **Expanded explanation** is a list — each
-entry becomes one paragraph, so add a new entry rather than running everything
-together in one box.
-
-If you empty both the read-more label and every paragraph, the button
-disappears and the section simply ends after the short text. That is fine and
-supported. What is not allowed is one without the other — a button with
-nothing behind it, or text nobody can reach — and the site will refuse to
-rebuild until you fix it.
+**Keep the question a question**: it is what the research is trying to find
+out, and the site should not read as though the answer is already known. And
+keep the paragraph short. How TSR works is explained two sections further
+down, so this paragraph only needs to say what the research is for.
 
 ### Funding & support
 
@@ -284,7 +280,13 @@ That is the site's job, and it stays the same however you reword the text.
    - **URL** is the whole change if a repository moves. The link, the
      `owner/name` shown on the card, and the connection to its tutorial pages
      all follow it.
-   - **Category** picks the section it appears under on the software page.
+   - **Category** picks where it appears: `core` is BioTSR itself, on the
+     BioTSR page; `historical` an earlier implementation and `analysis` a
+     separate research tool, both on the Earlier implementations and research code
+     page. BioTSR's version and citation are not editable here; they change
+     with a release.
+   - **Licence** is the licence the repository states on GitHub, shown on its
+     card. Write `No licence stated` if it has none, and never guess one.
    - **What it is** should be honest: `package` for something a user installs,
      `scripts` for research code that is run where it sits. It is printed on
      the entry.

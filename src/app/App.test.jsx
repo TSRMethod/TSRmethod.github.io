@@ -73,11 +73,11 @@ describe('404 handling', () => {
 })
 
 describe('legacy addresses that do have a successor', () => {
-  it('sends the old Source Code page to /software', () => {
+  it('sends the old Source Code page to /software', async () => {
     renderAt('/source-code')
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Software' }),
+      await screen.findByRole('heading', { level: 1, name: 'BioTSR' }),
     ).toBeInTheDocument()
   })
 })

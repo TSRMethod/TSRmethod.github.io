@@ -108,6 +108,47 @@ function validateFigure(figure, source, { requireAlt = true } = {}) {
     src: figure.src,
     alt: figure.alt?.trim() ?? '',
     caption: figure.caption ?? null,
+    credit: validateFigureCredit(figure.credit, source),
+  }
+}
+
+const FIGURE_CREDIT_USES = ['reproduced', 'adapted']
+
+/*
+ * Where a figure taken from a publication came from, and on what terms.
+ *
+ * A reused figure must say whose it is, link to it, name its licence and say
+ * whether it was changed (CC BY requires all four), so a credit missing any
+ * of them fails at every status rather than shipping a partial attribution.
+ * `use` is "reproduced" for the published figure as it is, or "adapted" for
+ * one that was redrawn or altered; `changes` says what was done to it.
+ */
+function validateFigureCredit(credit, source) {
+  if (!credit) return null
+  if (!FIGURE_CREDIT_USES.includes(credit.use)) {
+    throw new ContentError(
+      source,
+      `figure.credit.use must be one of ${FIGURE_CREDIT_USES.join(', ')}`,
+    )
+  }
+  for (const field of ['source', 'url', 'licence']) {
+    if (typeof credit[field] !== 'string' || credit[field].trim() === '') {
+      throw new ContentError(source, `figure.credit needs "${field}"`)
+    }
+  }
+  for (const field of ['url', 'licenceUrl']) {
+    if (credit[field] && !/^https:\/\//.test(credit[field])) {
+      throw new ContentError(source, `figure.credit.${field} must be an https:// link`)
+    }
+  }
+  return {
+    use: credit.use,
+    source: credit.source.trim(),
+    url: credit.url,
+    copyright: credit.copyright?.trim() || null,
+    licence: credit.licence.trim(),
+    licenceUrl: credit.licenceUrl ?? null,
+    changes: credit.changes?.trim() || null,
   }
 }
 
@@ -201,6 +242,42 @@ function validateSlurm(slurm, source) {
     },
     resources: slurm.resources ?? null,
     notes: slurm.notes ?? null,
+  }
+}
+
+/*
+ * A diagram is a figure drawn by the site rather than an uploaded image — a
+ * component, named here by id. The id is the whole interface: content says
+ * which diagram a page shows, the component decides how it is drawn, and an
+ * unknown id fails the build rather than rendering nothing.
+ */
+export const DIAGRAM_IDS = [
+  'tsr-overview',
+  'tsr-worked-example',
+  'modifier-scope',
+  'cross-triangles',
+  'point-choice',
+  'clustering-example',
+]
+
+function validateDiagram(diagram, source) {
+  if (diagram === undefined || diagram === null) return null
+  if (!DIAGRAM_IDS.includes(diagram)) {
+    throw new ContentError(
+      source,
+      `"diagram" must be one of ${DIAGRAM_IDS.join(', ')} — got "${diagram}"`,
+    )
+  }
+  return diagram
+}
+
+/*
+ * Figures placed in the body with ![](diagram:id), checked the same way: an
+ * unknown id would otherwise render as nothing at all.
+ */
+function validateBodyDiagrams(body, source) {
+  for (const match of body.matchAll(/\]\(diagram:([a-z-]+)/g)) {
+    validateDiagram(match[1], source)
   }
 }
 
@@ -303,6 +380,8 @@ function buildMethod(source, raw) {
     }
   }
 
+  validateBodyDiagrams(body, source)
+
   return {
     slug,
     source,
@@ -321,6 +400,7 @@ function buildMethod(source, raw) {
     paper: validatePaper(data.paper, source),
     repositories: validateRepositories(data.repositories, source),
     slurm: validateSlurm(data.slurm, source),
+    diagram: validateDiagram(data.diagram, source),
     references: Array.isArray(data.references) ? data.references : [],
     review: data.review ?? null,
     body,
@@ -364,6 +444,48 @@ export function getPublishedMethodsByCategory(category) {
 
 /* Exposed for tests, so the validation rules can be exercised directly. */
 export { buildMethod, buildRegistry }
+
+/*
+ * The software pages' prose: Markdown files in ./software.
+ *
+ * Not method pages — they have no category, group, paper or status, and are
+ * not generated routes. Each is the body of one hand-built page (the BioTSR
+ * page and Getting started), which owns its route and its layout; the file
+ * owns the words, the commands and the documentation links, so they stay
+ * editable as Markdown and cannot drift into a component.
+ */
+const softwareFiles = import.meta.glob('./software/*.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
+
+function buildSoftwarePage(source, raw) {
+  const { data, body } = parseFrontmatter(raw, source)
+  const slug = source.replace(/^.*\//, '').replace(/\.md$/, '')
+
+  if (body.trim() === '') {
+    throw new ContentError(source, 'a software page needs body content')
+  }
+
+  return {
+    slug,
+    source,
+    title: requireString(data, 'title', source),
+    summary: requireString(data, 'summary', source),
+    body,
+    headings: extractHeadings(body),
+  }
+}
+
+export const softwarePages = Object.fromEntries(
+  Object.entries(softwareFiles).map(([source, raw]) => {
+    const page = buildSoftwarePage(source, raw)
+    return [page.slug, page]
+  }),
+)
+
+export { buildSoftwarePage }
 
 /*
  * Record collections: one JSON file per record, in a folder.
@@ -424,7 +546,13 @@ export const repositories = loadCollection(
  * Software repositories
  * ------------------------------------------------------------------------ */
 
-const REPOSITORY_CATEGORIES = ['core', 'method', 'analysis', 'tooling']
+/*
+ * `core` is the supported software (BioTSR). `historical` is an earlier
+ * implementation of methods that BioTSR now runs, kept for provenance and for
+ * earlier work. `analysis` is separate research code, some of it for analyses
+ * BioTSR does not provide. `method` is kept so an older record still validates.
+ */
+const REPOSITORY_CATEGORIES = ['core', 'historical', 'method', 'analysis', 'tooling']
 
 /*
  * Whether a repository is something you install, or a set of scripts you run
@@ -471,7 +599,84 @@ function validateRepository(repository) {
     }
   }
 
+  /*
+   * Every repository states its own licence, because they do not share one:
+   * BioTSR is Apache-2.0, TSR-Package MIT, hsp70_actin GPL-3.0, and five
+   * have no licence file at all (CONTENT-REVIEW.md item 29). "No licence
+   * stated" is a valid value and the honest one for those five; a missing
+   * field is not, because the card would then say nothing where a reader
+   * deciding whether to reuse the code most needs an answer.
+   */
+  if (typeof repository.licence !== 'string' || repository.licence.trim() === '') {
+    throw new ContentError(
+      source,
+      '"licence" is required. Write the licence the repository states on GitHub, ' +
+        'or "No licence stated" if it has none.',
+    )
+  }
+
+  if (repository.release !== undefined) validateRelease(repository, source)
+
   return repository
+}
+
+/*
+ * A released package: the one place its version lives.
+ *
+ * Every version-specific thing the site shows — the install commands, the
+ * release and PyPI pages, the documentation links — is DERIVED from these few
+ * fields and the repository URL (see `softwareRelease` below), so a new
+ * release is an edit to this record and to the pages' pinned commands, which
+ * a test then holds to the same version.
+ *
+ * There is deliberately no DOI field. None has been registered, and a field
+ * for one would invite a placeholder.
+ */
+const RELEASE_TEXT_FIELDS = ['package', 'version', 'date', 'pythonVersions', 'platforms']
+
+function validateRelease(repository, source) {
+  const release = repository.release
+  if (!release || typeof release !== 'object' || Array.isArray(release)) {
+    throw new ContentError(source, '"release" must be an object')
+  }
+  for (const field of RELEASE_TEXT_FIELDS) {
+    if (typeof release[field] !== 'string' || release[field].trim() === '') {
+      throw new ContentError(source, `"release.${field}" is required`)
+    }
+  }
+  if (!/^\d+\.\d+\.\d+$/.test(release.version)) {
+    throw new ContentError(source, '"release.version" must look like 1.0.0')
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(release.date)) {
+    throw new ContentError(source, '"release.date" must be written YYYY-MM-DD')
+  }
+  if (!/^[a-z0-9][a-z0-9._-]*$/.test(release.package)) {
+    throw new ContentError(source, '"release.package" must be a PyPI project name')
+  }
+  if (!repositoryPath(repository.url)) {
+    throw new ContentError(source, 'a released package needs a GitHub repository URL')
+  }
+  if (typeof repository.licence !== 'string' || repository.licence.trim() === '') {
+    throw new ContentError(source, 'a released package must name its licence')
+  }
+
+  const authors = repository.citation?.authors
+  if (!Array.isArray(authors) || authors.length === 0) {
+    throw new ContentError(source, '"citation.authors" must list the authors')
+  }
+  authors.forEach((author, index) => {
+    for (const part of ['given', 'family']) {
+      if (typeof author?.[part] !== 'string' || author[part].trim() === '') {
+        throw new ContentError(
+          source,
+          `"citation.authors[${index}].${part}" is required`,
+        )
+      }
+    }
+  })
+  if (typeof repository.citation.title !== 'string' || !repository.citation.title.trim()) {
+    throw new ContentError(source, '"citation.title" is required')
+  }
 }
 
 const validatedRepositories = repositories.map(validateRepository)
@@ -532,6 +737,80 @@ export function getRepositoriesByCategory(
 ) {
   return records.filter((repository) => repository.category === category)
 }
+
+/** "Khajouie, P." from { given: "Poorya", family: "Khajouie" }. */
+function citationName({ given, family }) {
+  const initials = given
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => `${part.replace(/\.$/, '').charAt(0)}.`)
+    .join(' ')
+  return `${family}, ${initials}`
+}
+
+/** "A, B, C, & D" — the author list of a software reference. */
+function citationAuthors(authors) {
+  const names = authors.map(citationName)
+  if (names.length === 1) return names[0]
+  return `${names.slice(0, -1).join(', ')}, & ${names.at(-1)}`
+}
+
+/**
+ * The released package, with everything version-specific derived from it.
+ *
+ * Exactly one record may carry a `release` block: the site presents one
+ * supported package, and two would leave it ambiguous which version every
+ * pinned command refers to. Returns null when no record has one, so the pages
+ * that use it can fall back to saying nothing rather than inventing a version.
+ */
+export function buildSoftwareRelease(records = validatedRepositories) {
+  const released = records.filter((repository) => repository.release)
+  if (released.length > 1) {
+    throw new ContentError(
+      'repositories',
+      `only one repository may carry a release; found ${released
+        .map((r) => r.id)
+        .join(', ')}`,
+    )
+  }
+  const repository = released[0]
+  if (!repository) return null
+
+  const { release, citation } = repository
+  const tag = `v${release.version}`
+  const repositoryUrl = repository.url.replace(/\/+$/, '')
+  const docsBase = `${repositoryUrl}/blob/${tag}/`
+  const pin = `${release.package}==${release.version}`
+
+  return {
+    id: repository.id,
+    name: repository.name,
+    package: release.package,
+    version: release.version,
+    tag,
+    date: release.date,
+    pythonVersions: release.pythonVersions,
+    platforms: release.platforms,
+    licence: repository.licence,
+    repositoryUrl,
+    issuesUrl: repository.issuesUrl ?? null,
+    releaseUrl: `${repositoryUrl}/releases/tag/${tag}`,
+    pypiUrl: `https://pypi.org/project/${release.package}/${release.version}/`,
+    docsBase,
+    /** A path inside the repository, at the released tag. */
+    docUrl: (path) => `${docsBase}${path}`,
+    install: `python -m pip install "${pin}"`,
+    installPlot: `python -m pip install "${release.package}[plot]==${release.version}"`,
+    citation:
+      `${citationAuthors(citation.authors)} ${citation.title} ` +
+      `(version ${release.version}) [Computer software]. ${repositoryUrl}`,
+    citationTitle: citation.title,
+    citationLead: `${citationAuthors(citation.authors)} `,
+    citationTail: ` (version ${release.version}) [Computer software]. ${repositoryUrl}`,
+  }
+}
+
+export const softwareRelease = buildSoftwareRelease()
 
 /* ------------------------------------------------------------------------ *
  * People
@@ -772,57 +1051,14 @@ export function getRecentPublications(count = 3, records = publicationsByYear) {
  */
 const HOME_SHAPE = {
   hero: ['lede', 'primaryCta', 'secondaryCta'],
-  researchVision: ['heading', 'question', 'intro', 'direction'],
+  researchVision: ['heading', 'question', 'body'],
   introduction: ['heading', 'body', 'cta'],
-  methods: ['heading', 'intro'],
-  analysis: ['heading', 'intro'],
-  software: ['heading', 'intro'],
+  research: ['heading', 'intro', 'methodsCard', 'analysisCard', 'earlierCard', 'cta'],
+  software: ['heading', 'intro', 'installLabel', 'getStartedCta', 'softwareCta'],
   publications: ['heading', 'intro', 'cta'],
   group: ['heading', 'intro', 'cta'],
   funding: ['heading', 'primarySupport', 'computingSupport'],
   contact: ['heading', 'body', 'cta'],
-}
-
-/*
- * Expandable detail: optional as a whole, strict once present.
- *
- * The label and the paragraphs only make sense together — a label with nothing
- * behind it is a control that opens onto an empty box, and paragraphs with no
- * label cannot be reached. Either both are there or neither is, and anything
- * in between fails the build rather than shipping a dead control.
- *
- * Blank entries inside the list are rejected too: the CMS list widget adds an
- * empty row as soon as an editor clicks "add", and an unfilled one would
- * otherwise render as an empty paragraph.
- */
-const HOME_DISCLOSURES = [['researchVision', 'detailsLabel', 'details']]
-
-function validateDisclosure(block, section, labelField, listField) {
-  const label = block[labelField]
-  const paragraphs = block[listField]
-
-  const hasLabel = typeof label === 'string' && label.trim() !== ''
-  const hasList = Array.isArray(paragraphs) && paragraphs.length > 0
-
-  if (!hasLabel && !hasList) return
-
-  if (!hasLabel) {
-    throw new ContentError(
-      'home.json',
-      `"${section}.${listField}" has content but "${section}.${labelField}" is ` +
-        'empty, so there would be nothing to click to reveal it',
-    )
-  }
-
-  if (!hasList) {
-    throw new ContentError(
-      'home.json',
-      `"${section}.${labelField}" is set but "${section}.${listField}" is empty. ` +
-        'Remove the label, or write the text it should reveal.',
-    )
-  }
-
-  validateParagraphs(paragraphs, section, listField)
 }
 
 /** Every entry of an editorial paragraph list is prose someone has written. */
@@ -956,15 +1192,25 @@ function validateHome(data) {
     }
   }
 
-  for (const [section, labelField, listField] of HOME_DISCLOSURES) {
-    validateDisclosure(data[section], section, labelField, listField)
-  }
-
   validateFunding(data.funding)
 
-  /* Same rule as a method page: an illustration without a description of
-     what it shows is not publishable. */
-  validateFigure(data.introduction.figure, 'home.json')
+  /* The BioTSR section's short list of what the software does. Optional, but
+     an empty row from the CMS list widget would render as an empty bullet. */
+  validateParagraphs(requireList(data.software.highlights, 'software.highlights'), 'software', 'highlights')
+
+  /*
+   * The diagram under "How TSR represents a structure" is a component built
+   * from a BioTSR calculation (src/components/figures/TsrOverview.jsx), not an
+   * uploaded image, so the old `figure` field has nothing to drive. Refused
+   * rather than ignored, so an editor who adds one learns it would not show.
+   */
+  if (data.introduction.figure !== undefined) {
+    throw new ContentError(
+      'home.json',
+      '"introduction.figure" is no longer used: the diagram is drawn from a ' +
+        'BioTSR calculation. Remove the field.',
+    )
+  }
 
   return data
 }
@@ -981,7 +1227,54 @@ export const home = validateHome(homeData)
 const PAGES_SHAPE = {
   publications: ['title', 'intro'],
   people: ['title', 'intro', 'currentHeading', 'formerHeading'],
-  software: ['title', 'intro', 'note'],
+  software: [
+    'title',
+    'eyebrow',
+    'intro',
+    'getStartedAction',
+    'helpHeading',
+    'helpBody',
+    'contactAction',
+    'citeHeading',
+    'citeIntro',
+    'citeNote',
+    'licenceNote',
+    'figuresHeading',
+    'figuresIntro',
+    'matrixTitle',
+    'matrixAlt',
+    'matrixCaption',
+    'architectureTitle',
+    'architectureAlt',
+    'architectureCaption',
+    'researchCodeHeading',
+    'researchCodeIntro',
+    'researchCodeAction',
+  ],
+  research: [
+    'title',
+    'intro',
+    'coreNote',
+    'coreAction',
+    'methodsHeading',
+    'methodsIntro',
+    'analysisHeading',
+    'analysisIntro',
+    'earlierHeading',
+    'earlierIntro',
+    'earlierAction',
+  ],
+  earlierImplementations: [
+    'title',
+    'intro',
+    'biotsrNote',
+    'biotsrAction',
+    'historicalHeading',
+    'historicalIntro',
+    'toolsHeading',
+    'toolsIntro',
+    'licenceNote',
+  ],
   contact: [
     'title',
     'intro',

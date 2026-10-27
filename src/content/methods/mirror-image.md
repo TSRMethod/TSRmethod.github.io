@@ -34,11 +34,18 @@ paper:
   doi: 10.1016/j.compbiolchem.2023.107824
 
 repositories:
+  - name: BioTSR
+    url: https://github.com/TSRMethod/BioTSR
+    description: >-
+      Used by the examples on this page.
+    language: Python
   - name: TSR-Package
     url: https://github.com/pooryakhajouie/TSR-Package
     description: >-
-      Python package for downloading PDB files and generating TSR keys and
-      triplets. Mirror-image keys are enabled with an argument to `TSR()`.
+      Mirror-image keys were first implemented here, as the mirror_image
+      argument of the TSR() function. It is kept unchanged for provenance and
+      for work that depends on it; its README has its own installation
+      instructions.
     language: Python
 ---
 
@@ -64,136 +71,40 @@ identifying dynamic structural changes and molecular recognition processes,
 making it a useful tool for analysing stereochemistry in proteins and their
 interactions with ligands and drugs.
 
-## Installation
+## Run it with BioTSR
 
-Clone the repository:
-
-```bash
-git clone https://github.com/pooryakhajouie/TSR-Package.git
-cd TSR-Package
-```
-
-Create a virtual environment and activate it:
+Mirror-image keys are an option of BioTSR's single-structure methods,
+`--mirror`. To compute them for chain A of ubiquitin:
 
 ```bash
-python3 -m venv tsrenv
-source tsrenv/bin/activate   # macOS / Linux
-tsrenv\Scripts\activate      # Windows
+python -m pip install "biotsr==1.0.0"
+biotsr fetch 1UBQ --pdb-dir structures
+biotsr run --method protein --pdb structures/1UBQ.pdb --chain A --mirror --output results
 ```
 
-Install the package:
+A triangle's key is negated when its angle θ, before it is folded into 0–90°,
+exceeds 90°, so a triangle and its mirror image receive keys of opposite sign.
+For ubiquitin chain A the 70,300 triangles give 51,913 distinct keys, 24,909 of
+them negative, against 45,349 without the option. The files are written under
+the prefix `results/1UBQ_A_protein_mirror`, and the category column of the keys
+file reads `mirror`.
 
-```bash
-pip install .
-```
+- **Which methods take it:** both protein Cα methods and all 13 atomic
+  methods, from single amino acids to ligands, carbohydrates and nucleotides.
+  The five cross methods refuse it; no earlier cross program had a mirror
+  convention.
+- **From Python:** `biotsr.analyze(..., mirror=True)`.
+- **Comparing results:** mirror keys are a different key space from unsigned
+  keys, and BioTSR will not compare the two.
+- **Compared with the earlier package:** where BioTSR's protein Cα conventions
+  differ from TSR-Package's, such as dividing angles by π rather than 3.14,
+  the [TSR method page](/tsr#how-biotsr-differs-from-the-earlier-implementation)
+  lists the differences.
 
-Alternatively you can install from a built wheel, but you must build the
-distribution files first:
+![](diagram:modifier-scope?highlight=mirror)
 
-```bash
-python setup.py sdist bdist_wheel
-pip install dist/tsr_package-0.1.1-py3-none-any.whl
-```
-
-Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-Mirror-image keys are produced by the same `TSR()` entry point as the core
-method, with one extra argument.
-
-### Retrieve PDB files
-
-```python
-from tsr_package import PDB_DL
-
-# Retrieve PDB files for the specified PDB IDs
-pdb_ids = ["1GTA", "1GTB", "1LBE"]
-PDB_DL(pdb_ids, 'Dataset')
-```
-
-This downloads the PDB files into the specified `Dataset/` directory, which is
-also the default if no directory is given.
-
-### Generate keys with mirror-image discrimination
-
-```python
-from tsr_package import TSR
-
-# Define the directory where PDB files are stored
-data_dir = "Dataset"
-input_files = ["1GTA", "1GTB", "1LBE"]
-chain = ["A", "A", "A"]        # specify chains for each PDB file
-output_option = "keys"          # choose 'keys', 'triplets', or 'both'
-
-# Process protein data to generate key files
-TSR(data_dir, input_files, chain=chain, output_option=output_option,
-    mirror_image=True)
-```
-
-Protein chains are case-sensitive and must match the chain IDs in the PDB file.
-
-> With `mirror_image=True`, the TSR method considers keys together with their
-> mirror images, assigning a negative value to the mirror key.
-
-### Parameter
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `mirror_image` | `bool` | `False` | When true, mirror-image triangles receive the negated key. |
-
-### Using a CSV file as input
-
-```python
-from tsr_package import TSR
-
-# Define the directory and CSV file path
-data_dir = "Dataset"
-csv_file = "sample_details.csv"
-
-# Process the CSV input
-TSR(data_dir, csv_file, output_option="keys", mirror_image=True)
-```
-
-The CSV file should have two columns, one for the protein IDs and one for the
-corresponding chains:
-
-| protein | chain |
-| --- | --- |
-| 1GTA | A |
-| 1GTB | A |
-| 1LBE | A |
-
-## Examples
-
-### Retrieving PDB files and generating keys
-
-```python
-from tsr_package import PDB_DL, TSR
-
-# Step 1: retrieve PDB files
-data_dir = "Dataset"
-input_files = ["1GTA", "1gtb", "1lbe"]
-chain = ["A", "A", "A"]
-PDB_DL(input_files, data_dir)
-
-# Step 2: generate key files
-TSR(data_dir, input_files, chain=chain, output_option="keys",
-    mirror_image=True)
-```
-
-### Using a CSV file for input
-
-```python
-from tsr_package import PDB_DL, TSR
-
-# Use CSV input
-data_dir = "Dataset"
-csv_file = "sample_details.csv"
-PDB_DL(csv_file)
-TSR(data_dir, csv_file, output_option="triplets", mirror_image=True)
-```
+[Tutorial 01](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/01_protein_calpha.md#the-three-cα-modifiers)
+runs the option beside the other Cα options, and the
+[user guide, §11](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md#11-modifiers)
+describes every option. For many structures, `biotsr batch` runs a CSV manifest
+([tutorial 05](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/05_batch_manifest.md)).

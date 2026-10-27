@@ -83,6 +83,9 @@ a:hover {
   padding: 0.15em 0.35em;
   border-radius: var(--radius-sm);
   background-color: var(--color-code-inline-bg);
+  /* Paths, prefixes and calls such as results/3PTB_A_A_drug_protein_cross_BEN_1
+     have no spaces to break at, and widened a 375px page by up to 128px. */
+  overflow-wrap: anywhere;
 }
 
 hr {

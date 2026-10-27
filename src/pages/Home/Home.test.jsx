@@ -79,33 +79,43 @@ describe('the home page replaces the placeholder', () => {
 })
 
 describe('what the home page lists', () => {
-  it('links to every published method, using the registry', () => {
+  it('previews Methods & research in three cards rather than listing every page', () => {
+    /*
+     * The full directory moved to /research. The home page links into it,
+     * and must not grow back into a card per method.
+     */
     renderHome()
 
-    const published = methods.filter(
-      (method) => method.status === 'published' && method.category === 'method',
-    )
-    expect(published.length).toBeGreaterThan(0)
+    const section = within(screen.getByRole('region', { name: home.research.heading }))
+    const cards = section.getAllByRole('heading', { level: 3 })
+    expect(cards.map((card) => card.textContent)).toEqual([
+      'Scientific methods',
+      'Analysis and research applications',
+      'Earlier implementations',
+    ])
+    expect(section.getByRole('link', { name: home.research.cta })).toHaveAttribute('href', '/research')
 
     const links = internalLinks()
-    for (const method of published) {
-      expect(links, `${method.slug} is missing`).toContain(method.path)
+    for (const method of methods.filter((m) => m.status === 'published' && m.category !== 'core')) {
+      expect(links, method.slug).not.toContain(method.path)
     }
   })
 
-  it('links to every published analysis tool', () => {
+  it('counts the published pages behind each card from the registry', () => {
     renderHome()
 
-    const published = methods.filter(
-      (method) =>
-        method.status === 'published' && method.category === 'analysis',
-    )
-    expect(published.length).toBeGreaterThan(0)
+    const count = (category) =>
+      methods.filter((m) => m.status === 'published' && m.category === category).length
+    const section = within(screen.getByRole('region', { name: home.research.heading }))
+    expect(section.getByText(`${count('method')} pages`)).toBeInTheDocument()
+    expect(section.getByText(`${count('analysis')} pages`)).toBeInTheDocument()
+  })
 
-    const links = internalLinks()
-    for (const method of published) {
-      expect(links, `${method.slug} is missing`).toContain(method.path)
-    }
+  it('shows no earlier package as a card of its own', () => {
+    renderHome()
+    expect(screen.getByRole('main')).not.toHaveTextContent(
+      /TSR-Package|TSR_AMINOACID_PACKAGE|TSR_NUCLEOTIDE_PACKAGE|Nucleotide-Protein/,
+    )
   })
 
   it('does not show Key to 2D Image while it is a draft', () => {
@@ -210,11 +220,12 @@ describe('every home page link goes somewhere real', () => {
     }
   })
 
-  it('resolves the in-page anchor it offers', () => {
+  it('resolves any in-page anchor it offers', () => {
     renderHome()
 
+    // The hero's second action now leads to Getting started rather than to a
+    // section below, so the page may offer no in-page anchor at all.
     const anchors = Array.from(document.querySelectorAll('main a[href^="#"]'))
-    expect(anchors.length).toBeGreaterThan(0)
 
     for (const anchor of anchors) {
       const id = anchor.getAttribute('href').slice(1)
@@ -257,15 +268,83 @@ describe('the home page keeps its content in content files', () => {
     expect(screen.getByText(home.introduction.body)).toBeInTheDocument()
     expect(screen.getByText(home.contact.body)).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: home.methods.heading }),
+      screen.getByRole('heading', { name: home.research.heading }),
     ).toBeInTheDocument()
   })
 
-  it('describes the diagram it shows', () => {
+  it('shows the compact TSR overview, not the old infographic', () => {
+    /*
+     * The infographic drew the longest edge as the base and put θ at a
+     * vertex. The overview is drawn from a BioTSR calculation instead.
+     */
     renderHome()
 
-    const figure = screen.getByAltText(home.introduction.figure.alt)
-    expect(figure).toHaveAttribute('src', home.introduction.figure.src)
-    expect(home.introduction.figure.alt.length).toBeGreaterThan(20)
+    const figure = screen.getByRole('figure', { name: /From a structure to TSR keys/ })
+    expect(within(figure).getAllByRole('listitem')).toHaveLength(4)
+    expect(
+      document.querySelector('img[src*="high-resolution-scientific-workflow-infographic"]'),
+    ).toBeNull()
+    expect(screen.getByRole('link', { name: home.introduction.cta })).toHaveAttribute('href', '/tsr')
+  })
+})
+
+describe('BioTSR on the home page', () => {
+  it('follows the research question and comes before the TSR explanation', () => {
+    renderHome()
+
+    const headings = Array.from(document.querySelectorAll('main h2')).map((h) => h.textContent)
+    expect(headings.slice(0, 4)).toEqual([
+      home.researchVision.heading,
+      home.software.heading,
+      home.introduction.heading,
+      home.research.heading,
+    ])
+  })
+
+  it('says what BioTSR does, in the points from home.json', () => {
+    renderHome()
+
+    const section = within(screen.getByRole('region', { name: home.software.heading }))
+    for (const point of home.software.highlights) {
+      expect(section.getByText(point)).toBeInTheDocument()
+    }
+    expect(section.getByText(/BioTSR 1\.0\.0/)).toBeInTheDocument()
+  })
+
+  it('offers both ways in from the hero: the science and the software', () => {
+    renderHome()
+
+    const hero = within(screen.getByRole('region', { name: siteConfig.name }))
+    expect(hero.getByRole('link', { name: home.hero.primaryCta })).toHaveAttribute(
+      'href',
+      '/tsr',
+    )
+    expect(hero.getByRole('link', { name: home.hero.secondaryCta })).toHaveAttribute(
+      'href',
+      '/software/get-started',
+    )
+  })
+
+  it('features BioTSR with its pinned install command, not a repository grid', () => {
+    renderHome()
+
+    const section = within(screen.getByRole('region', { name: home.software.heading }))
+    expect(section.getByText('python -m pip install "biotsr==1.0.0"')).toBeInTheDocument()
+    expect(section.getByRole('link', { name: home.software.getStartedCta })).toHaveAttribute(
+      'href',
+      '/software/get-started',
+    )
+    expect(section.getByRole('link', { name: home.software.softwareCta })).toHaveAttribute(
+      'href',
+      '/software',
+    )
+    // The historical repositories have their own page, not a place here.
+    expect(section.queryByText(/TSR-Package|TSR_AMINOACID_PACKAGE/)).not.toBeInTheDocument()
+  })
+
+  it('no longer says a consolidated package is coming', () => {
+    renderHome()
+
+    expect(screen.getByRole('main')).not.toHaveTextContent(/consolidated package|is planned/i)
   })
 })

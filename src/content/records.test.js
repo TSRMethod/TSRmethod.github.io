@@ -25,6 +25,8 @@ import {
   validatePages,
   validatePerson,
   validateRepository,
+  softwareRelease,
+  buildSoftwareRelease,
   home,
   pages,
 } from './index'
@@ -439,7 +441,7 @@ describe('repository records', () => {
 
   it('requires a category and a kind it understands', () => {
     for (const repository of repositories) {
-      expect(['core', 'method', 'analysis', 'tooling']).toContain(
+      expect(['core', 'historical', 'method', 'analysis', 'tooling']).toContain(
         repository.category,
       )
       expect(['package', 'scripts']).toContain(repository.kind)
@@ -506,10 +508,90 @@ describe('repository records', () => {
   })
 
   it('groups by category without losing anyone', () => {
-    const grouped = ['core', 'method', 'analysis', 'tooling'].flatMap(
+    const grouped = ['core', 'historical', 'method', 'analysis', 'tooling'].flatMap(
       (category) => getRepositoriesByCategory(category),
     )
     expect(grouped).toHaveLength(repositories.length)
+  })
+})
+
+describe('the BioTSR release record', () => {
+  const record = repositories.find((r) => r.id === 'biotsr')
+
+  it('is the one core entry, and the earlier packages are historical', () => {
+    expect(getRepositoriesByCategory('core').map((r) => r.id)).toEqual(['biotsr'])
+    for (const id of [
+      'tsr-package',
+      'tsr-aminoacid-package',
+      'tsr-nucleotide-package',
+      'nucleotide-protein',
+    ]) {
+      expect(repositories.find((r) => r.id === id).category, id).toBe('historical')
+    }
+  })
+
+  it('derives every version-specific link from one version', () => {
+    expect(softwareRelease).toMatchObject({
+      version: '1.0.0',
+      tag: 'v1.0.0',
+      repositoryUrl: 'https://github.com/TSRMethod/BioTSR',
+      releaseUrl: 'https://github.com/TSRMethod/BioTSR/releases/tag/v1.0.0',
+      pypiUrl: 'https://pypi.org/project/biotsr/1.0.0/',
+      docsBase: 'https://github.com/TSRMethod/BioTSR/blob/v1.0.0/',
+      install: 'python -m pip install "biotsr==1.0.0"',
+      installPlot: 'python -m pip install "biotsr[plot]==1.0.0"',
+      licence: 'Apache License 2.0',
+      pythonVersions: '3.9–3.13',
+    })
+    expect(softwareRelease.docUrl('docs/USER_GUIDE.md')).toBe(
+      'https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md',
+    )
+  })
+
+  it('formats the citation exactly as the released README gives it', () => {
+    expect(softwareRelease.citation).toBe(
+      'Khajouie, P., Rauniyar, K., Raghavan, V. V., & Xu, W. BioTSR ' +
+        '(version 1.0.0) [Computer software]. https://github.com/TSRMethod/BioTSR',
+    )
+  })
+
+  it('keeps the authors of CITATION.cff, in its order', () => {
+    expect(record.citation.authors.map((a) => `${a.given} ${a.family}`)).toEqual([
+      'Poorya Khajouie',
+      'Krishna Rauniyar',
+      'Vijay V. Raghavan',
+      'Wu Xu',
+    ])
+  })
+
+  it('records no DOI, because none has been registered', () => {
+    expect(JSON.stringify(record)).not.toMatch(/doi|zenodo/i)
+    expect(Object.values(softwareRelease).join(' ')).not.toMatch(/doi|zenodo/i)
+  })
+
+  it('refuses a malformed release rather than printing it', () => {
+    const base = { ...record, release: { ...record.release } }
+    for (const [field, value] of [
+      ['version', '1.0'],
+      ['version', 'latest'],
+      ['date', '26/10/2026'],
+      ['package', 'Bio TSR'],
+    ]) {
+      expect(
+        () => validateRepository({ ...base, release: { ...base.release, [field]: value } }),
+        `${field}=${value}`,
+      ).toThrow(ContentError)
+    }
+    expect(() => validateRepository({ ...base, licence: '' })).toThrow(ContentError)
+    expect(() =>
+      validateRepository({ ...base, citation: { title: 'BioTSR', authors: [] } }),
+    ).toThrow(ContentError)
+  })
+
+  it('allows only one released package, so "the version" is never ambiguous', () => {
+    const second = { ...record, id: 'other', url: 'https://github.com/TSRMethod/other' }
+    expect(() => buildSoftwareRelease([record, second])).toThrow(ContentError)
+    expect(buildSoftwareRelease([])).toBeNull()
   })
 })
 

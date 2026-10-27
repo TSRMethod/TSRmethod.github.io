@@ -1,42 +1,27 @@
 import { Link } from 'react-router-dom'
 import { home } from '../../content'
 import HomeSection from './HomeSection'
-import OptimizedImage from '../shared/OptimizedImage'
+import TsrOverview from '../figures/TsrOverview'
 import styles from './TsrIntroduction.module.css'
 
 /*
  * A short explanation of what TSR does, and the diagram that makes it concrete.
  *
- * Deliberately a summary. The full derivation, the parameter tables and the
- * tutorial live on /tsr, and duplicating any of that here would give the site
- * two copies of the same explanation to keep in step.
+ * Deliberately a summary. The full derivation and the six-step figure live on
+ * /tsr. The diagram here is the same component in its compact form, drawn
+ * from the same BioTSR calculation, so the home page and the method page
+ * cannot give two different accounts of how a key is made. (The infographic
+ * this replaced drew the longest edge as the base and put θ at a vertex; the
+ * image file is kept in public/images/uploads, unreferenced.)
  */
 export default function TsrIntroduction({ tone }) {
-  const { heading, body, cta, figure } = home.introduction
+  const { heading, body, cta } = home.introduction
 
   return (
     <HomeSection id="introduction" heading={heading} tone={tone}>
-      <div className={styles.layout}>
-        <p className={styles.body}>{body}</p>
+      <p className={styles.body}>{body}</p>
 
-        {figure && (
-          <figure className={styles.figure}>
-            {/*
-             * Above the fold on the landing page: loaded eagerly and given
-             * priority, because this is the largest paint and the first thing
-             * that explains what the site is about.
-             */}
-            <OptimizedImage
-              src={figure.src}
-              alt={figure.alt}
-              sizes="(min-width: 1024px) 60vw, 100vw"
-              loading="eager"
-              fetchPriority="high"
-            />
-            {figure.caption && <figcaption>{figure.caption}</figcaption>}
-          </figure>
-        )}
-      </div>
+      <TsrOverview variant="compact" />
 
       <p className={styles.action}>
         <Link to="/tsr">{cta}</Link>

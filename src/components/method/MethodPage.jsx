@@ -9,11 +9,47 @@ import SourceCodeCard from './SourceCodeCard'
 import Reveal from '../shared/Reveal'
 import OptimizedImage from '../shared/OptimizedImage'
 import Callout from './Callout'
+import { DIAGRAMS } from '../figures/diagrams'
 import styles from './MethodPage.module.css'
 
 const SLURM_ID = 'slurm-and-hpc'
 const SOURCE_ID = 'source-code'
 const REFERENCES_ID = 'references'
+
+/*
+ * Sections whose text now lives in the source-code cards. A page that no
+ * longer has one of these headings keeps its id on the source-code section, so
+ * an old link such as /methods/mirror-image#earlier-implementation still lands
+ * on the earlier package's card rather than at the top of the page.
+ */
+const RETIRED_SECTION_IDS = ['earlier-implementation', 'earlier-scripts']
+
+/*
+ * "Reproduced from <source>. © 2024 the authors. CC BY 4.0. Resized for the
+ * web." — the attribution a figure taken from a publication must carry.
+ */
+function FigureCredit({ credit }) {
+  if (!credit) return null
+  return (
+    <span className={styles.credit}>
+      {credit.use === 'adapted' ? 'Adapted from ' : 'Reproduced from '}
+      <a href={credit.url} target="_blank" rel="noopener noreferrer">
+        {credit.source}
+        <span className="visually-hidden"> (opens in a new tab)</span>
+      </a>
+      .{credit.copyright && ` ${credit.copyright}.`}{' '}
+      {credit.licenceUrl ? (
+        <a href={credit.licenceUrl} target="_blank" rel="noopener noreferrer license">
+          {credit.licence}
+          <span className="visually-hidden"> (opens in a new tab)</span>
+        </a>
+      ) : (
+        credit.licence
+      )}
+      .{credit.changes && ` ${credit.changes}`}
+    </span>
+  )
+}
 
 /*
  * Renders one method or tutorial page from a content file.
@@ -32,8 +68,14 @@ const REFERENCES_ID = 'references'
  * The section navigation lists both kinds, so the reader sees one continuous
  * table of contents and cannot tell which sections came from which source.
  */
-export default function MethodPage({ slug }) {
-  const method = getPublishedMethod(slug)
+/*
+ * `entry` renders an already-built entry instead of looking the slug up. It
+ * exists for the template's own tests, which render a fixture page carrying
+ * every block type (src/test/fixtures/method-kit.md); no route passes it, so
+ * it is not a way to show a draft.
+ */
+export default function MethodPage({ slug, entry }) {
+  const method = entry ?? getPublishedMethod(slug)
 
   usePageMetadata({ title: method?.title, description: method?.summary })
 
@@ -73,6 +115,7 @@ export default function MethodPage({ slug }) {
   if (!method) return <NotFound />
 
   const citation = formatCitation(method.paper)
+  const Diagram = method.diagram ? DIAGRAMS[method.diagram] : null
 
   return (
     <article className={styles.page}>
@@ -113,8 +156,11 @@ export default function MethodPage({ slug }) {
               loading="eager"
               fetchPriority="high"
             />
-            {method.figure.caption && (
-              <figcaption>{method.figure.caption}</figcaption>
+            {(method.figure.caption || method.figure.credit) && (
+              <figcaption>
+                {method.figure.caption}
+                <FigureCredit credit={method.figure.credit} />
+              </figcaption>
             )}
           </figure>
         )}
@@ -124,6 +170,7 @@ export default function MethodPage({ slug }) {
         <SectionNavigation sections={sections} />
 
         <div className={styles.content}>
+          {Diagram && <Diagram />}
           <MarkdownContent>{method.body}</MarkdownContent>
 
           <SlurmGuide slurm={method.slurm} headingId={SLURM_ID} />
@@ -134,6 +181,11 @@ export default function MethodPage({ slug }) {
               className={styles.section}
               aria-labelledby={SOURCE_ID}
             >
+              {RETIRED_SECTION_IDS.filter(
+                (id) => !method.headings.some((heading) => heading.id === id),
+              ).map((id) => (
+                <span key={id} id={id} className={styles.anchor} aria-hidden="true" />
+              ))}
               <h2 id={SOURCE_ID} className={styles.sectionHeading}>
                 Source code
               </h2>

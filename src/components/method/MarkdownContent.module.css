@@ -69,3 +69,24 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
+
+/* An optional block an editor wrote as `> [!DETAILS] Summary`. */
+.prose details {
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.prose summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.prose details[open] > summary {
+  margin-bottom: var(--space-3);
+}
+
+.prose details > :last-child {
+  margin-bottom: 0;
+}

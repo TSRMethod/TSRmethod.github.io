@@ -9,8 +9,10 @@ import {
   getPublishedMethod,
   buildMethod,
   formatCitation,
+  softwarePages,
+  publications,
 } from './index'
-import { getVisibleNavigation } from '../app/navigation'
+import { getVisibleNavigation, getContentGroups } from '../app/navigation'
 import { isRouteImplemented } from '../app/routeRegistry'
 import { LEGACY_PATHS } from '../app/legacyPaths'
 import { extractHeadings } from '../lib/toc'
@@ -82,39 +84,58 @@ describe('the migrated methods parse', () => {
     )
   })
 
-  it('uses each method’s own authoritative package', () => {
+  it('lists BioTSR first, then each method’s own earlier implementation', () => {
     /*
-     * The nucleotide and amino-acid methods are separate repositories, not
-     * part of TSR-Package. Collapsing them into the central package would
-     * make every install and import instruction on those pages wrong.
+     * The nucleotide and amino-acid methods were first published in separate
+     * repositories, not in TSR-Package. Collapsing them into the central
+     * package would point their earlier-implementation links at the wrong
+     * code.
      */
-    const repo = (slug) => getPublishedMethod(slug).repositories[0].url
+    const repos = (slug) => getPublishedMethod(slug).repositories.map((r) => r.url)
+    const BIOTSR = 'https://github.com/TSRMethod/BioTSR'
 
-    expect(repo('drug-tsr')).toBe('https://github.com/pooryakhajouie/TSR-Package')
-    expect(repo('amino-acid')).toBe(
-      'https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE',
-    )
-    expect(repo('nucleotide')).toBe(
-      'https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE',
-    )
-    expect(repo('nucleotide-protein')).toBe(
-      'https://github.com/KrishnaRauniyar/Nucleotide-Protein',
-    )
+    for (const [slug, earlier] of [
+      ['drug-tsr', 'https://github.com/pooryakhajouie/TSR-Package'],
+      ['amino-acid', 'https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE'],
+      ['nucleotide', 'https://github.com/KrishnaRauniyar/TSR_NUCLEOTIDE_PACKAGE'],
+      ['nucleotide-protein', 'https://github.com/KrishnaRauniyar/Nucleotide-Protein'],
+      ['amino-acid-grouping', 'https://github.com/pooryakhajouie/TSR-Package'],
+      ['mirror-image', 'https://github.com/pooryakhajouie/TSR-Package'],
+      ['size-filtering', 'https://github.com/pooryakhajouie/TSR-Package'],
+      ['sse-tsr', 'https://github.com/pooryakhajouie/TSR-Package'],
+    ]) {
+      expect(repos(slug), slug).toEqual([BIOTSR, earlier])
+    }
   })
 
-  it('imports each package by its own name, not always tsr_package', () => {
-    const body = (slug) => getPublishedMethod(slug).body
+  it('gives each method a BioTSR command and its earlier implementation, once', () => {
+    for (const slug of PUBLISHED) {
+      const method = getPublishedMethod(slug)
+      const headings = method.headings.map((h) => h.text)
+      expect(headings, slug).toContain('Run it with BioTSR')
+      expect(method.body, slug).toMatch(/```bash\n(python -m pip install "biotsr==1\.0\.0"\n)?biotsr (fetch|run|batch)/)
 
-    expect(body('drug-tsr')).toContain('from tsr_package import DrugTSR')
-    expect(body('amino-acid')).toContain(
-      'from aminoacid_tsr_package.AminoAcid import AminoAcidProteinTSR',
-    )
-    expect(body('nucleotide')).toContain(
-      'from nucleotide_tsr_package.Nucleotide import NucleotideTSR',
-    )
-    // Nucleotide–Protein is a pair of CLI scripts, so it has no import at all.
-    expect(body('nucleotide-protein')).toContain('python drug_protein_3A.py')
-    expect(body('nucleotide-protein')).not.toContain('import tsr_package')
+      /* The earlier implementation is described on its source-code card, and
+         not again in a section of its own just above it. */
+      expect(headings, slug).not.toContain('Earlier implementation')
+      expect(method.body, slug).not.toMatch(/kept unchanged for provenance/)
+      const earlier = method.repositories.filter((r) => r.name !== 'BioTSR')
+      expect(earlier.length, slug).toBeGreaterThan(0)
+      for (const repository of earlier) {
+        expect(repository.description, slug).toMatch(/kept unchanged for provenance/)
+      }
+    }
+  })
+
+  it('no longer carries the earlier packages’ installation walk-throughs', () => {
+    for (const slug of PUBLISHED) {
+      const body = getPublishedMethod(slug).body
+      expect(body, slug).not.toMatch(/^## Installation$/m)
+      expect(body, slug).not.toMatch(/git clone https:\/\/github\.com\/(pooryakhajouie|KrishnaRauniyar)/)
+      expect(body, slug).not.toMatch(/tsrenv\\Scripts\\activate/)
+      expect(body, slug).not.toMatch(/from (tsr_package|aminoacid_tsr_package|nucleotide_tsr_package)/)
+      expect(getPublishedMethod(slug).slurm, slug).toBeNull()
+    }
   })
 
   it('does not repeat the aa_grouping mistake on DrugTSR', () => {
@@ -125,20 +146,71 @@ describe('the migrated methods parse', () => {
     expect(getPublishedMethod('drug-tsr').body).not.toMatch(/aa_grouping/)
   })
 
-  it('keeps the Slurm scripts of the three HPC workflows intact', () => {
-    for (const slug of ['amino-acid', 'nucleotide', 'nucleotide-protein']) {
-      const slurm = getPublishedMethod(slug).slurm
-      expect(slurm, `${slug} should have a slurm block`).toBeTruthy()
-      expect(slurm.script.code).toContain('#SBATCH -t 72:00:00')
-      expect(slurm.script.code.split('\n').length).toBeGreaterThan(10)
-      expect(slurm.submit.code).toMatch(/^sbatch /)
-    }
+  it('does not present the DNA–p53 paper as the cross-key method’s publication', () => {
+    const page = getPublishedMethod('nucleotide-protein')
 
-    // The two-step workflow must stay chained, in order.
-    const cross = getPublishedMethod('nucleotide-protein').slurm.script.code
-    expect(cross.indexOf('drug_protein_3A.py')).toBeLessThan(
-      cross.indexOf('cross_key.py'),
+    // No "Read the paper" link: the method has not been published.
+    expect(page.paper).toBeNull()
+    expect(page.body).toMatch(/has not been described in a\s+publication/)
+    expect(page.body).toContain('https://github.com/KrishnaRauniyar/Nucleotide-Protein')
+    // The DNA–p53 paper stays, as related research. What the paper says, what
+    // the authors confirm and what is unpublished are kept apart, and the
+    // page does not claim the study had nothing to do with cross-key code.
+    expect(page.headings.map(({ id }) => id)).toContain('related-research')
+    expect(page.body).toContain('https://doi.org/10.1002/prot.70005')
+    const text = page.body.replace(/\s+/g, ' ')
+    expect(text).toMatch(/The paper does not describe cross keys\./)
+    expect(text).toMatch(/The authors confirm that the study's raw data were generated with Krishna Rauniyar's cross-key code/)
+    expect(text).toMatch(/cross-key method has not been published/)
+    expect(text).not.toMatch(/did not build cross keys|without cross keys|did not use cross keys/)
+  })
+
+  it('keeps DrugTSR’s historical settings apart from BioTSR’s', () => {
+    const text = getPublishedMethod('drug-tsr').body.replace(/\s+/g, ' ')
+    const history = text.slice(text.indexOf("### Earlier settings and BioTSR's"))
+    // The binding-site definitions the authors confirmed.
+    expect(history).toMatch(
+      /one Cα atom from each binding-site residue, a residue with an atom within the cutoff of the drug\. The Cα itself need not lie within the cutoff\./,
     )
+    expect(history).toMatch(
+      /only the protein atoms within the cutoff of the drug, not every atom of the residues they belong to/,
+    )
+    expect(history).toMatch(/ranged from 3 to 5 Å, most often 3\.5 Å/)
+    // Nothing assigned that the evidence does not give.
+    expect(history).toMatch(/does not say which cutoff each published figure used or which program produced it/)
+    expect(history).not.toMatch(/whether an all-atom binding site took only/)
+    // BioTSR 1.0.0 described as it behaves, separately.
+    expect(history).toMatch(/BioTSR 1\.0\.0's behaviour is its own, not a record of earlier work/)
+    expect(history).toMatch(/builds only cross triangles, with atoms on both sides, and computes no keys over the binding-site atoms alone/)
+    expect(history).toMatch(/No BioTSR method selects a ligand's binding-site residues or atoms/)
+  })
+
+  it('gives the DNA–p53 paper’s confirmed figure cutoffs without naming a script version', () => {
+    const text = getPublishedMethod('nucleotide-protein').body.replace(/\s+/g, ' ')
+    expect(text).toMatch(/Its Figure 8 used a cutoff of 3\.0 Å and its Figures 9 and 10 used 3\.5 Å/)
+    expect(text).toMatch(/which version of that code was used has not been identified/)
+    expect(text).not.toMatch(/for one analysis and 3\.5 Å for others/)
+  })
+
+  it('cites the spike–antibody paper on Amino Acid TSR from the publication record', () => {
+    const page = getPublishedMethod('amino-acid')
+    const record = publications.find(({ id }) => id === 'milon-2025-spike-antibody')
+    const text = page.body.replace(/\s+/g, ' ')
+    expect(text).toContain(`(https://doi.org/${record.doi})`)
+    expect(text).toContain(record.authors.slice(0, -1).join(', ') + ' and ' + record.authors.at(-1))
+    expect(text).toMatch(/Amino Acid TSR was reported in the 2025 study/)
+    // Reported in it; not claimed to be the first publication of the method.
+    expect(text).not.toMatch(/first (?:reported|published|introduced)|first publication/i)
+    // The page's own paper link is unchanged.
+    expect(page.paper.doi).toBe('10.2174/0115748936306625240724102438')
+  })
+
+  it('points HPC users at BioTSR’s Slurm examples instead of the old scripts', () => {
+    for (const slug of ['amino-acid', 'nucleotide', 'nucleotide-protein']) {
+      expect(getPublishedMethod(slug).body, slug).toContain(
+        'https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/CLI_GUIDE.md#12-scripts-and-hpc',
+      )
+    }
   })
 
   it('cites the confirmed SSE-TSR publication, not the legacy one', () => {
@@ -190,20 +262,14 @@ describe('published methods are reachable', () => {
      * Derived from the registry rather than a hard-coded list, so migrating a
      * further method does not silently make this assertion vacuous.
      */
-    const menu = getVisibleNavigation().find((item) => item.id === 'methods')
-    expect(menu, 'the TSR-Based Methods menu should exist').toBeDefined()
+    const menu = getVisibleNavigation().find((item) => item.id === 'research')
+    expect(menu, 'the Methods & research menu should exist').toBeDefined()
 
-    for (const group of menu.groups) {
-      const expected = publishedMethods
-        .filter((m) => m.category === 'method' && m.group === group.id)
-        .map((m) => m.slug)
-        .sort()
+    const [methodGroup] = menu.groups
+    expect(methodGroup.label).toBe('Scientific methods')
 
-      expect(group.items.map((item) => item.id).sort()).toEqual(expected)
-    }
-
-    // Every published `method` is in exactly one group, none dropped.
-    const shown = menu.groups.flatMap((g) => g.items.map((i) => i.id)).sort()
+    // Every published `method` is in the group, none dropped, none twice.
+    const shown = methodGroup.items.map((i) => i.id).sort()
     const all = publishedMethods
       .filter((m) => m.category === 'method')
       .map((m) => m.slug)
@@ -222,7 +288,8 @@ describe('published methods are reachable', () => {
     expect(a.path).toBe('/methods/amino-acid')
     expect(b.path).toBe('/methods/amino-acid-grouping')
     expect(a.path).not.toBe(b.path)
-    expect(a.repositories[0].url).not.toBe(b.repositories[0].url)
+    // Their earlier implementations were different packages.
+    expect(a.repositories[1].url).not.toBe(b.repositories[1].url)
     expect(a.paper.doi).not.toBe(b.paper.doi)
   })
 
@@ -231,7 +298,7 @@ describe('published methods are reachable', () => {
     const nav = screen.getByRole('navigation', { name: 'Main' })
 
     expect(
-      within(nav).getByRole('button', { name: /TSR-Based Methods/ }),
+      within(nav).getByRole('button', { name: 'Methods & research' }),
     ).toBeInTheDocument()
   })
 })
@@ -359,15 +426,13 @@ describe('content quality of every published method', () => {
   it('shares a DOI between methods only where that is intended', () => {
     /*
      * The legacy site reused the amino-acid-grouping DOI on SSE-TSR, so a
-     * repeated DOI is worth catching. But sharing can be legitimate: one
-     * Proteins 2025 paper covers both the nucleotide representation and the
-     * DNA–p53 interaction work, and is correctly cited by both pages.
-     *
-     * Anything shared must therefore be listed here deliberately.
+     * repeated DOI is worth catching. Sharing can be legitimate, so anything
+     * shared must be listed here deliberately. Nothing is at present: the
+     * Proteins 2025 DNA–p53 paper is Nucleotide TSR's publication, and only
+     * related research for Nucleotide–Protein TSR, whose cross-key method is
+     * unpublished.
      */
-    const INTENTIONALLY_SHARED = {
-      '10.1002/prot.70005': ['nucleotide', 'nucleotide-protein'],
-    }
+    const INTENTIONALLY_SHARED = {}
 
     const bySlug = new Map()
     for (const method of publishedMethods) {
@@ -397,9 +462,8 @@ describe('the existing TSR page is unaffected', () => {
     ).toBeInTheDocument()
   })
 
-  it('still appears in the navigation', () => {
-    const visible = getVisibleNavigation()
-    expect(visible.some((item) => item.id === 'tsr')).toBe(true)
+  it('is the navigation’s first entry after Home, Understand TSR', () => {
+    expect(getVisibleNavigation()[1]).toMatchObject({ id: 'science', to: '/tsr' })
   })
 })
 
@@ -416,5 +480,85 @@ describe('no navigation link points at an unimplemented route', () => {
     for (const href of internal) {
       expect(isRouteImplemented(href), `${href} has no route`).toBe(true)
     }
+  })
+})
+
+describe('what a key is, stated accurately', () => {
+  /*
+   * A key encodes a triangle's labels and its angle and distance classes, so
+   * different triangles can share one, and a structure is its distinct keys
+   * and their frequencies. "Unique" is right for distinct values: "the set of
+   * unique integer keys", or the `n_unique_keys` column. What must not appear
+   * is a claim that each triangle receives a key no other triangle has.
+   * Text inside quotation marks is a quotation, and is left alone.
+   */
+  const ONE_KEY_PER_TRIANGLE = [
+    /\b(?:each|every) triangle (?:receives|gets|is (?:given|assigned)|has) (?:a|its own) (?:unique|different|distinct) (?:integer |TSR )?key/i,
+    /\b(?:unique|different|distinct) (?:integer |TSR )?key (?:for|to) (?:each|every) triangle/i,
+    /\bno two triangles (?:share|have|receive) (?:a |the same )?(?:integer |TSR )?key/i,
+    /\bkeys? (?:that|which) uniquely identif(?:y|ies) (?:a|each|every|the) triangle/i,
+  ]
+  const misstatesKeys = (text) => {
+    const unquoted = text.replace(/\s+/g, ' ').replace(/“[^”]*”/g, '“”')
+    return ONE_KEY_PER_TRIANGLE.some((pattern) => pattern.test(unquoted))
+  }
+
+  it('tells a claim of one key per triangle from distinct-value wording', () => {
+    for (const text of [
+      'Each triangle receives a unique key.',
+      'Every triangle is assigned its own distinct\nkey.',
+      'a different key for each triangle',
+      'No two triangles share a key.',
+      'keys that uniquely identify each triangle',
+    ]) {
+      expect(misstatesKeys(text), text).toBe(true)
+    }
+    for (const text of [
+      'A structure is the set of unique integer keys and their frequencies.',
+      'Its 70,300 triangles give 45,349 unique keys.',
+      'The keys are unique integers.',
+      '`n_unique_keys` is the number of distinct keys.',
+      'Different triangles can share a key.',
+      'The paper writes that “each triangle receives a unique key” (Kondra et al., 2021).',
+    ]) {
+      expect(misstatesKeys(text), text).toBe(false)
+    }
+  })
+
+  it('never says each triangle receives a key of its own', () => {
+    const pages = [...publishedMethods, ...Object.values(softwarePages)]
+    for (const page of pages) {
+      for (const text of [page.summary, page.body]) {
+        expect(misstatesKeys(text ?? ''), page.slug).toBe(false)
+      }
+    }
+  })
+
+  it('says on /tsr that triangles can share a key, and how a structure is represented', () => {
+    const tsr = getPublishedMethod('tsr')
+    expect(tsr.summary).toMatch(/distinct keys and how often each occurs/)
+    expect(tsr.body).toMatch(/different triangles can share a key/)
+    expect(tsr.body).toMatch(/receive the same key/)
+  })
+})
+
+describe('method groups', () => {
+  it('files Nucleotide–Protein TSR with the two-molecule methods, once', () => {
+    const byLabel = Object.fromEntries(
+      getContentGroups('method').map((group) => [group.label, group.methods.map((m) => m.slug)]),
+    )
+    expect(byLabel['Two-molecule methods']).toEqual(['drug-tsr', 'nucleotide-protein'])
+    expect(byLabel['Nucleotide methods']).toEqual(['nucleotide'])
+
+    // The menu lists it once, after the single-molecule methods.
+    const research = getVisibleNavigation().find((item) => item.id === 'research')
+    const methodsMenu = research.groups.find((group) => group.id === 'scientific-methods')
+    const paths = methodsMenu.items.map((item) => item.to)
+    expect(paths.filter((to) => to === '/methods/nucleotide-protein')).toHaveLength(1)
+    expect(paths.slice(-3)).toEqual([
+      '/methods/nucleotide',
+      '/methods/drug-tsr',
+      '/methods/nucleotide-protein',
+    ])
   })
 })

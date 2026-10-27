@@ -102,6 +102,29 @@ describe('method validation', () => {
     ).toThrow(/needs "alt" text/)
   })
 
+  it('requires a complete credit on a figure taken from a publication', () => {
+    const figure = '\nfigure:\n  src: /images/x.png\n  alt: A figure.\n  credit:\n'
+    const full =
+      '    use: reproduced\n    source: A paper, Figure 1\n' +
+      '    url: https://doi.org/10.1000/abc\n    licence: CC BY 4.0\n'
+
+    expect(build(`${VALID}${figure}${full}`).figure.credit).toMatchObject({
+      use: 'reproduced',
+      source: 'A paper, Figure 1',
+      licence: 'CC BY 4.0',
+      changes: null,
+    })
+    expect(() =>
+      build(`${VALID}${figure}${full.replace('reproduced', 'borrowed')}`),
+    ).toThrow(/credit.use must be one of reproduced, adapted/)
+    expect(() =>
+      build(`${VALID}${figure}${full.replace('    licence: CC BY 4.0\n', '')}`),
+    ).toThrow(/credit needs "licence"/)
+    expect(() =>
+      build(`${VALID}${figure}${full.replace('https://doi.org', 'http://doi.org')}`),
+    ).toThrow(/must be an https:\/\/ link/)
+  })
+
   it('requires a doi or url on a paper', () => {
     expect(() => build(`${VALID}\npaper:\n  title: Something`)).toThrow(
       /needs either a "doi" or a "url"/,
@@ -334,29 +357,13 @@ describe('markdown body order survives a CMS round-trip', () => {
     expect(blockSequence(tsr.body)).toEqual([
       'h2:Overview',
       'h3:Key generation process',
+      'h3:Worked example',
       'h3:Distinguishing features',
       'h3:Applications',
-      'h2:Installation',
+      'h2:Run it with BioTSR',
       'code:bash',
-      'code:bash',
-      'code:bash',
-      'code:bash',
-      'code:bash',
-      'h2:Usage',
-      'h3:Retrieve PDB files',
-      'code:python',
-      'h3:Generate keys and triplets',
-      'code:python',
-      'h3:Parameters',
-      'table',
-      'h3:Using a CSV file as input',
-      'code:python',
-      'table',
-      'h2:Examples',
-      'h3:Retrieving PDB files and generating keys',
-      'code:python',
-      'h3:Using a CSV file for input',
-      'code:python',
+      'h3:Residue labels in BioTSR',
+      'h3:How BioTSR differs from the earlier implementation',
     ])
   })
 
@@ -364,14 +371,11 @@ describe('markdown body order survives a CMS round-trip', () => {
     const tsr = getPublishedMethod('tsr')
     const sequence = blockSequence(tsr.body)
 
-    // The two examples are each a heading immediately followed by their code.
-    const examplesAt = sequence.indexOf('h2:Examples')
-    expect(sequence.slice(examplesAt)).toEqual([
-      'h2:Examples',
-      'h3:Retrieving PDB files and generating keys',
-      'code:python',
-      'h3:Using a CSV file for input',
-      'code:python',
+    // The BioTSR commands sit directly under the heading that introduces them.
+    const runAt = sequence.indexOf('h2:Run it with BioTSR')
+    expect(sequence.slice(runAt, runAt + 2)).toEqual([
+      'h2:Run it with BioTSR',
+      'code:bash',
     ])
   })
 })
@@ -391,9 +395,10 @@ describe('the registry', () => {
 
     expect(tsr.paper.doi).toBe('10.3389/fchem.2020.602291')
     expect(tsr.paper.url).toBe('https://doi.org/10.3389/fchem.2020.602291')
-    expect(tsr.repositories[0].url).toBe(
+    expect(tsr.repositories.map((repository) => repository.url)).toEqual([
+      'https://github.com/TSRMethod/BioTSR',
       'https://github.com/pooryakhajouie/TSR-Package',
-    )
+    ])
     expect(tsr.figure.alt.length).toBeGreaterThan(20)
   })
 
@@ -401,7 +406,7 @@ describe('the registry', () => {
     const tsr = getPublishedMethod('tsr')
     const topLevel = tsr.headings.filter((h) => h.depth === 2).map((h) => h.text)
 
-    expect(topLevel).toEqual(['Overview', 'Installation', 'Usage', 'Examples'])
+    expect(topLevel).toEqual(['Overview', 'Run it with BioTSR'])
   })
 
   it('never returns a draft method by slug', () => {

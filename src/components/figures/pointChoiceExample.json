@@ -1,0 +1,83 @@
+{
+ "source": "BioTSR 1.0.0, biotsr run --method amino_acid_atomic --pdb 1UBQ.pdb --chain A --residue 15 --residue-name LEU",
+ "structure": "1UBQ",
+ "chain": "A",
+ "residue": "LEU",
+ "number": 15,
+ "triangles": 56,
+ "distinctKeys": 46,
+ "atoms": [
+  {
+   "name": "C",
+   "element": "C",
+   "label": 106,
+   "xy": [
+    2.061,
+    -0.669
+   ]
+  },
+  {
+   "name": "CA",
+   "element": "C",
+   "label": 106,
+   "xy": [
+    0.683,
+    -0.376
+   ]
+  },
+  {
+   "name": "CB",
+   "element": "C",
+   "label": 106,
+   "xy": [
+    -0.197,
+    0.203
+   ]
+  },
+  {
+   "name": "CD1",
+   "element": "C",
+   "label": 106,
+   "xy": [
+    -2.443,
+    -0.875
+   ]
+  },
+  {
+   "name": "CD2",
+   "element": "C",
+   "label": 106,
+   "xy": [
+    -2.216,
+    0.988
+   ]
+  },
+  {
+   "name": "CG",
+   "element": "C",
+   "label": 106,
+   "xy": [
+    -1.546,
+    -0.238
+   ]
+  },
+  {
+   "name": "N",
+   "element": "N",
+   "label": 108,
+   "xy": [
+    0.825,
+    0.688
+   ]
+  },
+  {
+   "name": "O",
+   "element": "O",
+   "label": 109,
+   "xy": [
+    2.833,
+    0.28
+   ]
+  }
+ ]
+}

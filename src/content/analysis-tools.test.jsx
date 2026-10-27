@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 
 import App from '../app/App'
@@ -75,49 +76,47 @@ describe('the analysis collection', () => {
   })
 })
 
-describe('the analysis menu', () => {
+describe('the analysis group of the Methods & research menu', () => {
   beforeEach(() => setViewport('desktop'))
 
-  const menu = () =>
-    getVisibleNavigation().find((item) => item.id === 'analysis')
+  /* The analysis pages sit in "Methods & research", after the methods. */
+  const analysisGroups = (navigation = getVisibleNavigation()) =>
+    (navigation.find((item) => item.id === 'research')?.groups ?? []).filter(
+      (group) => group.id === 'analysis-research',
+    )
 
   it('appears now that at least one child is published', () => {
-    expect(menu()).toBeDefined()
+    expect(analysisGroups().length).toBe(1)
   })
 
-  it('puts each page in the subgroup its content declares', () => {
-    for (const group of menu().groups) {
-      const expected = publishedMethods
-        .filter((m) => m.category === 'analysis' && m.group === group.id)
-        .map((m) => m.slug)
-        .sort()
+  it('holds every published analysis page, in content order', () => {
+    const [group] = analysisGroups()
+    const expected = ['key-analysis', 'key-visualization'].flatMap((id) =>
+      publishedMethods.filter((m) => m.category === 'analysis' && m.group === id).map((m) => m.slug),
+    )
 
-      expect(group.items.map((i) => i.id).sort()).toEqual(expected)
-    }
+    expect(group.items.map((i) => i.id)).toEqual(expected)
   })
 
-  it('renders no empty subgroup', () => {
-    for (const group of menu().groups) {
-      expect(group.items.length, `${group.id} is empty`).toBeGreaterThan(0)
-    }
-  })
-
-  it('shows the dropdown in the header', () => {
+  it('shows the analysis pages in the header menu', async () => {
+    const user = userEvent.setup()
     renderApp('/')
     const nav = screen.getByRole('navigation', { name: 'Main' })
 
+    await user.click(within(nav).getByRole('button', { name: 'Methods & research' }))
     expect(
-      within(nav).getByRole('button', { name: /Key Analysis & Visualization/ }),
+      within(nav).getByRole('list', { name: 'Analysis and research applications' }),
     ).toBeInTheDocument()
+    expect(within(nav).getByRole('link', { name: 'Common Keys' })).toBeInTheDocument()
   })
 
-  it('would hide the whole menu if nothing were published', () => {
+  it('would drop the analysis groups if nothing were published', () => {
     const hidden = getVisibleNavigation({
       methods: publishedMethods.filter((m) => m.category !== 'analysis'),
       isAvailable: () => true,
     })
 
-    expect(hidden.find((item) => item.id === 'analysis')).toBeUndefined()
+    expect(analysisGroups(hidden)).toEqual([])
   })
 })
 
@@ -206,32 +205,29 @@ describe('workflows match their authoritative sources', () => {
     expect(body).not.toContain('confusion_matrix.csv')
   })
 
-  it('keeps the clustering steps in their required order', () => {
-    /*
-     * Asserted on the step headings, not on first mention of each tool: the
-     * overview table names all three steps up front, so raw indexOf order
-     * would prove nothing.
-     */
-    const entry = getPublishedMethod('clustering')
-    const steps = entry.headings
-      .filter((h) => /^Step \d/.test(h.text))
-      .map((h) => h.text)
+  it('keeps the published clustering workflow in its order, naming each tool', () => {
+    const body = getPublishedMethod('clustering').body
+    const table = body.slice(body.indexOf('### The published workflow'))
+    const s1 = table.indexOf('1. Key frequencies')
+    const s2 = table.indexOf('2. Jaccard similarity')
+    const s3 = table.indexOf('3. Clustermap')
 
-    expect(steps).toEqual([
-      'Step 1 — generate key frequencies',
-      'Step 2 — Jaccard similarity',
-      'Step 3 — hierarchical clustering',
-    ])
+    expect(s1).toBeGreaterThan(-1)
+    expect(s1).toBeLessThan(s2)
+    expect(s2).toBeLessThan(s3)
+    expect(table.indexOf('key_frequency_drug.py', s1)).toBeLessThan(s2)
+    expect(table.indexOf('hsp70_actin', s2)).toBeLessThan(s3)
+    expect(table.indexOf('clustermap_n.py', s3)).toBeGreaterThan(s3)
+  })
 
-    // And each step names the tool it actually runs.
-    const body = entry.body
-    const s1 = body.indexOf('Step 1 —')
-    const s2 = body.indexOf('Step 2 —')
-    const s3 = body.indexOf('Step 3 —')
+  it('runs clustering in BioTSR from Python, with no number of clusters by default', () => {
+    const body = getPublishedMethod('clustering').body
 
-    expect(body.indexOf('key_frequency_drug.py', s1)).toBeLessThan(s2)
-    expect(body.indexOf('hsp70_actin', s2)).toBeLessThan(s3)
-    expect(body.indexOf('clustermap_n.py', s3)).toBeGreaterThan(s3)
+    expect(body).toContain('biotsr.analysis')
+    expect(body).toContain('"biotsr[plot]==1.0.0"')
+    expect(body).toMatch(/not on the command line/)
+    expect(body).toMatch(/No number of clusters by default/)
+    expect(body).not.toMatch(/-n 5/)
   })
 
   it('names both clustering repositories, since it spans two', () => {
@@ -243,14 +239,16 @@ describe('workflows match their authoritative sources', () => {
     expect(repos).toContain('https://github.com/dbxmcf/hsp70_actin')
   })
 
-  it('uses the right header flag for each consumer of key_frequency_drug.py', () => {
-    // -H no for clustering (Jaccard needs headerless), -H yes for the DNN.
-    expect(getPublishedMethod('clustering').body).toContain(
-      'key_frequency_drug.py -p triplets_directory -H no',
-    )
+  it('keeps the DNN research instructions, with the header flag the model needs', () => {
     expect(getPublishedMethod('dnn').body).toContain(
       'key_frequency_drug.py -p triplets_directory -H yes',
     )
+  })
+
+  it('says the DNN is separate research code, not part of BioTSR', () => {
+    const body = getPublishedMethod('dnn').body
+    expect(body).toMatch(/not part of BioTSR/)
+    expect(body).toMatch(/does not train\s+> or run this model/)
   })
 
   it('states that Key to 2D Image consumes triplets, not keys', () => {
@@ -270,10 +268,74 @@ describe('workflows match their authoritative sources', () => {
     expect(body).not.toContain('from tsr_package import KeyToImage')
   })
 
-  it('states that Common Keys reads triplet files', () => {
-    expect(getPublishedMethod('common-keys').body).toMatch(
-      /triplet files, not key files/i,
+  it('runs common keys from the command line and the percentages from Python', () => {
+    const body = getPublishedMethod('common-keys').body
+    expect(body).toContain('biotsr analyze common-keys --from-results batch --output analysis_out')
+    expect(body).toContain('key_occurrence_percent')
+    expect(body).toMatch(/does not write\s+them as files/)
+    // The earlier scripts read triplet files; that now sits on their card.
+    const card = getPublishedMethod('common-keys').repositories.find(
+      (r) => r.name === 'Nucleotide_Analysis',
     )
+    expect(card.description).toMatch(/read a directory of triplet files/)
+  })
+
+  it('names the four BioTSR quantities and where each is written', () => {
+    const body = getPublishedMethod('common-keys').body
+    for (const quantity of [
+      'Global common keys',
+      'Group-wise common keys',
+      'Key occurrence percentage',
+      'One-versus-all occurrence',
+    ]) {
+      expect(body).toContain(quantity)
+    }
+    expect(body).toContain('analysis_out/analysis/common_keys/all_samples.csv')
+    expect(body).toMatch(/does not\s+compute Common, Specific or specific keys/)
+    // The prerequisites are stated before the first command.
+    expect(body.indexOf('### Before you start')).toBeLessThan(body.indexOf('```bash'))
+  })
+
+  it('credits the published figure and keeps its two kinds of key apart', () => {
+    const page = getPublishedMethod('common-keys')
+    // Figure 13 of Milon et al. 2024, an open-access CC BY article.
+    expect(page.figure.credit).toMatchObject({
+      use: 'reproduced',
+      url: 'https://doi.org/10.3390/kinasesphosphatases2040021',
+      licence: 'CC BY 4.0',
+      licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+    })
+    expect(page.figure.credit.source).toMatch(/Figure 13/)
+    // "Common"/"Specific" and "common"/"specific" are different sets.
+    for (const term of ['**Common** keys', '**Specific** keys', '**common** keys', '**specific** keys']) {
+      expect(page.body).toContain(term)
+    }
+    expect(page.body).not.toMatch(/specific keys of a class are a subset of that class's keys/)
+  })
+
+  it('shows the figure credit under the Common Keys figure', async () => {
+    setViewport('desktop')
+    renderApp('/analysis/common-keys')
+    const figure = (await screen.findByRole('img', { name: /Worked example over two protein classes/ })).closest('figure')
+    const caption = within(figure).getByText(/Reproduced from/)
+    expect(within(caption).getByRole('link', { name: /Figure 13/ })).toHaveAttribute(
+      'href',
+      'https://doi.org/10.3390/kinasesphosphatases2040021',
+    )
+    expect(within(caption).getByRole('link', { name: /CC BY 4.0/ })).toHaveAttribute(
+      'href',
+      'https://creativecommons.org/licenses/by/4.0/',
+    )
+    expect(caption).toHaveTextContent('© 2024 the authors.')
+    expect(caption).toHaveTextContent('Resized for the web; otherwise unchanged.')
+  })
+
+  it('makes the clustering example runnable without the Common Keys page', () => {
+    const body = getPublishedMethod('clustering').body
+    const setup = body.indexOf('biotsr batch --manifest samples.csv')
+    expect(setup).toBeGreaterThan(-1)
+    expect(setup).toBeLessThan(body.indexOf('```python'))
+    expect(body).toContain('sample_id,pdb_id,method,chain,label')
   })
 })
 

@@ -1,77 +1,92 @@
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/*
+ * The BioTSR block: what it does beside how to get it. One column on a phone,
+ * the points first; two on a wide screen, with the install panel given the
+ * larger share so the command fits on one line.
+ */
+.layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
-.card {
-  min-width: 0;
-  padding: var(--space-4);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
 }
 
-.name {
-  font-size: var(--text-base);
-  font-family: var(--font-mono);
-  margin: 0 0 var(--space-2);
-  overflow-wrap: anywhere;
-}
-
-.description {
+.highlights {
   margin: 0;
+  padding-left: var(--space-5);
+  max-width: var(--content-measure);
+}
+
+/* On the items: reset.css's `ul[class]` outranks a single class on the list. */
+.highlights li {
+  list-style: disc;
+}
+
+.highlights li + li {
+  margin-top: var(--space-2);
+}
+
+.panel {
+  min-width: 0;
+  padding: var(--space-5);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.facts {
+  margin: 0 0 var(--space-3);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
-.language {
-  margin: var(--space-3) 0 0;
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
+.version {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-heading);
 }
 
-/*
- * Interaction polish, shared by every card on the site (see --card-lift in
- * tokens.css). Two pixels and a shadow: enough to acknowledge the pointer,
- * not enough to move the reader's eye. No scaling — a card that grows pushes
- * its neighbours' text around and makes a grid feel unstable.
- *
- * Movement is asked for only where a pointer can hover. On a touch screen the
- * hover state sticks after a tap, which would leave one card looking raised
- * until something else is touched.
- */
-.card {
-  transition:
-    transform var(--motion-base) var(--motion-ease),
-    box-shadow var(--motion-base) var(--motion-ease),
-    border-color var(--motion-base) var(--motion-ease);
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    transform: translateY(var(--card-lift));
-    border-color: var(--color-border-strong);
-    box-shadow: var(--shadow-sm);
-  }
+/* The same two button treatments as the hero, so an action looks like an
+   action wherever it is on the page. */
+.primary,
+.secondary {
+  display: inline-block;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
 }
 
-/* Keyboard focus is treated as deliberately as hover: same surface change,
-   in the accent colour, whenever focus lands on a link inside the card. */
-.card:focus-within {
+.primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid var(--color-primary);
+}
+
+.primary:hover {
+  background-color: var(--color-primary-dark);
+  color: #ffffff;
+}
+
+.secondary {
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border-strong);
+}
+
+.secondary:hover {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card,
-  .card:hover {
-    transform: none;
-    transition: none;
-  }
 }

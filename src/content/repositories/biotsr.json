@@ -1,0 +1,28 @@
+{
+  "id": "biotsr",
+  "name": "BioTSR",
+  "url": "https://github.com/TSRMethod/BioTSR",
+  "description": "The unified software implementation of the Triangular Spatial Relationship (TSR) methodology: one Python package and one command line for the protein Cα, atomic, ligand, carbohydrate, nucleotide and cross TSR methods.",
+  "language": "Python",
+  "category": "core",
+  "kind": "package",
+  "issuesUrl": "https://github.com/TSRMethod/BioTSR/issues",
+  "order": 1,
+  "release": {
+    "package": "biotsr",
+    "version": "1.0.0",
+    "date": "2026-10-26",
+    "pythonVersions": "3.9–3.13",
+    "platforms": "Linux and macOS"
+  },
+  "licence": "Apache License 2.0",
+  "citation": {
+    "title": "BioTSR",
+    "authors": [
+      { "given": "Poorya", "family": "Khajouie" },
+      { "given": "Krishna", "family": "Rauniyar" },
+      { "given": "Vijay V.", "family": "Raghavan" },
+      { "given": "Wu", "family": "Xu" }
+    ]
+  }
+}

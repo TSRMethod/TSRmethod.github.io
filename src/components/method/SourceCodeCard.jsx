@@ -9,7 +9,18 @@ import styles from './SourceCodeCard.module.css'
  * Replaces the previous site's "Source Code" section, which put a bare URL
  * inside a code block wrapped in an anchor. One card per repository, because
  * some methods legitimately have more than one.
+ *
+ * The card is also where a page says what each repository is to this method:
+ * its role and licence come from the repository's own record, so a method page
+ * cannot call TSR-Package "current" or misstate its licence, and the page's
+ * text does not need to repeat either.
  */
+const ROLES = {
+  core: 'Current software',
+  historical: 'Earlier implementation',
+  analysis: 'Research code',
+}
+
 export default function SourceCodeCard({ repository, index }) {
   const { name, url, description, language } = repository
 
@@ -42,12 +53,20 @@ export default function SourceCodeCard({ repository, index }) {
         </a>
       </h3>
 
+      {ROLES[record?.category] && <p className={styles.role}>{ROLES[record.category]}</p>}
+
       {description && <p className={styles.description}>{description}</p>}
 
       {language && (
         <p className={styles.meta}>
           <span className="visually-hidden">Language: </span>
           {language}
+        </p>
+      )}
+
+      {record?.licence && (
+        <p className={styles.licence}>
+          <span className={styles.licenceLabel}>Licence</span> {record.licence}
         </p>
       )}
     </Reveal>

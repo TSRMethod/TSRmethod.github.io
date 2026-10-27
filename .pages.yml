@@ -99,6 +99,11 @@ content:
       - name: status
         type: string
         hidden: true
+      # Which site-drawn figure the page shows (for example tsr-overview).
+      # An id of a component, so it is architecture, not copy.
+      - name: diagram
+        type: string
+        hidden: true
 
       # ---- Editorial ----
       - name: title
@@ -134,6 +139,41 @@ content:
             label: Caption
             type: string
             description: Optional caption shown beneath the image.
+          - name: credit
+            label: Credit (figures from a publication)
+            type: object
+            description: >-
+              Fill in only for a figure taken from a published paper. Source,
+              link and licence are all required once any field is set.
+            fields:
+              - name: use
+                label: Reproduced or adapted
+                type: select
+                options:
+                  values: [reproduced, adapted]
+              - name: source
+                label: Source
+                type: string
+                description: Paper and figure, for example "Milon et al., Kinases and Phosphatases 2024, 2(4), 315–339, Figure 13".
+              - name: url
+                label: Link to the source
+                type: string
+                description: The paper's https://doi.org/ link.
+              - name: copyright
+                label: Copyright line
+                type: string
+                description: For example "© 2024 the authors".
+              - name: licence
+                label: Licence
+                type: string
+                description: For example "CC BY 4.0".
+              - name: licenceUrl
+                label: Licence link
+                type: string
+              - name: changes
+                label: Changes made
+                type: string
+                description: What was changed, for example "Resized for the web; otherwise unchanged."
 
       - name: paper
         label: Publication
@@ -297,6 +337,11 @@ content:
       - name: status
         type: string
         hidden: true
+      # Which site-drawn figure the page shows (for example tsr-overview).
+      # An id of a component, so it is architecture, not copy.
+      - name: diagram
+        type: string
+        hidden: true
 
       # ---- Editorial ----
       - name: title
@@ -332,6 +377,41 @@ content:
             label: Caption
             type: string
             description: Optional caption shown beneath the image.
+          - name: credit
+            label: Credit (figures from a publication)
+            type: object
+            description: >-
+              Fill in only for a figure taken from a published paper. Source,
+              link and licence are all required once any field is set.
+            fields:
+              - name: use
+                label: Reproduced or adapted
+                type: select
+                options:
+                  values: [reproduced, adapted]
+              - name: source
+                label: Source
+                type: string
+                description: Paper and figure, for example "Milon et al., Kinases and Phosphatases 2024, 2(4), 315–339, Figure 13".
+              - name: url
+                label: Link to the source
+                type: string
+                description: The paper's https://doi.org/ link.
+              - name: copyright
+                label: Copyright line
+                type: string
+                description: For example "© 2024 the authors".
+              - name: licence
+                label: Licence
+                type: string
+                description: For example "CC BY 4.0".
+              - name: licenceUrl
+                label: Licence link
+                type: string
+              - name: changes
+                label: Changes made
+                type: string
+                description: What was changed, for example "Resized for the web; otherwise unchanged."
 
       - name: paper
         label: Publication
@@ -637,11 +717,12 @@ content:
         label: Category
         type: select
         options:
-          values: [core, method, analysis, tooling]
+          values: [core, historical, method, analysis, tooling]
         description: >-
-          Which section of the software page the entry appears under: core is
-          the main TSR software, method is the specialised packages, analysis
-          is the tools that work on generated keys.
+          Where the entry appears: core is BioTSR itself, historical lists
+          earlier implementations of methods BioTSR now runs, and analysis
+          lists separate research tools. Historical and analysis entries are on
+          the Earlier implementations and research code page.
       - name: kind
         label: What it is
         type: select
@@ -651,6 +732,14 @@ content:
           "package" for something a user installs, "scripts" for research code
           that is run where it sits. Shown on the entry, so nothing implies a
           maintained release where there is not one.
+      - name: licence
+        label: Licence
+        type: string
+        required: true
+        description: >-
+          The licence the repository states on GitHub, for example "MIT
+          License". Write "No licence stated" if it has no licence file; do not
+          guess one. Shown on the entry.
       - name: issuesUrl
         label: Issue tracker
         type: string
@@ -662,6 +751,89 @@ content:
         label: Sort position
         type: number
         description: Lower numbers appear first within a section.
+
+      # ---- The released package: hidden, preserved, never editable here ----
+      # The version, and everything derived from it (install commands, the
+      # release and PyPI pages, pinned documentation links), changes with a
+      # release, not with an editorial edit. A test holds the pinned commands
+      # on every page to this version.
+      - name: release
+        type: object
+        hidden: true
+        fields:
+          - name: package
+            type: string
+          - name: version
+            type: string
+          - name: date
+            type: string
+          - name: pythonVersions
+            type: string
+          - name: platforms
+            type: string
+      # Mirrors the released CITATION.cff: authors in its order, no DOI.
+      - name: citation
+        type: object
+        hidden: true
+        fields:
+          - name: title
+            type: string
+          - name: authors
+            type: object
+            list: true
+            fields:
+              - name: given
+                type: string
+              - name: family
+                type: string
+
+  # -------------------------------------------------------------------------
+  # BioTSR page text and Getting started
+  # -------------------------------------------------------------------------
+  # The prose of the two software pages, as Markdown. The pages' layout,
+  # route and release facts are not here: the facts come from the BioTSR
+  # record above, and every pinned command (biotsr==1.0.0) and documentation
+  # link (blob/v1.0.0) is checked against that record by the test suite.
+  - name: biotsr-page
+    label: BioTSR page text
+    type: file
+    path: src/content/software/biotsr.md
+    format: yaml-frontmatter
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: summary
+        label: Summary
+        type: text
+        required: true
+        description: Used as the page description in search results.
+      - name: body
+        label: Page content
+        type: rich-text
+        options:
+          format: markdown
+  - name: get-started
+    label: Getting started page
+    type: file
+    path: src/content/software/get-started.md
+    format: yaml-frontmatter
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: summary
+        label: Summary
+        type: text
+        required: true
+        description: Shown under the title, and used in search results.
+      - name: body
+        label: Page content
+        type: rich-text
+        options:
+          format: markdown
 
   # -------------------------------------------------------------------------
   # Home page wording
@@ -705,7 +877,7 @@ content:
             label: Second button label
             type: string
             required: true
-            description: Jumps to the list of methods further down the page.
+            description: Links to Getting started with BioTSR.
       - name: researchVision
         label: Research vision
         type: object
@@ -722,31 +894,49 @@ content:
               The open research question, shown as the most prominent text in
               the section. Keep it a question — the site should not read as
               though the answer has been found.
-          - name: intro
+          - name: body
             label: Short explanation
             type: text
             required: true
             description: >-
-              One or two sentences on what TSR does. The full explanation is
-              the next section down, so this should not repeat it.
-          - name: direction
-            label: Long-term direction
+              One short paragraph on what the research is for. How TSR works is
+              explained two sections further down, so this should not repeat
+              it.
+      - name: software
+        label: BioTSR section
+        type: object
+        fields:
+          - name: heading
+            label: Heading
+            type: string
+            required: true
+          - name: intro
+            label: Introduction
             type: text
             required: true
-            description: One sentence on where the research is going.
-          - name: detailsLabel
-            label: Read-more label
-            type: string
             description: >-
-              The wording on the button that reveals the longer explanation.
-              Leave this and the paragraphs below empty to hide the button.
-          - name: details
-            label: Expanded explanation
+              What BioTSR does, in two or three sentences. The version and the
+              install command come from the BioTSR record in the Software
+              collection.
+          - name: highlights
+            label: What it does, as short points
             type: text
             list: true
             description: >-
-              One entry per paragraph, shown when a reader opens the read-more
-              button. Fill in the label above if you add any.
+              Two to four short points, for example the calculation families and
+              batch processing. Say only what BioTSR 1.0.0 actually does.
+          - name: installLabel
+            label: Label above the install command
+            type: string
+            required: true
+          - name: getStartedCta
+            label: Getting started button
+            type: string
+            required: true
+          - name: softwareCta
+            label: BioTSR page button
+            type: string
+            required: true
       - name: introduction
         label: What TSR is
         type: object
@@ -760,32 +950,17 @@ content:
             type: text
             required: true
             description: >-
-              A short summary only. The full method and tutorial live on the
-              TSR method page, and this should not repeat them.
+              One sentence introducing the four-step diagram below it, which
+              shows how the representation works and is drawn from a BioTSR
+              calculation (it is not edited here). The hero has already said
+              what TSR is, so this should not explain it again.
           - name: cta
             label: Link label
             type: string
             required: true
             description: Links to the TSR method page.
-          - name: figure
-            label: Diagram
-            type: object
-            fields:
-              - name: src
-                label: Image
-                type: image
-              - name: alt
-                label: Alt text
-                type: text
-                description: >-
-                  What the diagram shows, in a sentence. This is what a screen
-                  reader reads in place of the picture, so describe the
-                  content rather than naming the file.
-              - name: caption
-                label: Caption
-                type: string
-      - name: methods
-        label: TSR-based methods section
+      - name: research
+        label: Methods & research section
         type: object
         fields:
           - name: heading
@@ -796,36 +971,24 @@ content:
             label: Introduction
             type: text
             required: true
-            description: >-
-              The methods themselves are listed automatically from the method
-              pages, so there is no list to maintain here.
-      - name: analysis
-        label: Key analysis section
-        type: object
-        fields:
-          - name: heading
-            label: Heading
-            type: string
-            required: true
-          - name: intro
-            label: Introduction
+          - name: methodsCard
+            label: Scientific methods card
             type: text
             required: true
-      - name: software
-        label: Software section
-        type: object
-        fields:
-          - name: heading
-            label: Heading
-            type: string
-            required: true
-          - name: intro
-            label: Introduction
+            description: One sentence. The card links to the methods on the Methods & research page.
+          - name: analysisCard
+            label: Analysis card
             type: text
             required: true
-            description: >-
-              The repositories are listed automatically from the Software
-              collection.
+          - name: earlierCard
+            label: Earlier implementations card
+            type: text
+            required: true
+          - name: cta
+            label: Link label
+            type: string
+            required: true
+            description: Links to the Methods & research page.
       - name: publications
         label: Publications section
         type: object
@@ -999,28 +1162,208 @@ content:
             type: string
             required: true
       - name: software
-        label: Software page
+        label: BioTSR page
         type: object
         fields:
           - name: title
             label: Page title
             type: string
             required: true
-            description: Also used for the browser tab.
+            description: >-
+              The page's main heading; also used for the browser tab.
+          - name: eyebrow
+            label: Small label above the title
+            type: string
+            required: true
           - name: intro
             label: Introduction
             type: text
             required: true
             description: >-
-              The repositories themselves come from the Software collection, so
-              there is no list to keep up to date here.
-          - name: note
-            label: Highlighted note
+              What BioTSR is. The version, dates, licence and links come from the BioTSR record in the Software collection; the installation, methods and documentation sections are the BioTSR page text under Software pages.
+          - name: getStartedAction
+            label: Getting started button
+            type: string
+            required: true
+          - name: helpHeading
+            label: Help heading
+            type: string
+            required: true
+          - name: helpBody
+            label: Help text
+            type: text
+            required: true
+          - name: contactAction
+            label: Contact link
+            type: string
+            required: true
+          - name: citeHeading
+            label: Citation heading
+            type: string
+            required: true
+          - name: citeIntro
+            label: Citation request
+            type: text
+            required: true
+          - name: citeNote
+            label: Note below the citation
+            type: text
+            required: true
+          - name: licenceNote
+            label: Licence note
             type: text
             required: true
             description: >-
-              The short caveat in the tinted box, currently explaining that the
-              code is spread across several repositories.
+              Name BioTSR's licence only. The research repositories each have their own terms.
+          - name: figuresHeading
+            label: Figures heading
+            type: string
+            required: true
+          - name: figuresIntro
+            label: Figures introduction
+            type: text
+            required: true
+          - name: matrixTitle
+            label: "Capability figure: title"
+            type: string
+            required: true
+          - name: matrixAlt
+            label: "Capability figure: description"
+            type: text
+            required: true
+            description: >-
+              Describes the figure for people who cannot see it. Update it whenever the figure changes.
+          - name: matrixCaption
+            label: "Capability figure: caption"
+            type: text
+            required: true
+          - name: architectureTitle
+            label: "Architecture figure: title"
+            type: string
+            required: true
+          - name: architectureAlt
+            label: "Architecture figure: description"
+            type: text
+            required: true
+            description: >-
+              Describes the figure for people who cannot see it. Update it whenever the figure changes.
+          - name: architectureCaption
+            label: "Architecture figure: caption"
+            type: text
+            required: true
+          - name: researchCodeHeading
+            label: "Earlier implementations section: heading"
+            type: string
+            required: true
+          - name: researchCodeIntro
+            label: "Earlier implementations section: text"
+            type: text
+            required: true
+            description: >-
+              A short pointer. The repositories themselves are listed on the Earlier implementations and research code page.
+          - name: researchCodeAction
+            label: "Earlier implementations section: link label"
+            type: string
+            required: true
+      - name: research
+        label: Methods & research page
+        type: object
+        fields:
+          - name: title
+            label: "Page title"
+            type: string
+            required: true
+            description: >-
+              Also used for the browser tab. The menu label is set in code.
+          - name: intro
+            label: "Introduction"
+            type: text
+            required: true
+          - name: coreNote
+            label: "Line before the TSR method link"
+            type: string
+            required: true
+          - name: coreAction
+            label: "TSR method link label"
+            type: string
+            required: true
+          - name: methodsHeading
+            label: "Scientific methods heading"
+            type: string
+            required: true
+          - name: methodsIntro
+            label: "Scientific methods introduction"
+            type: text
+            required: true
+            description: >-
+              The method pages are listed automatically, so there is no list to maintain here.
+          - name: analysisHeading
+            label: "Analysis heading"
+            type: string
+            required: true
+          - name: analysisIntro
+            label: "Analysis introduction"
+            type: text
+            required: true
+          - name: earlierHeading
+            label: "Earlier implementations heading"
+            type: string
+            required: true
+          - name: earlierIntro
+            label: "Earlier implementations introduction"
+            type: text
+            required: true
+          - name: earlierAction
+            label: "Earlier implementations link label"
+            type: string
+            required: true
+      - name: earlierImplementations
+        label: Earlier implementations and research code page
+        type: object
+        fields:
+          - name: title
+            label: "Page title"
+            type: string
+            required: true
+            description: >-
+              Also used for the browser tab.
+          - name: intro
+            label: "Introduction"
+            type: text
+            required: true
+          - name: biotsrNote
+            label: "BioTSR recommendation"
+            type: text
+            required: true
+            description: >-
+              One or two sentences in the box under the introduction, beside
+              the button to the BioTSR page.
+          - name: biotsrAction
+            label: "BioTSR link label"
+            type: string
+            required: true
+          - name: historicalHeading
+            label: "Earlier implementations heading"
+            type: string
+            required: true
+          - name: historicalIntro
+            label: "Earlier implementations introduction"
+            type: text
+            required: true
+          - name: toolsHeading
+            label: "Research tools heading"
+            type: string
+            required: true
+          - name: toolsIntro
+            label: "Research tools introduction"
+            type: text
+            required: true
+          - name: licenceNote
+            label: "Licence note"
+            type: text
+            required: true
+            description: >-
+              Each repository shows its own licence from its record in the Software collection. Do not name one licence for all of them.
       - name: contact
         label: Contact page
         type: object

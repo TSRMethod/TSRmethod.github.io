@@ -8,8 +8,8 @@
  *
  * `routeRegistry.jsx` turns each entry into a redirect route, but ONLY when
  * the target method is published. An alias must never become a back door to a
- * draft: `/sse-tsr` is listed here and stays inert until that page's citation
- * is resolved and it is published.
+ * draft: `/keytoimage` is listed here and stays inert until that page's
+ * content is resolved and it is published.
  *
  * Add an entry when migrating a page whose URL changed. Plain data in its own
  * module, so the route table can stay a JSX file without mixing exports.

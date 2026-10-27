@@ -37,11 +37,17 @@ paper:
   doi: 10.1002/prot.26215
 
 repositories:
+  - name: BioTSR
+    url: https://github.com/TSRMethod/BioTSR
+    description: >-
+      Used by the examples on this page.
+    language: Python
   - name: TSR-Package
     url: https://github.com/pooryakhajouie/TSR-Package
     description: >-
-      Python package for downloading PDB files and generating TSR keys and
-      triplets. Size filtering is enabled with an argument to `TSR()`.
+      Size filtering was first implemented here, as the size_filter argument
+      of the TSR() function. It is kept unchanged for provenance and for work
+      that depends on it; its README has its own installation instructions.
     language: Python
 ---
 
@@ -71,135 +77,41 @@ By refining structural similarity measurements, size filtering enables more
 accurate comparisons between proteins of different sizes and helps uncover
 their functional relationships.
 
-## Installation
+## Run it with BioTSR
 
-Clone the repository:
-
-```bash
-git clone https://github.com/pooryakhajouie/TSR-Package.git
-cd TSR-Package
-```
-
-Create a virtual environment and activate it:
+Size filtering is an option of every BioTSR method, `--size-filter`, followed
+by a distance in ångströms. A run keeps only the triangles whose longest edge,
+MaxDist, is below that distance:
 
 ```bash
-python3 -m venv tsrenv
-source tsrenv/bin/activate   # macOS / Linux
-tsrenv\Scripts\activate      # Windows
+python -m pip install "biotsr==1.0.0"
+biotsr fetch 1UBQ --pdb-dir structures
+biotsr run --method protein --pdb structures/1UBQ.pdb --chain A --size-filter 25 --output results
 ```
 
-Install the package:
+With a 25 Å cutoff, ubiquitin chain A keeps 60,742 of its 70,300 triangles,
+which give 37,522 distinct keys. The files are written under the prefix
+`results/1UBQ_A_protein_size25`, and the run records how many triangles the
+filter removed.
 
-```bash
-pip install .
-```
+- **Choosing the cutoff:** BioTSR applies one fixed cutoff per run and does
+  not derive it from a second structure. In the published comparison the
+  cutoff for the larger protein was the MaxDist of the smaller one, so choose
+  the value from the smaller structure and pass it when computing the larger.
+- **Compared with the earlier package:** the filter is the same as in
+  TSR-Package, where a value of 10000 meant no filtering, and keeps triangles
+  strictly below the cutoff. In BioTSR it is off unless the option is given,
+  and a run reports the triangles it removed.
+- **Which methods take it:** all 20 methods, the cross methods included.
+- **From Python:** `biotsr.analyze(..., size_filter=25.0)`.
+- **Comparing results:** filtering keeps the same key space, so filtered keys
+  are still comparable with unfiltered ones, but the analysis functions ask
+  you to confirm that you mean to mix the two
+  ([tutorial 07](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/07_analysis.md#what-has-to-match-and-what-never-blocks)).
 
-Alternatively you can install from a built wheel, but you must build the
-distribution files first:
+![](diagram:modifier-scope?highlight=size-filter)
 
-```bash
-python setup.py sdist bdist_wheel
-pip install dist/tsr_package-0.1.1-py3-none-any.whl
-```
-
-Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-Size filtering is produced by the same `TSR()` entry point as the core method,
-with one extra argument.
-
-### Retrieve PDB files
-
-```python
-from tsr_package import PDB_DL
-
-# Retrieve PDB files for the specified PDB IDs
-pdb_ids = ["1GTA", "1GTB", "1LBE"]
-PDB_DL(pdb_ids, 'Dataset')
-```
-
-This downloads the PDB files into the specified `Dataset/` directory, which is
-also the default if no directory is given.
-
-### Generate keys with size filtering
-
-```python
-from tsr_package import TSR
-
-# Define the directory where PDB files are stored
-data_dir = "Dataset"
-input_files = ["1GTA", "1GTB", "1LBE"]
-chain = ["A", "A", "A"]        # specify chains for each PDB file
-output_option = "keys"          # choose 'keys', 'triplets', or 'both'
-
-# Process protein data to generate key files
-TSR(data_dir, input_files, chain=chain, output_option=output_option,
-    size_filter=500)
-```
-
-Protein chains are case-sensitive and must match the chain IDs in the PDB file.
-
-> With the `size_filter` argument, TSR discards keys whose MaxDist is greater
-> than the given value.
-
-### Parameter
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `size_filter` | `int` | `10000` | Upper bound on a triangle's MaxDist. Triangles above it are discarded. The default is high enough that no filtering occurs. |
-
-### Using a CSV file as input
-
-```python
-from tsr_package import TSR
-
-# Define the directory and CSV file path
-data_dir = "Dataset"
-csv_file = "sample_details.csv"
-
-# Process the CSV input
-TSR(data_dir, csv_file, output_option="keys", size_filter=500)
-```
-
-The CSV file should have two columns, one for the protein IDs and one for the
-corresponding chains:
-
-| protein | chain |
-| --- | --- |
-| 1GTA | A |
-| 1GTB | A |
-| 1LBE | A |
-
-## Examples
-
-### Retrieving PDB files and generating keys
-
-```python
-from tsr_package import PDB_DL, TSR
-
-# Step 1: retrieve PDB files
-data_dir = "Dataset"
-input_files = ["1GTA", "1gtb", "1lbe"]
-chain = ["A", "A", "A"]
-PDB_DL(input_files, data_dir)
-
-# Step 2: generate key files
-TSR(data_dir, input_files, chain=chain, output_option="keys", size_filter=500)
-```
-
-### Using a CSV file for input
-
-```python
-from tsr_package import PDB_DL, TSR
-
-# Use CSV input
-data_dir = "Dataset"
-csv_file = "sample_details.csv"
-PDB_DL(csv_file)
-TSR(data_dir, csv_file, output_option="triplets", size_filter=500)
-```
+[Tutorial 01](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/01_protein_calpha.md#the-three-cα-modifiers)
+runs the option beside the other Cα options, and the
+[user guide, §11](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md#11-modifiers)
+describes every option.

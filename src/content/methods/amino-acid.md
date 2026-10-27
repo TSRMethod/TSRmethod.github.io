@@ -24,62 +24,30 @@ paper:
   doi: 10.2174/0115748936306625240724102438
 
 repositories:
+  - name: BioTSR
+    url: https://github.com/TSRMethod/BioTSR
+    description: >-
+      Used by the examples on this page.
+    language: Python
   - name: TSR_AMINOACID_PACKAGE
     url: https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE
     description: >-
-      Standalone Python package for amino-acid-level TSR key and triplet
-      generation. Separate from the core TSR-Package.
+      The method's first implementation. It is kept unchanged for provenance
+      and for work that depends on it; its README has its own installation
+      instructions.
     language: Python
-
-slurm:
-  intro: >-
-    Key generation over a large structure set is best run as a batch job. Put
-    the Python from the Usage section into a script, then submit the job below.
-  script:
-    filename: aminoacid_keys.sbatch
-    code: |
-      #!/bin/bash
-      #SBATCH -p workq
-      #SBATCH -N 1
-      #SBATCH -n 64
-      #SBATCH -t 72:00:00
-      #SBATCH -A loni_tsr_4
-      #SBATCH -J pdb
-      #SBATCH -o output_pdb.out
-      #SBATCH -e error_pdb.err
-
-      git clone https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE.git
-      cd TSR_AMINOACID_PACKAGE
-
-      python3 -m venv myenv
-      source myenv/bin/activate
-      pip install --upgrade pip
-      pip install -e .
-      pip install -r requirements.txt
-
-      cd aminoacid_tsr_package
-      python3 your_script.py
-  submit:
-    code: sbatch aminoacid_keys.sbatch
-  resources: >-
-    Requests one node with 64 tasks for up to 72 hours on the `workq`
-    partition, under the group's `loni_tsr_4` allocation. Substitute your own
-    allocation, and scale the wall time to your dataset.
-  notes: >-
-    Replace `your_script.py` with your own script containing the `PDB_DL` and
-    `AminoAcidProteinTSR` calls from the Usage section.
 ---
 
 ## Overview
 
 Amino Acid TSR generates TSR keys and triplets at the level of individual amino
-acids rather than whole protein chains, using a separate package from the core
-TSR method.
+acids rather than whole protein chains: the points of its triangles are the
+heavy atoms of one residue, not the Cα atoms of a chain.
 
 > **Not the same as [Amino Acid Grouping TSR](/methods/amino-acid-grouping).**
 > That method groups amino acids by structural similarity before generating
-> whole-protein keys, and is an argument to the core `TSR()` function. This
-> method represents each amino acid itself, and lives in its own package.
+> whole-protein Cα keys. This method represents each amino acid itself, from
+> its atoms.
 
 Key triplet generation filters residues against the expected length for each
 amino acid type, so that only residues meeting the specified condition are
@@ -103,139 +71,68 @@ Applying these conditions ensures only relevant residues are processed, which
 supports identification of structural motifs and functional characteristics
 within protein chains at triplet level.
 
-## Installation
+### Publications
 
-Clone the repository:
+Amino Acid TSR was reported in the 2025 study of spike protein and monoclonal
+antibody interactions:
 
-```bash
-git clone https://github.com/KrishnaRauniyar/TSR_AMINOACID_PACKAGE.git
-cd TSR_AMINOACID_PACKAGE
-```
+Tarikul I. Milon, Titli Sarkar, Yixin Chen, Jordan M. Grider, Feng Chen,
+Jun-Yuan Ji, Seetharama D. Jois, Konstantin G. Kousoulas, Vijay Raghavan and
+Wu Xu.
+[Development of the TSR-based computational method to investigate spike and monoclonal antibody interactions](https://doi.org/10.3389/fchem.2025.1395374).
+*Frontiers in Chemistry*, 2025, 13, 1395374.
 
-Create a virtual environment and activate it:
+The paper linked at the top of this page, Chen et al. (2025), describes a
+parallel implementation of TSR comparisons for proteins and amino acids.
 
-```bash
-python -m venv tsrenv
-source tsrenv/bin/activate   # macOS / Linux
-tsrenv\Scripts\activate      # Windows
-```
+## Run it with BioTSR
 
-Install the package and its dependencies:
-
-```bash
-pip install -e .
-pip install -r requirements.txt
-```
-
-Then change into the package directory to run the commands below:
+BioTSR's `amino_acid_atomic` method computes TSR keys from the heavy atoms of
+one amino acid at a time, each atom labelled by its element. To compute them
+for Leu15 of ubiquitin:
 
 ```bash
-cd aminoacid_tsr_package
+python -m pip install "biotsr==1.0.0"
+biotsr fetch 1UBQ --pdb-dir structures
+biotsr run --method amino_acid_atomic --pdb structures/1UBQ.pdb --chain A --residue 15 --residue-name LEU --output results
 ```
 
-## Usage
+Leucine's 8 heavy atoms form 56 triangles, with 46 distinct keys, written under
+the prefix `results/1UBQ_A_amino_acid_atomic_LEU_15`.
 
-### Retrieve PDB files
+![](diagram:point-choice)
 
-```python
-from aminoacid_tsr_package.PDB_DL import PDB_DL
+- **One residue, one type, or the whole chain:** give `--residue` with
+  `--residue-name` for one residue, `--residue-name` alone for one calculation
+  per residue of that name, or neither for one calculation per residue of the
+  chain. Each residue gets its own files, and a sweep has one completion
+  record.
+- **The expected atom counts:** BioTSR keeps this method's rule that a residue
+  is computed only when its heavy-atom count matches the table above. A residue
+  that does not match is declined and the reason recorded; a C-terminal residue
+  with its extra `OXT` oxygen is one example.
+- **Related methods:** `aa_ind` and `aa_ind_mix` pool every atom of one or
+  more residue types, `aa_ind_specific` pools named residues, and
+  `amino_acid_atom_selection` uses atoms you name.
+- **Options:** mirror images and size filtering. Amino acid grouping and SSE
+  annotation are Cα options and are refused here.
+- **From Python:** `biotsr.analyze(..., method="amino_acid_atomic",
+  residue="15", residue_name="LEU")`.
 
-# Retrieve PDB files for the specified PDB IDs
-pdb_ids = ["1GTA", "1GTB", "1lbe"]
-PDB_DL(pdb_ids, 'Dataset/')
-```
+The [user guide, §5](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md#5-amino-acid-atomic-tsr)
+covers every amino-acid method, and
+[tutorial 02](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/02_atomic.md#one-amino-acid-residue)
+runs one. For many structures, `biotsr batch` runs a CSV manifest
+([tutorial 05](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/05_batch_manifest.md)),
+and the
+[command-line guide, §12](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/CLI_GUIDE.md#12-scripts-and-hpc)
+has example Slurm job scripts for an HPC cluster.
 
-Protein IDs are not case-sensitive. A CSV file can be used instead of a list:
+### Comparing with the earlier package
 
-```python
-from aminoacid_tsr_package.PDB_DL import PDB_DL
-
-data_dir = "Dataset/"
-csv_file = "sample_details.csv"
-PDB_DL(csv_file, data_dir)
-```
-
-### Generate keys and triplets
-
-```python
-from aminoacid_tsr_package.AminoAcid import AminoAcidProteinTSR
-
-# Define the directory where PDB files are stored
-data_dir = "Dataset/"
-input_files = ["1GTA", "1GTB", "1LBE"]
-chain = ["A", "A", "A"]        # specify chains for each PDB file
-output_option = "keys"          # 'keys', 'triplets', or 'both'
-
-AminoAcidProteinTSR(data_dir, input_files, chain=chain,
-                    output_option=output_option, mirror_image=True)
-```
-
-Chains are case-sensitive, since chain IDs may be upper or lower case.
-
-### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `data_dir` | `str` | — | Directory where the PDB files are, or will be downloaded to. |
-| `input_files` | `list[str]` or `str` | — | List of PDB IDs, or the path to a CSV file. |
-| `chain` | `list[str]` | `None` | Chain for each input file. Optional when a CSV is used. |
-| `output_option` | `str` | `'both'` | One of `'keys'`, `'triplets'` or `'both'`. |
-| `output_subdir` | `str` | `'aminoacid_results'` | Subdirectory of `data_dir` for the generated files. |
-| `mirror_image` | `bool` | `False` | Set true to distinguish mirror-image triangles. |
-
-### Using a CSV file as input
-
-```python
-from aminoacid_tsr_package.AminoAcid import AminoAcidProteinTSR
-
-data_dir = "Dataset/"
-csv_file = "sample_details.csv"
-
-AminoAcidProteinTSR(data_dir, csv_file, output_option="keys",
-                    mirror_image=True)
-```
-
-The CSV file should have two columns:
-
-| protein | chain |
-| --- | --- |
-| 1GTA | A |
-| 1GTB | A |
-| 1LBE | A |
-
-## Output
-
-Keys and triplet frequency files are written to `aminoacid_results/`, a
-directory created inside `data_dir`.
-
-## Examples
-
-### Retrieving PDB files and generating keys
-
-```python
-from aminoacid_tsr_package.PDB_DL import PDB_DL
-from aminoacid_tsr_package.AminoAcid import AminoAcidProteinTSR
-
-# Step 1: retrieve PDB files
-data_dir = "Dataset/"
-pdb_ids = ["1GTA", "1gtb", "1lbe"]   # not case-sensitive
-chain = ["A", "A", "A"]              # case-sensitive
-PDB_DL(pdb_ids, data_dir)
-
-# Step 2: generate key files
-AminoAcidProteinTSR(data_dir, pdb_ids, chain=chain, output_option="keys",
-                    mirror_image=True)
-```
-
-### Using a CSV file for input
-
-```python
-from aminoacid_tsr_package.PDB_DL import PDB_DL
-from aminoacid_tsr_package.AminoAcid import AminoAcidProteinTSR
-
-data_dir = "Dataset/"
-csv_file = "sample_details.csv"
-PDB_DL(csv_file, data_dir)
-AminoAcidProteinTSR(data_dir, csv_file, output_option="triplets",
-                    mirror_image=True)
-```
+BioTSR's expected atom counts are the earlier package's own, transcribed
+unchanged. BioTSR labels each atom from the element field of its PDB record
+(columns 77–78) and has no option to reproduce the earlier package's output
+files; the
+[known limitations, §1](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/KNOWN_LIMITATIONS.md#1-the-standard-only)
+explain where its standard definitions come from.

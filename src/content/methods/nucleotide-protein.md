@@ -3,88 +3,47 @@ slug: nucleotide-protein
 title: Nucleotide–Protein TSR
 shortTitle: Nucleotide–Protein TSR
 summary: >-
-  Finds nucleotide–protein contacts within 3 Å and builds cross keys whose
-  triangles span both the nucleic acid and the protein.
+  Builds cross keys from the atoms where a nucleic acid and a protein are in
+  contact, with triangles that span both molecules.
 status: published
 category: method
-group: nucleotide
+group: two-molecules
 order: 2
 
-paper:
-  title: >-
-    Development of a Novel Method for Representing 3D Structures of Nucleotides
-    Using the Concept of the TSR Algorithm and Evaluation of the Method Through
-    Studying Specific Interactions Between DNAs and p53
-  authors: >-
-    Krishna Rauniyar, Tarikul I. Milon, Poorya Khajouie, Ramy Alabdulkarim,
-    Yuwu Chen, Sarika Kondra, Vijay Raghavan, Wu Xu
-  journal: 'Proteins: Structure, Function, and Bioinformatics'
-  year: 2025
-  volume: '93'
-  issue: '11'
-  pages: 1988–2004
-  doi: 10.1002/prot.70005
-
 repositories:
+  - name: BioTSR
+    url: https://github.com/TSRMethod/BioTSR
+    description: >-
+      Used by the examples on this page.
+    language: Python
   - name: Nucleotide-Protein
     url: https://github.com/KrishnaRauniyar/Nucleotide-Protein
     description: >-
-      Two command-line scripts: contact detection within 3 Å, then cross key
-      generation from the resulting CSV.
+      The method's first implementation, as two scripts: drug_protein_3A.py
+      lists the contacts and cross_key.py builds the keys. The nucleotide
+      occupies the "drug" position of a general drug–protein pipeline there,
+      so their file and column names say "drug". The repository is kept
+      unchanged for provenance and for work that depends on it; its README has
+      its own instructions.
     language: Python
-
-slurm:
-  intro: >-
-    Both steps run in a single batch job, the contact detection feeding
-    straight into cross key generation.
-  script:
-    filename: cross_key.sbatch
-    code: |
-      #!/bin/bash
-      #SBATCH -p workq
-      #SBATCH -N 1
-      #SBATCH -n 64
-      #SBATCH -t 72:00:00
-      #SBATCH -A loni_tsr_4
-      #SBATCH -J cross_key
-      #SBATCH -o output_cross_key.out
-      #SBATCH -e error_cross_key.err
-
-      git clone https://github.com/KrishnaRauniyar/Nucleotide-Protein.git
-      cd Nucleotide-Protein
-
-      python3 -m venv myenv
-      source myenv/bin/activate
-      pip install --upgrade pip
-      pip install -r requirements.txt
-
-      python3 drug_protein_3A.py -p pdb_downloaded -c sample_details_p53_dna.csv \
-        -l drug_atom_lexical_txt.csv -o drug_protein_cross.csv && \
-      python3 cross_key.py -p drug_protein_cross.csv -o cross_key_results
-  submit:
-    code: sbatch cross_key.sbatch
-  resources: >-
-    Requests one node with 64 tasks for up to 72 hours on the `workq`
-    partition, under the group's `loni_tsr_4` allocation. Substitute your own
-    allocation, and scale the wall time to your dataset.
-  notes: >-
-    The two commands are chained with `&&`, so cross key generation only runs
-    if contact detection succeeded.
 ---
 
 ## Overview
 
 Nucleotide–Protein TSR analyses contacts between nucleic acid and protein
 residues, generating cross keys whose triangles span both molecules. It is
-aimed at the biochemical detail of nucleotide–protein binding, such as the
-interactions between DNA and p53 studied in the accompanying paper.
+aimed at the biochemical detail of nucleotide–protein binding.
 
-> **A note on naming.** In this workflow the nucleotide occupies the "drug"
-> position of a general drug–protein cross-key pipeline. The script is called
-> `drug_protein_3A.py` and its output column is `drug`, but in this context
-> those refer to the nucleotide. This is the upstream repository's own
-> terminology, kept here so that the commands and column names on this page
-> match what you will actually run and see.
+The method is a software implementation and has not been described in a
+publication. It was first written as the scripts in the
+[Nucleotide-Protein](https://github.com/KrishnaRauniyar/Nucleotide-Protein)
+repository, and BioTSR now provides it as the `nucleotide_protein_cross`
+method. Cross keys between two molecules have been published for other pairs:
+a drug and its target protein in the [DrugTSR](/methods/drug-tsr) study
+(Milon et al., 2024), and spike proteins and monoclonal antibodies
+([Milon et al., 2025](https://doi.org/10.3389/fchem.2025.1395374)). The
+nucleotide keys of [Nucleotide TSR](/methods/nucleotide) describe a nucleotide
+on its own.
 
 ### Residues considered
 
@@ -105,87 +64,96 @@ Twenty-three protein residues, spanning a range of chemical properties:
 | Negatively charged (acidic) | ASP, GLU |
 | Modified, post-translational | TPO (phosphothreonine), SEP (phosphoserine), PTR (phosphotyrosine) |
 
-## Installation
+## Which atoms are in contact
 
-Clone the repository:
+The DNA–p53 study, the earlier scripts and BioTSR all select atoms by the
+distance between a nucleotide atom and a protein atom, with a cutoff.
 
-```bash
-git clone https://github.com/KrishnaRauniyar/Nucleotide-Protein.git
-cd Nucleotide-Protein
-```
+- **The DNA–p53 study** (see [Related research](#related-research)) describes
+  the amino acids surrounding a nucleotide as those with an atom within the
+  cutoff of a DNA atom. Its Figure 8 used a cutoff of 3.0 Å and its Figures 9
+  and 10 used 3.5 Å, as the figure legends state and the authors confirm. The
+  authors also confirm that its raw data were generated with Krishna
+  Rauniyar's cross-key code, with the cutoff given as an argument; which
+  version of that code was used has not been identified.
+- **The earlier scripts**, in
+  [Nucleotide-Protein](https://github.com/KrishnaRauniyar/Nucleotide-Protein),
+  list every pair of a nucleotide atom and a protein atom from the `ATOM`
+  records of the file, hydrogens left out, that lie within the cutoff; in the
+  repository's version it is fixed at 3 Å. Each nucleotide residue's cross keys
+  are then built from its contacting atoms.
+- **BioTSR** keeps a nucleotide heavy atom when a heavy atom of the named
+  protein chain lies within the cutoff of it, and a protein heavy atom when a
+  nucleotide heavy atom does, with the cutoff included. The reference cutoff is
+  3.5 Å, set with `--contact-cutoff`, and the cutoff used is recorded with
+  every result. It is the default for new calculations, not a record of the
+  cutoff behind any earlier figure.
 
-Create a virtual environment and install the dependencies:
+The selections differ in more than the number. The earlier scripts read every
+chain of the file and identified a pooled protein atom by its name, so
+same-named atoms of different residues became one; on 1KX5 that under-counts
+the triangles of the affected contacts by 44%. BioTSR takes one nucleotide
+chain and one protein chain, keeps every atom distinct, reads alternate
+location blank or `A` only, and reads model 1. Setting `--contact-cutoff 3.0`
+therefore does not by itself reproduce the earlier scripts' contacts or keys.
+The
+[cross-TSR record, §10](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/methods/CROSS_TSR.md#10-relationship-to-the-historical-implementations)
+lists every difference.
 
-```bash
-python3 -m venv tsrenv
-source tsrenv/bin/activate   # macOS / Linux
-tsrenv\Scripts\activate      # Windows
+## Run it with BioTSR
 
-pip install -r requirements.txt
-```
-
-This repository is a pair of command-line scripts rather than an installable
-package, so there is no `pip install .` step.
-
-## Usage
-
-The workflow is two steps: find the contacts, then build keys from them.
-
-### Step 1 — find contacts within 3 Å
-
-```bash
-python drug_protein_3A.py -p pdb_download_path -c input_file.csv \
-  -l drug_atom_lexical_txt.csv -o drug_protein_cross.csv
-```
-
-| Option | Description |
-| --- | --- |
-| `-p`, `--input_path` | Directory to download PDB files into. Created if absent. |
-| `-c`, `--csv_file` | Input CSV listing the protein names, for example `sample_details_p53_dna.csv`. |
-| `-l`, `--lexical_file` | CSV of atom sequence numbers. |
-| `-o`, `--output_csv` | Output CSV, the input to step 2. |
-
-The script creates the download directory if needed, downloads the structures
-from RCSB, calculates interactions within 3 Å, and writes the results.
-
-### The intermediate CSV
-
-`drug_protein_cross.csv` has one row per contact. The first three columns
-describe the nucleotide atom, the next three the protein atom, and the last the
-distance between them:
-
-| drug | drug_seq | drug_coordinates | protein | protein_seq | protein_coordinates | distance (angstrom) |
-| --- | --- | --- | --- | --- | --- | --- |
-| 3D0A_E_DC_1_O5' | 109 | -3.283_17.038_0.965 | 3D0A_A_SER_121_O | 109 | -2.462_18.759_2.734 | 2.6 |
-| 3D0A_E_DC_1_C5' | 106 | -3.710_17.876_-0.156 | 3D0A_A_SER_121_O | 109 | -2.462_18.759_2.734 | 3.3 |
-| 3D0A_E_DG_2_OP2 | 109 | -5.794_20.820_2.780 | 3D0A_A_SER_121_N | 108 | -4.315_20.590_5.173 | 2.8 |
-
-### Step 2 — generate cross keys
+BioTSR finds the contacts and builds the cross keys in one command,
+`nucleotide_protein_cross`. For deoxyguanosine DG 8 of chain E, against protein
+chain B, in PDB entry 2AC0 (p53 bound to DNA):
 
 ```bash
-python cross_key.py -p drug_protein_cross.csv -o output_dir
+python -m pip install "biotsr==1.0.0"
+biotsr fetch 2AC0 --pdb-dir structures
+biotsr run --method nucleotide_protein_cross --pdb structures/2AC0.pdb --chain E --chain-2 B --entity-name DG --entity-id 8 --output results
 ```
 
-| Option | Description |
-| --- | --- |
-| `-p`, `--input_path` | The CSV produced by step 1. |
-| `-o`, `--output_path` | Directory for the generated key files. |
+At the reference 3.5 Å, 4 nucleotide atoms and 7 protein atoms are in contact,
+and they form 126 cross triangles with 117 distinct keys, written under the
+prefix `results/2AC0_E_B_nucleotide_protein_cross_DG_8`. The triplets file
+names every vertex atom, so no intermediate contact file is needed.
 
-## Output
+![](diagram:cross-triangles)
 
-Cross keys are generated for triangles spanning both molecules, in two
-arrangements:
+- **Choosing the nucleotide side:** `--chain` is the nucleotide's chain and
+  `--chain-2` the protein's. `--entity-name` with `--entity-id` is one
+  residue; `--entity-name` alone is every residue of that name on the chain;
+  `--entity-names 'DA;DC;DG;DT'` is the whole strand.
+- **The protein side** reads the 20 standard amino acids and TPO, SEP and PTR,
+  the 23 residues in the table above.
+- **Options:** size filtering. Mirror images are not available for cross
+  methods.
+- **From Python:** `biotsr.analyze_cross(..., method="nucleotide_protein_cross",
+  ...)`.
 
-- one nucleotide atom and two protein atoms
-- two nucleotide atoms and one protein atom
+The [user guide, §10](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/USER_GUIDE.md#10-cross-tsr)
+covers the cross methods,
+[tutorial 04](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/04_cross.md)
+runs one, and the
+[cross-TSR record, §7](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/methods/CROSS_TSR.md#7-cutoff-values)
+gives the reference cutoffs. For many structures, `biotsr batch` runs a CSV
+manifest
+([tutorial 05](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/tutorials/05_batch_manifest.md)),
+and the
+[command-line guide, §12](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/docs/CLI_GUIDE.md#12-scripts-and-hpc)
+has example Slurm job scripts for an HPC cluster.
 
-Two files are written per structure into the output directory:
+## Related research
 
-| File | Contents |
-| --- | --- |
-| `<name>.keys_theta29_dist18` | The keys themselves, e.g. `1_1TSR_E_DT.keys_theta29_dist18` |
-| `<name>.keys_Freq_theta29_dist18` | Triplet frequencies |
+The 2025 study of DNA–p53 interactions introduced the TSR representation of
+nucleotides, which is described on [Nucleotide TSR](/methods/nucleotide), and
+applied it to DNA bound to p53, p63 and p73. The paper does not describe cross
+keys. The authors confirm that the study's raw data were generated with Krishna
+Rauniyar's cross-key code, and that the nucleotide–protein cross-key method has
+not been published. The study is therefore listed here as related research,
+not as the method's publication; the software is cited through its
+[repository](https://github.com/KrishnaRauniyar/Nucleotide-Protein).
 
-> A triangle needs three atoms. Where fewer than three are available, no cross
-> keys are produced and the run reports it, for example
-> `Cannot make keys for 46_3TS8_L_DT having only 2 atoms.`
+Krishna Rauniyar, Tarikul I. Milon, Poorya Khajouie, Ramy Alabdulkarim, Yuwu
+Chen, Sarika Kondra, Vijay Raghavan and Wu Xu.
+[Development of a Novel Method for Representing 3D Structures of Nucleotides Using the Concept of the TSR Algorithm and Evaluation of the Method Through Studying Specific Interactions Between DNAs and p53](https://doi.org/10.1002/prot.70005).
+*Proteins: Structure, Function, and Bioinformatics*, 2025, 93(11), 1988–2004.

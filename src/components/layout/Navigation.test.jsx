@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -7,6 +7,7 @@ import DesktopNav from './DesktopNav'
 import MobileNav from './MobileNav'
 import { setViewport } from '../../test/viewport'
 import { isRouteImplemented } from '../../app/routeRegistry'
+import { getVisibleNavigation } from '../../app/navigation'
 import { siteConfig } from '../../app/siteConfig'
 
 /*
@@ -537,8 +538,10 @@ describe('the footer', () => {
 
     const footer = within(screen.getByRole('contentinfo'))
     for (const [name, href] of [
-      ['TSR Method', '/tsr'],
-      ['Software', '/software'],
+      ['Understand TSR', '/tsr'],
+      ['BioTSR', '/software'],
+      ['Getting started with BioTSR', '/software/get-started'],
+      ['Methods & research', '/research'],
       ['Publications', '/publications'],
       ['People', '/people'],
       ['Contact', '/contact'],
@@ -573,5 +576,169 @@ describe('the footer', () => {
 
     const footer = within(screen.getByRole('contentinfo'))
     expect(footer.getByText(siteConfig.tagline)).toBeInTheDocument()
+  })
+})
+
+describe('exactly one current menu entry', () => {
+  /*
+   * The bug this guards against: on /software#install the BioTSR menu used
+   * to mark both "Overview" and "Installation" as current, because the menu
+   * held links to sections of the page. The menus now hold pages only, and
+   * the section a reader is at belongs to the page's own sidebar.
+   */
+  function renderAt(path) {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <DesktopNav items={getVisibleNavigation()} />
+      </MemoryRouter>,
+    )
+  }
+
+  const current = () =>
+    screen
+      .getAllByRole('link')
+      .filter((link) => link.getAttribute('aria-current') === 'page')
+      .map((link) => link.textContent)
+
+  for (const [path, menu, expected] of [
+    ['/software', 'BioTSR', 'Overview'],
+    ['/software#install', 'BioTSR', 'Overview'],
+    ['/software#cite', 'BioTSR', 'Overview'],
+    ['/software/get-started', 'BioTSR', 'Getting started'],
+    ['/software/get-started#next-steps', 'BioTSR', 'Getting started'],
+    ['/methods/mirror-image', 'Methods & research', 'Mirror-Image TSR'],
+    ['/research', 'Methods & research', 'All methods and research'],
+    ['/research/earlier-implementations', 'Methods & research', 'Earlier implementations and research code'],
+  ]) {
+    it(`marks only "${expected}" on ${path}`, async () => {
+      const user = userEvent.setup()
+      renderAt(path)
+
+      await user.click(screen.getByRole('button', { name: menu }))
+      expect(current()).toEqual([expected])
+    })
+  }
+
+  it('marks the plain Understand TSR link on /tsr, and nothing else', () => {
+    renderAt('/tsr')
+    expect(current()).toEqual(['Understand TSR'])
+  })
+
+  it('marks Home on the home page, and nothing else', () => {
+    renderAt('/')
+    expect(current()).toEqual(['Home'])
+  })
+
+  it('does not mark Home on any other page', () => {
+    for (const path of ['/tsr', '/software', '/research', '/methods/mirror-image', '/people']) {
+      const { unmount } = renderAt(path)
+      expect(current(), path).not.toContain('Home')
+      unmount()
+    }
+  })
+
+  it('marks nothing on a page that has no menu entry', () => {
+    renderAt('/no-such-page')
+    expect(current()).toEqual([])
+  })
+})
+
+describe('a dropdown laid out in columns', () => {
+  const columnItems = [
+    {
+      id: 'science',
+      label: 'Science behind TSR',
+      groups: [
+        { id: 'a', label: 'Group A', column: 1, items: [{ id: 'a1', label: 'A one', to: '/a1' }] },
+        { id: 'b', label: 'Group B', column: 1, items: [{ id: 'b1', label: 'B one', to: '/b1' }] },
+        { id: 'c', label: 'Group C', column: 2, items: [{ id: 'c1', label: 'C one', to: '/c1' }] },
+      ],
+    },
+  ]
+
+  it('stacks groups that share a column, and keeps every list named', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <DesktopNav items={columnItems} />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Science behind TSR' }))
+    const panel = document.getElementById('nav-science-panel')
+    expect(panel.children).toHaveLength(2)
+    expect(within(panel.children[0]).getAllByRole('list')).toHaveLength(2)
+    for (const name of ['Group A', 'Group B', 'Group C']) {
+      expect(within(panel).getByRole('list', { name })).toBeInTheDocument()
+    }
+  })
+})
+
+describe('where a dropdown opens', () => {
+  /*
+   * A panel opens under its own trigger and moves only by as much as it would
+   * overflow the window. The panels used to be pinned to the right of the
+   * whole bar, which put BioTSR's under Publications and About.
+   */
+  const realWidth = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')
+
+  function openWith(rect, { triggerRight = 0 } = {}) {
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      configurable: true,
+      value: 1280,
+    })
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
+      if (this.id?.endsWith('-panel')) {
+        return { left: rect.left, right: rect.right, top: 0, bottom: 0, width: rect.right - rect.left, height: 0 }
+      }
+      return { left: 0, right: triggerRight, top: 0, bottom: 0, width: 0, height: 0 }
+    })
+    render(
+      <MemoryRouter>
+        <DesktopNav items={getVisibleNavigation()} />
+      </MemoryRouter>,
+    )
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    delete document.documentElement.clientWidth
+    if (realWidth) Object.defineProperty(Element.prototype, 'clientWidth', realWidth)
+  })
+
+  it('puts each panel inside the menu item of its own trigger', async () => {
+    const user = userEvent.setup()
+    openWith({ left: 600, right: 800 })
+
+    for (const name of ['BioTSR', 'Methods & research', 'About']) {
+      const button = screen.getByRole('button', { name })
+      await user.click(button)
+      const panel = document.getElementById(button.getAttribute('aria-controls'))
+      expect(panel.parentElement, name).toBe(button.parentElement)
+      await user.click(button)
+    }
+  })
+
+  it('leaves a panel under its trigger when it fits', async () => {
+    const user = userEvent.setup()
+    openWith({ left: 600, right: 800 })
+    await user.click(screen.getByRole('button', { name: 'BioTSR' }))
+    expect(document.getElementById('nav-biotsr-panel').style.getPropertyValue('--panel-shift')).toBe('0px')
+  })
+
+  it('lines a panel up with the end of its trigger when it would overflow', async () => {
+    const user = userEvent.setup()
+    openWith({ left: 1000, right: 1300 }, { triggerRight: 1200 })
+    await user.click(screen.getByRole('button', { name: 'About' }))
+    // Ends where About ends: 1200 − 1300.
+    expect(document.getElementById('nav-about-panel').style.getPropertyValue('--panel-shift')).toBe('-100px')
+  })
+
+  it('falls back to just inside the window, keeping a 16px margin', async () => {
+    const user = userEvent.setup()
+    openWith({ left: 700, right: 1400 })
+    await user.click(screen.getByRole('button', { name: 'Methods & research' }))
+    // 1280 − 16 − 1400
+    expect(document.getElementById('nav-research-panel').style.getPropertyValue('--panel-shift')).toBe('-136px')
   })
 })

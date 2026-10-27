@@ -1,0 +1,267 @@
+/*
+ * Shared styles for the site's smaller drawn figures: Cα or atoms, cross
+ * TSR, and the clustering example. The TSR overview and the modifier table
+ * have their own stylesheets.
+ *
+ * Every colour is a site token. Nothing is told apart by colour alone:
+ * shapes, line styles and text carry each distinction too.
+ */
+
+.figure {
+  margin: var(--space-5) 0;
+}
+
+.caption {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.drawing {
+  display: block;
+  width: 100%;
+  height: 10rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Panels (Cα or atoms) ---- */
+
+.panels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-4);
+}
+
+.panel {
+  min-width: 0;
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.panel p {
+  margin: 0;
+}
+
+.panel .panelTitle {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.traceFaint {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.point {
+  fill: var(--color-accent);
+  stroke: var(--color-background);
+  stroke-width: 1.5;
+}
+
+.marked {
+  fill: none;
+  stroke: var(--color-primary-dark);
+  stroke-width: 4;
+}
+
+.bond {
+  stroke: var(--color-border-strong);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.atomC,
+.atomN,
+.atomO {
+  stroke: var(--color-background);
+  stroke-width: 2;
+}
+
+.atomC {
+  fill: var(--color-text-muted);
+}
+
+.atomN {
+  fill: var(--color-primary);
+}
+
+.atomO {
+  fill: var(--color-primary-dark);
+}
+
+.atomLabel {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--color-text);
+}
+
+/* ---- Cross TSR ---- */
+
+.cross {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+@media (min-width: 640px) {
+  .cross {
+    grid-template-columns: minmax(0, 1fr) 11rem minmax(0, 1fr);
+  }
+}
+
+.side {
+  min-width: 0;
+}
+
+.sideTitle {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.sideCount {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+/* The chip's marker repeats the drawing's shape for its side. */
+.chips li::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  background-color: var(--color-primary);
+}
+
+.chips[data-shape='circle'] li::before {
+  border-radius: 50%;
+}
+
+.chips[data-shape='square'] li::before {
+  background-color: var(--color-primary-dark);
+}
+
+.schematic {
+  display: block;
+  width: 100%;
+  max-width: 11rem;
+  margin-inline: auto;
+}
+
+.atomA {
+  fill: var(--color-primary);
+  stroke: var(--color-background);
+  stroke-width: 2;
+}
+
+.atomB {
+  fill: var(--color-primary-dark);
+  stroke: var(--color-background);
+  stroke-width: 2;
+}
+
+.formedOne,
+.formedTwo {
+  stroke: var(--color-primary);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.formedOne {
+  fill: var(--color-primary-light);
+}
+
+.formedTwo {
+  fill: none;
+  stroke-dasharray: 6 4;
+}
+
+.schematicLabel {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+}
+
+.formula {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+}
+
+/* ---- Clustering example ---- */
+
+.scrollFigure {
+  padding: var(--space-3);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.heatmap {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  height: auto;
+  margin-inline: auto;
+}
+
+.tree line {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.25;
+}
+
+.rowLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--color-text);
+}
+
+.scale {
+  stroke: var(--color-border);
+}
+
+.scaleLabel {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--color-text-muted);
+}

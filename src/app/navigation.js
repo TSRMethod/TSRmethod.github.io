@@ -8,10 +8,9 @@ import { isRouteImplemented } from './routeRegistry'
  * whether a link is shown, and both must pass:
  *
  *   1. Content approval — the method's `status` in its Markdown frontmatter
- *      must be `published`. This is the scientific sign-off: CrossTSR and
- *      Metal-Ion TSR are `draft` because their content has known problems
- *      (see CONTENT-REVIEW.md), and no amount of working code should surface
- *      them.
+ *      must be `published`. This is the scientific sign-off: Key to 2D Image
+ *      is `draft` because its content has known problems (see
+ *      CONTENT-REVIEW.md), and no amount of working code should surface it.
  *
  *   2. Technical availability — the path must resolve in the route table.
  *      This is derived by asking the router itself (`isRouteImplemented`),
@@ -27,59 +26,121 @@ import { isRouteImplemented } from './routeRegistry'
  * group comes from the content registry.
  */
 
-/** Sections whose items are filled from the content registry. */
+/*
+ * The content registry's groups, labelled for the Methods & research page,
+ * where each heads its own list. The ids are the `group` field of the
+ * Markdown files.
+ */
 const GROUP_LABELS = {
   methods: [
-    { id: 'one-molecule', label: 'One Molecule' },
-    { id: 'two-molecules', label: 'Two Molecules' },
-    { id: 'nucleotide', label: 'Nucleotide' },
+    { id: 'one-molecule', label: 'One-molecule methods' },
+    { id: 'nucleotide', label: 'Nucleotide methods' },
+    // Cross methods: every triangle spans two molecules. Nucleotide–Protein
+    // TSR is here rather than under nucleotides, beside DrugTSR's cross keys.
+    { id: 'two-molecules', label: 'Two-molecule methods' },
   ],
   analysis: [
     // Tools that summarise or transform TSR keys...
-    { id: 'key-analysis', label: 'Analysis' },
+    { id: 'key-analysis', label: 'Key analysis' },
     // ...and tools that cluster, plot or learn from them.
-    { id: 'key-visualization', label: 'Visualization & Modeling' },
+    { id: 'key-visualization', label: 'Visualisation and modelling' },
   ],
 }
+
+/*
+ * The "Methods & research" menu: every published method and analysis page,
+ * plus the code they were first published with.
+ *
+ * Three groups, by what a page IS rather than by how old its software is. The
+ * scientific methods are current science, and most of them run in BioTSR
+ * today; it is their first implementations that are historical, so the word
+ * "legacy" appears nowhere in the menu. `sources` lists the registry groups
+ * that fill a menu group, in order, so the eight method pages keep the
+ * one-molecule / nucleotide / two-molecule order the content gives them
+ * without the menu needing three headings for it.
+ *
+ * `column` lays the groups out as two columns: the methods, and the rest. It
+ * is a layout hint only; the list is in reading order, which is the order the
+ * mobile drawer and a screen reader's list of lists follow.
+ */
+const RESEARCH_GROUPS = [
+  {
+    id: 'scientific-methods',
+    label: 'Scientific methods',
+    sources: ['one-molecule', 'nucleotide', 'two-molecules'],
+    column: 1,
+  },
+  {
+    id: 'analysis-research',
+    label: 'Analysis and research applications',
+    sources: ['key-analysis', 'key-visualization'],
+    column: 2,
+  },
+  {
+    id: 'earlier-implementations',
+    label: 'Earlier implementations',
+    column: 2,
+    items: [
+      {
+        id: 'earlier-code',
+        label: 'Earlier implementations and research code',
+        to: '/research/earlier-implementations',
+      },
+    ],
+  },
+  {
+    id: 'research-overview',
+    label: 'Overview',
+    column: 2,
+    items: [{ id: 'research', label: 'All methods and research', to: '/research' }],
+  },
+]
 
 /**
  * The menu skeleton.
  *
- * `source` marks a dropdown whose items come from the content registry for
- * that category. Everything else is a fixed link to a hand-built page.
+ * A group with `sources` takes its items from the content registry; every
+ * other item is a fixed link to a hand-built page.
+ *
+ * NO LINK IN THE MENU HAS A #FRAGMENT, and a test holds it to that. A menu
+ * entry is a page, and exactly one can be current: when /software and
+ * /software#install were both entries, both were highlighted at once on the
+ * BioTSR page. Sections of a page belong in that page's own "On this page"
+ * navigation, which tracks them separately.
+ *
+ * Six top-level items. "Home" comes first as a plain link, as well as being
+ * the group's mark and name at the left of the header: a visitor who does
+ * not know the logo is a link still has a way back. "Understand TSR" is a
+ * plain link to the core method, the one page a newcomer needs. BioTSR holds
+ * only its two pages; installation, documentation and citation are sections
+ * of its overview. "Methods & research" is where every other method page,
+ * the analysis pages and the earlier code live. Measured at 1150px, where the
+ * desktop bar first appears: see NAV_QUERY in useMediaQuery.js before adding
+ * a seventh.
  */
 const SKELETON = [
   { id: 'home', label: 'Home', to: '/' },
-  { id: 'tsr', label: 'TSR Method', to: '/tsr' },
+  { id: 'science', label: 'Understand TSR', to: '/tsr' },
   {
-    id: 'methods',
-    label: 'TSR-Based Methods',
-    source: 'method',
-    groups: GROUP_LABELS.methods,
+    id: 'biotsr',
+    label: 'BioTSR',
+    groups: [
+      {
+        id: 'biotsr-group',
+        label: 'BioTSR software',
+        items: [
+          { id: 'biotsr-overview', label: 'Overview', to: '/software' },
+          { id: 'get-started', label: 'Getting started', to: '/software/get-started' },
+        ],
+      },
+    ],
   },
   {
-    id: 'analysis',
-    label: 'Key Analysis & Visualization',
-    source: 'analysis',
-    groups: GROUP_LABELS.analysis,
+    id: 'research',
+    label: 'Methods & research',
+    groups: RESEARCH_GROUPS,
   },
   { id: 'publications', label: 'Publications', to: '/publications' },
-  /*
-   * Software stays inside About rather than becoming a seventh top-level item,
-   * and that is a measurement rather than a preference.
-   *
-   * Promoting it was tried first: a researcher after the code is arguably not
-   * looking under "About". But the bar is already 926px wide with six items,
-   * and the desktop navigation turns on at 1024px. Adding "Software" pushed
-   * the group's name out of the header — ellipsised at 1280px, and collapsed
-   * to nothing at 1024px, leaving the bare "TSR" mark. Trading the site's own
-   * name in the header for one menu position is a bad deal, and the only ways
-   * to buy the width back were shortening an established menu label or hiding
-   * the name deliberately.
-   *
-   * Software is reachable in three other places instead: the footer's Explore
-   * column, the home page's software section, and the contact page.
-   */
   {
     id: 'about',
     label: 'About',
@@ -89,7 +150,6 @@ const SKELETON = [
         label: 'About the group',
         items: [
           { id: 'people', label: 'People', to: '/people' },
-          { id: 'software', label: 'Software', to: '/software' },
           { id: 'contact', label: 'Contact', to: '/contact' },
         ],
       },
@@ -127,12 +187,12 @@ export function getVisibleNavigation({
 
     const groups = item.groups
       .map((group) => {
-        // Registry-backed groups pull their items from published content;
-        // fixed groups declare them inline.
-        const candidates = item.source
-          ? methods
-              .filter((method) => method.group === group.id)
-              .map(methodToLink)
+        // Registry-backed groups pull their items from published content,
+        // source group by source group; fixed groups declare them inline.
+        const candidates = group.sources
+          ? group.sources.flatMap((source) =>
+              methods.filter((method) => method.group === source).map(methodToLink),
+            )
           : (group.items ?? [])
 
         return { ...group, items: candidates.filter(linkIsUsable) }
@@ -147,10 +207,10 @@ export function getVisibleNavigation({
  * Published content for one category, arranged into the same labelled groups
  * the menu uses.
  *
- * The home page needs the whole method entry (title, summary) rather than the
- * link shape above, but it must not invent a second taxonomy: if a method
- * moves group, or a new group is added here, both the menu and the home page
- * follow. Both gates still apply, so a draft or an unrouted page cannot appear.
+ * The Methods & research page needs the whole method entry (title, summary)
+ * rather than the link shape above, but it must not invent a second taxonomy:
+ * if a method moves group, or a new group is added here, both the menu and
+ * that page follow. Both gates still apply, so a draft or an unrouted page cannot appear.
  *
  * @param {'method' | 'analysis'} category  which set of group labels to use
  * @returns {Array<{id: string, label: string, methods: Array}>} non-empty groups

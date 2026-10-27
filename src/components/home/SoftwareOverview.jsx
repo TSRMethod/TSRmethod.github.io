@@ -1,80 +1,70 @@
 import { Link } from 'react-router-dom'
-import { home, repositories } from '../../content'
+import { home, softwareRelease } from '../../content'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import { SOFTWARE_SECTION_ID } from './sectionIds'
 import HomeSection from './HomeSection'
-import Reveal from '../shared/Reveal'
-import { EVENTS, trackEvent } from '../../lib/analytics'
+import CodeBlock from '../method/CodeBlock'
 import styles from './SoftwareOverview.module.css'
 
 const SOFTWARE_PATH = '/software'
+const GET_STARTED_PATH = '/software/get-started'
 
 /*
- * The packages, from the repositories collection.
+ * BioTSR on the home page, straight after the hero: the obvious place to
+ * start for anyone who wants to compute TSR keys today.
  *
- * No installation command is printed here. TSR-Package is installed from
- * source — clone, create a virtual environment, `pip install .` — and it is
- * not on PyPI, so a one-line `pip install tsr-package` would be an invention.
- * The exact, verified commands are on /tsr, and this section links there
- * rather than keeping a second copy that could fall out of date.
+ * Two columns on a wide screen. On the left, what BioTSR does, as a sentence
+ * and a few short points from home.json. On the right, the released version,
+ * the one command that installs it, and the two ways in: Getting started
+ * first, the BioTSR page second. On a phone the columns stack in that order.
  *
- * The link to a full software catalogue appears by itself when Stage 8 builds
- * that route: until then `isRouteImplemented` reports it missing and the link
- * is not rendered.
+ * The version and the install command are built from the release record, the
+ * same source as every other version-specific string on the site, so they
+ * cannot name a different version from the pages they link to. Without a
+ * release record the section says nothing rather than guess.
  */
 export default function SoftwareOverview({ tone }) {
-  const { heading, intro } = home.software
-  const hasSoftwarePage = isRouteImplemented(SOFTWARE_PATH)
+  const { heading, intro, highlights = [], installLabel, getStartedCta, softwareCta } =
+    home.software
+  const release = softwareRelease
 
-  if (repositories.length === 0) return null
+  if (!release) return null
 
   return (
-    <HomeSection
-      id={SOFTWARE_SECTION_ID}
-      heading={heading}
-      intro={intro}
-      tone={tone}
-      action={
-        hasSoftwarePage ? (
-          <Link to={SOFTWARE_PATH}>All software</Link>
-        ) : (
-          <Link to="/tsr">Installation instructions and worked examples</Link>
-        )
-      }
-    >
-      <ul className={styles.list}>
-        {repositories.map((repository, index) => (
-          <Reveal
-            as="li"
-            key={repository.id}
-            index={index}
-            className={styles.card}
-          >
-            <h3 className={styles.name}>
-              <a
-                href={repository.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent(EVENTS.repositoryLink, {
-                    repository_id: repository.id,
-                    link_type: 'repository',
-                  })
-                }
-              >
-                {repository.name}
-                <span className="visually-hidden"> on GitHub (opens in a new tab)</span>
-              </a>
-            </h3>
-            {repository.description && (
-              <p className={styles.description}>{repository.description}</p>
+    <HomeSection id={SOFTWARE_SECTION_ID} heading={heading} intro={intro} tone={tone}>
+      <div className={styles.layout}>
+        {highlights.length > 0 && (
+          <ul className={styles.highlights}>
+            {highlights.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        )}
+
+        <div className={styles.panel}>
+          <p className={styles.facts}>
+            <span className={styles.version}>
+              {release.name} {release.version}
+            </span>{' '}
+            · Python {release.pythonVersions} on {release.platforms} · {release.licence}
+          </p>
+
+          <CodeBlock code={release.install} language="bash" filename={installLabel} />
+
+          <div className={styles.actions}>
+            {isRouteImplemented(GET_STARTED_PATH) && (
+              <Link to={GET_STARTED_PATH} className={styles.primary}>
+                {getStartedCta}
+              </Link>
             )}
-            {repository.language && (
-              <p className={styles.language}>{repository.language}</p>
+            {isRouteImplemented(SOFTWARE_PATH) && (
+              <Link to={SOFTWARE_PATH} className={styles.secondary}>
+                {softwareCta}
+              </Link>
             )}
-          </Reveal>
-        ))}
-      </ul>
+          </div>
+        </div>
+      </div>
     </HomeSection>
   )
 }

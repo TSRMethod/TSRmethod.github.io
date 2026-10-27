@@ -1,42 +1,38 @@
 {
   "hero": {
-    "lede": "We develop the Triangular Spatial Relationship (TSR) method: an alignment-free way of representing a 3D protein structure as a set of integer keys, so that structures can be compared, clustered and searched without superimposition. This site documents the method, the TSR-derived methods built on it, and the public Python packages that implement them.",
-    "primaryCta": "Read about the TSR method",
-    "secondaryCta": "Browse methods and tutorials"
+    "lede": "We develop the Triangular Spatial Relationship (TSR) method: an alignment-free way of describing a biomolecular 3D structure as a set of integer keys, so that structures can be compared, clustered and searched without superimposition. BioTSR, our software, computes those keys.",
+    "primaryCta": "Understand TSR",
+    "secondaryCta": "Get started with BioTSR"
   },
   "researchVision": {
     "heading": "Toward Deciphering Molecular Recognition",
     "question": "Is there a general molecular recognition code that governs how biomolecules recognize one another and how those interactions reshape molecular structure?",
-    "intro": "TSR transforms molecular 3D geometry into interpretable integer descriptors that can be compared across structures to identify conserved, altered, and interaction-associated spatial patterns.",
-    "direction": "Our long-term goal is to combine these interpretable structural descriptors with machine learning, AI-generated structures, and simulation-derived ensembles to connect structural prediction with mechanistic understanding.",
-    "detailsLabel": "Read more about our research vision",
-    "details": [
-      "Biomolecular interactions can produce structural changes ranging from subtle local atomic rearrangements to larger conformational shifts. A continuing challenge is not only to generate or predict molecular structures, but also to determine which geometric features are conserved, altered, or specifically associated with recognition and binding.",
-      "TSR represents molecular 3D structures through triangular spatial relationships encoded as discrete integer keys. These descriptors make it possible to quantify structural relationships and investigate recurring or interaction-associated geometric signatures at global, local, and atomic scales. The TSR framework has been extended across proteins, amino acids, ligands, drugs, nucleotides, carbohydrates, and biomolecular interaction interfaces.",
-      "By combining TSR-based analysis with machine learning and structures generated through AI-guided prediction or physics-based simulation, we aim to identify structural determinants of molecular recognition and investigate whether common recognition principles emerge across different biomolecular systems."
-    ]
+    "body": "Comparing TSR keys across structures can identify conserved, altered, and interaction-associated spatial patterns. Our long-term goal is to combine these interpretable structural descriptors with machine learning, AI-generated structures, and simulation-derived ensembles to connect structural prediction with mechanistic understanding."
+  },
+  "software": {
+    "heading": "BioTSR",
+    "intro": "BioTSR is the group's software for computing TSR keys: one Python package and one command line for the methods described on this site.",
+    "highlights": [
+      "Four calculation families: protein Cα, atomic protein, ligands, carbohydrates and nucleotides, and cross TSR for the interface between two molecules.",
+      "Whole datasets from one CSV manifest, processed in parallel as part of the standard installation.",
+      "Common keys from the command line; similarity, clustering and a clustered heat map from Python."
+    ],
+    "installLabel": "Install from PyPI",
+    "getStartedCta": "Get started with BioTSR",
+    "softwareCta": "Explore BioTSR"
   },
   "introduction": {
     "heading": "How TSR represents a structure",
-    "body": "TSR takes the Cα atoms of a protein as the vertices of triangles. Every triangle is reduced to a single integer — its key — computed from the triangle's side lengths, its angles and the labels of its vertices. Identical triangles in different proteins receive the same key, so two structures can be compared by counting the keys they share, with no alignment step and no superimposition.",
-    "cta": "See the full method and tutorial",
-    "figure": {
-      "src": "/images/uploads/high-resolution-scientific-workflow-infographic-for-a-peer-reviewed-rev-image-9-2.png",
-      "alt": "Six-step diagram of the TSR pipeline: an input 3D protein structure; its representative Cα coordinates selected; triangular motifs constructed between triplets of those points; the geometric features of a triangle measured as its maximum distance, angle bin and vertex labels; those features mapped deterministically to TSR keys; and the keys counted into a key-frequency vector used for structural similarity and machine learning. A footnote reads: no structural superposition required.",
-      "caption": "From a structure, to triangles between its Cα atoms, to one integer key per triangle, to a vector describing the whole protein."
-    }
+    "body": "The four steps below follow one triangle of ubiquitin from its atoms to the integer key BioTSR computes for it.",
+    "cta": "Read the full explanation, with a worked example"
   },
-  "methods": {
-    "heading": "TSR-based methods",
-    "intro": "The core representation has been extended in several directions — grouping amino acids, discriminating mirror images, comparing structures of different sizes, adding secondary structure, and moving beyond a single protein to drugs, ligands and nucleotides. Each method has its own page with installation instructions and a worked tutorial."
-  },
-  "analysis": {
-    "heading": "Key analysis and visualisation",
-    "intro": "Once keys have been generated, a second family of tools summarises and interprets them: finding the keys shared across a set of structures, clustering structures by key similarity, and training models on key frequencies."
-  },
-  "software": {
-    "heading": "Software and source code",
-    "intro": "Every method on this site is implemented in a public repository. The packages are installed from source with pip; the method pages carry the exact commands and the expected input formats."
+  "research": {
+    "heading": "Methods & research",
+    "intro": "The core representation has been extended to amino acids, drugs, ligands, nucleotides and the interfaces between molecules, and the keys it produces are analysed and modelled in several ways. Each method has its own page explaining the science and the paper behind it.",
+    "methodsCard": "Amino-acid grouping, mirror images, size filtering, secondary structure, amino acids, drugs, nucleotides and nucleotide–protein interfaces.",
+    "analysisCard": "Finding the keys structures share, clustering structures by key similarity, and models trained on key frequencies.",
+    "earlierCard": "The programs the methods were first published with, and separate tools written for particular papers.",
+    "cta": "All methods and research"
   },
   "publications": {
     "heading": "Recent publications",
@@ -82,7 +78,7 @@
   },
   "contact": {
     "heading": "Working with us",
-    "body": "We welcome questions about the method, about using the packages on your own structures, and about research collaboration. Problems with the software are best reported as issues on the relevant repository.",
+    "body": "We welcome questions about the method, about using BioTSR on your own structures, and about research collaboration. Problems with the software are best reported as issues on the relevant repository.",
     "cta": "Email the group"
   }
 }

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
 import usePageMetadata from '../../hooks/usePageMetadata'
-import { pages } from '../../content'
+import { pages, softwareRelease } from '../../content'
 import { siteConfig, mailtoHref } from '../../app/siteConfig'
 import { EVENTS, trackEvent } from '../../lib/analytics'
 import { isRouteImplemented } from '../../app/routeRegistry'
 import CopyButton from '../../components/shared/CopyButton'
+import ExternalLink from '../../components/software/ExternalLink'
+import trackRepositoryLink from '../../components/software/trackRepositoryLink'
 import styles from './Contact.module.css'
 
-const SOFTWARE_PATH = '/software'
+const EARLIER_PATH = '/research/earlier-implementations'
 
 /*
  * How to reach the group.
@@ -86,9 +88,24 @@ export default function Contact() {
           {softwareHeading}
         </h2>
         <p className={styles.body}>{softwareBody}</p>
-        {isRouteImplemented(SOFTWARE_PATH) && (
+        {/*
+         * One link per thing a visitor may be looking for: BioTSR's own issue
+         * tracker, or the list of every other repository, each of which links
+         * to its own.
+         */}
+        {softwareRelease?.issuesUrl && (
           <p className={styles.action}>
-            <Link to={SOFTWARE_PATH}>Find the right repository</Link>
+            <ExternalLink
+              label="Report a BioTSR problem"
+              href={softwareRelease.issuesUrl}
+              context="on GitHub"
+              onClick={() => trackRepositoryLink(softwareRelease.id, 'issues')}
+            />
+          </p>
+        )}
+        {isRouteImplemented(EARLIER_PATH) && (
+          <p className={styles.action}>
+            <Link to={EARLIER_PATH}>Earlier implementations</Link>
           </p>
         )}
       </section>

@@ -11,6 +11,8 @@ import {
   people,
   publications,
   repositories,
+  buildMethod,
+  validateHome,
 } from './index'
 
 /*
@@ -74,6 +76,8 @@ describe('.pages.yml is valid and matches the repository', () => {
   it('exposes exactly the expected content areas', () => {
     expect(Object.keys(entries).sort()).toEqual([
       'analysis',
+      'biotsr-page',
+      'get-started',
       'home',
       'methods',
       'pages',
@@ -86,7 +90,7 @@ describe('.pages.yml is valid and matches the repository', () => {
 })
 
 describe('the architecture boundary', () => {
-  const ARCHITECTURE = ['slug', 'category', 'group', 'order', 'status']
+  const ARCHITECTURE = ['slug', 'category', 'group', 'order', 'status', 'diagram']
 
   it('hides every architectural field on method pages', () => {
     for (const name of ARCHITECTURE) {
@@ -216,8 +220,17 @@ describe('the schema can represent the real content', () => {
     ])
   })
 
-  it('keeps the real Slurm script round-trippable', () => {
-    const tsr = methods.find((method) => method.slug === 'tsr')
+  it('keeps a real Slurm script round-trippable', () => {
+    /*
+     * No published page carries a job script any more (they point at
+     * BioTSR's HPC guide), but the schema still offers the block, so it is
+     * checked on the template's fixture, which is a real one.
+     */
+    const tsr = buildMethod(
+      './methods/method-kit.md',
+      readFileSync(resolve(root, 'src/test/fixtures/method-kit.md'), 'utf8'),
+    )
+    expect(methods.filter((method) => method.slurm)).toEqual([])
 
     // Re-serialising and re-parsing the script must return it unchanged,
     // which is what a CMS save does to the frontmatter.
@@ -386,14 +399,7 @@ describe('editorial copy for the hand-built pages', () => {
      * change when an award does. Neither should ever need a developer.
      */
     const expected = {
-      researchVision: [
-        'heading',
-        'question',
-        'intro',
-        'direction',
-        'detailsLabel',
-        'details',
-      ],
+      researchVision: ['heading', 'question', 'body'],
       funding: [
         'heading',
         'primarySupport',
@@ -451,10 +457,7 @@ describe('editorial copy for the hand-built pages', () => {
   })
 
   it('collects the expandable text as a list, one entry per paragraph', () => {
-    for (const [section, name] of [
-      ['researchVision', 'details'],
-      ['funding', 'acknowledgments'],
-    ]) {
+    for (const [section, name] of [['funding', 'acknowledgments']]) {
       const block = field(entries.home, section)
       const list = block.fields.find((f) => f.name === name)
 
@@ -465,11 +468,58 @@ describe('editorial copy for the hand-built pages', () => {
     }
   })
 
-  it('requires the diagram on the home page to describe itself', () => {
-    const figure = field(entries.home, 'introduction').fields.find(
-      (f) => f.name === 'figure',
-    )
-    const alt = figure.fields.find((f) => f.name === 'alt')
-    expect(alt.description).toMatch(/screen reader/i)
+  it('offers no image field for the home diagram, which is drawn from a calculation', () => {
+    /* The diagram under "How TSR represents a structure" is the TSR overview
+       component; an uploaded image there would show nothing. */
+    const introduction = field(entries.home, 'introduction')
+    expect(introduction.fields.find((f) => f.name === 'figure')).toBeUndefined()
+    expect(() =>
+      validateHome({ ...home, introduction: { ...home.introduction, figure: { src: '/x.png', alt: 'x' } } }),
+    ).toThrow(/no longer used/)
   })
+})
+
+describe('the BioTSR release record', () => {
+  it('keeps the release and citation out of the editor', () => {
+    /*
+     * The version decides every pinned command and documentation link on the
+     * site, and the citation mirrors the released CITATION.cff. Both change
+     * with a release, so they round-trip untouched rather than being editable.
+     */
+    for (const name of ['release', 'citation']) {
+      const declared = field(entries.repositories, name)
+      expect(declared, `${name} must be declared so it is preserved`).toBeDefined()
+      expect(declared.hidden, `${name} must be hidden`).toBe(true)
+    }
+  })
+
+  it('lets an editor record each repository’s own licence, and requires one', () => {
+    /* Repositories do not share a licence, and five state none at all, so
+       each record says what its repository states — including "none". */
+    const licence = field(entries.repositories, 'licence')
+    expect(licence.hidden).toBeFalsy()
+    expect(licence.required).toBe(true)
+    expect(licence.description).toMatch(/No licence stated/)
+  })
+
+  it('offers the historical category the BioTSR page groups by', () => {
+    expect(field(entries.repositories, 'category').options.values).toContain('historical')
+  })
+
+  it.each(['biotsr-page', 'get-started'])(
+    'edits the %s text as Markdown, with every frontmatter key declared',
+    (name) => {
+      const entry = entries[name]
+      const body = field(entry, 'body')
+      expect(body.type).toBe('rich-text')
+      expect(body.options.format).toBe('markdown')
+
+      const frontmatter = parseYaml(
+        readFileSync(resolve(root, entry.path), 'utf8').split('---')[1],
+      )
+      for (const key of Object.keys(frontmatter)) {
+        expect(fieldNames(entry), `${name}: "${key}"`).toContain(key)
+      }
+    },
+  )
 })

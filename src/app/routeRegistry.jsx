@@ -3,9 +3,11 @@ import Home from '../pages/Home/Home'
 import NotFound from '../pages/NotFound/NotFound'
 import Publications from '../pages/Publications/Publications'
 import People from '../pages/People/People'
-import Software from '../pages/Software/Software'
 import Contact from '../pages/Contact/Contact'
+import Research from '../pages/Research/Research'
+import EarlierImplementations from '../pages/Research/EarlierImplementations'
 import LazyMethodPage from './LazyMethodPage'
+import { LazySoftware, LazyGetStarted } from './LazySoftwarePages'
 import { publishedMethods } from '../content'
 import { LEGACY_PATHS, LEGACY_PAGE_PATHS } from './legacyPaths'
 
@@ -41,10 +43,10 @@ const methodRoutes = publishedMethods.map((method) => ({
 /*
  * A legacy alias is created only when its target is actually published.
  *
- * This matters: an alias must not become a back door to a draft. SSE-TSR is
- * listed above and is deliberately absent from the route table, because its
- * content is still draft — the entry starts working by itself on the day the
- * page is published, and not before.
+ * This matters: an alias must not become a back door to a draft. Key to 2D
+ * Image is listed in legacyPaths.js and is deliberately absent from the route
+ * table, because its content is still draft — the entry starts working by
+ * itself on the day the page is published, and not before.
  */
 const legacyRoutes = Object.entries(LEGACY_PATHS).flatMap(([from, slug]) => {
   const target = publishedMethods.find((method) => method.slug === slug)
@@ -56,7 +58,10 @@ const pageRoutes = [
   { path: '/', element: <Home /> },
   { path: '/publications', element: <Publications /> },
   { path: '/people', element: <People /> },
-  { path: '/software', element: <Software /> },
+  { path: '/software', element: <LazySoftware /> },
+  { path: '/software/get-started', element: <LazyGetStarted /> },
+  { path: '/research', element: <Research /> },
+  { path: '/research/earlier-implementations', element: <EarlierImplementations /> },
   { path: '/contact', element: <Contact /> },
 ]
 

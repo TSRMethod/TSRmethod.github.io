@@ -46,10 +46,11 @@ A file has two parts: a block of settings at the top between `---` lines
 | `category` | yes | `core`, `method`, or `analysis`. Sets the URL prefix. |
 | `group` | yes | Which sub-heading of the menu it appears under. |
 | `order` | no | Sort position within its group. Lower comes first. |
-| `figure` | no | Main illustration: `src`, `alt`, optional `caption`. |
+| `figure` | no | Main illustration: `src`, `alt`, optional `caption` and `credit`. |
 | `paper` | no | The publication: `title`, `authors`, `journal`, `year`, `doi`. |
 | `repositories` | no | List of code repositories: `name`, `url`, `description`, `language`. |
 | `slurm` | no | HPC job instructions. See below. |
+| `diagram` | no | A figure the site draws itself, shown above the body, by id (`tsr-overview`). Hidden from the CMS. To place a drawn figure inside the text instead, see "Drawn figures" below. |
 | `references` | no | Further reading: list of `title` and `url`. |
 | `review` | no | Flags the page as needing author review. |
 
@@ -57,9 +58,12 @@ A file has two parts: a block of settings at the top between `---` lines
 
 | `category` | URL | Menu |
 | --- | --- | --- |
-| `core` | `/tsr` | TSR Method |
-| `method` | `/methods/<slug>` | TSR-Based Methods |
-| `analysis` | `/analysis/<slug>` | Key Analysis & Visualization |
+| `core` | `/tsr` | Understand TSR (a plain link) |
+| `method` | `/methods/<slug>` | Methods & research → Scientific methods |
+| `analysis` | `/analysis/<slug>` | Methods & research → Analysis and research applications |
+
+Every published `method` and `analysis` page is also listed on `/research`,
+under its `group`.
 
 ### `status`: publishing a page
 
@@ -128,11 +132,53 @@ figure:
     labelled with its computed integer key.
 ```
 
+### Figures from a publication
+
+A figure taken from a published paper carries a `credit`, shown beneath it:
+where it comes from, a link, its licence, and whether it was changed. All of
+`use`, `source`, `url` and `licence` are required once `credit` is set, so a
+half-written attribution fails the build.
+
+```yaml
+figure:
+  src: /images/analysis/common-keys.webp
+  alt: >-
+    …
+  credit:
+    use: reproduced            # or "adapted" for a redrawn or altered figure
+    source: Milon et al., Kinases and Phosphatases 2024, 2(4), 315–339, Figure 13
+    url: https://doi.org/10.3390/kinasesphosphatases2040021
+    copyright: © 2024 the authors
+    licence: CC BY 4.0
+    licenceUrl: https://creativecommons.org/licenses/by/4.0/
+    changes: Resized for the web; otherwise unchanged.
+```
+
+Check the paper's licence before reusing a figure. An open-access CC BY
+article allows reuse with this credit; a figure from a paper that is not
+openly licensed needs the publisher's permission.
+
 ---
 
 ## Writing the body
 
 The body is ordinary Markdown.
+
+### Drawn figures
+
+A figure the site draws from a BioTSR calculation is placed with image syntax
+and a `diagram:` address, on a line of its own, where it belongs in the text:
+
+```markdown
+![](diagram:modifier-scope?highlight=mirror)
+```
+
+The ids are `tsr-overview`, `tsr-worked-example`, `modifier-scope`,
+`cross-triangles`, `point-choice` and `clustering-example`
+(`src/components/figures/diagrams.js`);
+anything after `?` is passed to the figure. An unknown id fails the build. The
+figures' numbers come from scripts in `scripts/figures/`, run by hand against
+the released BioTSR, never typed in.
 
 ### Headings become the section menu
 
@@ -140,18 +186,23 @@ The body is ordinary Markdown.
 `###` headings become entries beneath them. Nothing else is needed to build
 that menu — write the headings and it appears.
 
-Use `##` for the major sections of the page. A typical method page uses:
+Use `##` for the major sections of the page. A method that BioTSR runs uses:
 
 ```markdown
 ## Overview
-## Installation
-## Usage
-## Examples
+## Run it with BioTSR
 ```
 
-but a page is free to use whatever sections suit it. A command-line tool with
-no Python API can just as well have `## Overview`, `## Installation`,
-`## Commands`, `## Output files`.
+with any further science sections after the overview, and the differences
+from the earlier program, where BioTSR's documentation records them, under
+`Run it with BioTSR`. The earlier implementation itself is described once, in
+its entry under `repositories` in the frontmatter: that text appears on its
+card in the page's Source code section, beside the repository's role and
+licence, which come from its record. Do not repeat it in a section of the
+body. An old link to `#earlier-implementation` or `#earlier-scripts` lands on
+the Source code section. A separate research tool that BioTSR does not provide,
+such as the deep neural network, keeps its own `## Installation` and usage
+sections, introduced by a note saying it is not part of BioTSR.
 
 ### Code
 
@@ -335,7 +386,8 @@ line is assembled from whichever are present without leaving stray commas.
 
 ### `repositories/`
 
-One file per repository. These are what the software page lists.
+One file per repository. BioTSR's record drives the BioTSR page (`/software`);
+the others are listed on `/research/earlier-implementations`.
 
 ```json
 {
@@ -344,16 +396,38 @@ One file per repository. These are what the software page lists.
   "url": "https://github.com/pooryakhajouie/TSR-Package",
   "description": "…",
   "language": "Python",
-  "category": "core",
+  "category": "historical",
   "kind": "package",
   "issuesUrl": "https://github.com/pooryakhajouie/TSR-Package/issues",
+  "licence": "MIT License",
   "order": 1
 }
 ```
 
-`category` decides which section of the software page the entry appears under:
-`core` for the main TSR software, `method` for the specialised packages,
-`analysis` for tools that work on keys once they exist.
+`licence` is required for every record and is shown on its card: the licence
+the repository states on GitHub, or `No licence stated` if it has none
+(CONTENT-REVIEW.md item 29). The repositories do not share one licence.
+
+`category` decides where the entry appears: `core` is BioTSR itself, on
+`/software`; `historical` lists earlier implementations of methods BioTSR now
+runs; `analysis` lists separate research tools, including analyses BioTSR does
+not provide. `method` and `tooling` are still accepted but currently unused.
+
+**The released package** — `biotsr.json` — also carries a `release` block
+(`package`, `version`, `date`, `pythonVersions`, `platforms`) and a
+`citation` (title, and authors as `given`/`family` in the order of the released
+`CITATION.cff`). These two are hidden in the CMS. The tag, release page, PyPI page,
+pinned documentation links and install commands are derived from them; only
+one record may carry a release, and there is deliberately no DOI field.
+
+### `software/`
+
+The prose of the two software pages, as Markdown with a `title` and `summary`:
+`biotsr.md` (the body of `/software`: install, method families, command line
+and Python, documentation) and `get-started.md` (`/software/get-started`).
+Every pinned BioTSR install command, `blob/v…` link and release link in them is checked
+against `biotsr.json` by `biotsr-claims.test.js`, so a new release fails the
+tests until the pages are updated with it.
 
 `kind` is `package` for something a user installs, or `scripts` for research
 code that is run where it sits. It is printed on the entry, so that nothing on

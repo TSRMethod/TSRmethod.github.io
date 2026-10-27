@@ -58,7 +58,7 @@ describe('the hero still says what it said', () => {
     ).toHaveAttribute('href', '/tsr')
     expect(
       screen.getByRole('link', { name: home.hero.secondaryCta }),
-    ).toHaveAttribute('href', '#methods')
+    ).toHaveAttribute('href', '/software/get-started')
   })
 
   it('writes none of that in the component', () => {
