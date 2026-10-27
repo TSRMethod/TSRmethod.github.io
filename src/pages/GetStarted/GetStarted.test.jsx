@@ -1,11 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../../app/App'
 import { softwarePages, softwareRelease } from '../../content'
 import { setViewport } from '../../test/viewport'
 
 const PAGE = softwarePages['get-started']
+
+/*
+ * Evaluate the lazily loaded page before the first test, as src/test/setup.js
+ * does for MethodPage, so that findBy's one-second wait measures React's
+ * re-render rather than the first compile of the module under a loaded run.
+ * It is done here rather than in setup.js, which would bypass other files'
+ * vi.mock calls (see the note there).
+ */
+await import('./GetStarted')
 
 /* The page is code-split, so it arrives a tick after the route renders. */
 async function renderPage() {
@@ -30,7 +39,10 @@ describe('Getting started with BioTSR', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Getting started with BioTSR' }),
     ).toBeInTheDocument()
-    expect(document.title).toBe('Getting started with BioTSR | TSR Research Group')
+    // usePageMetadata sets the title in an effect. On a lazily loaded page the
+    // heading can be in the DOM a moment before that effect has run, so wait
+    // for the exact title rather than reading it at that instant.
+    await waitFor(() => expect(document.title).toBe('Getting started with BioTSR | TSR Research Group'))
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
       'content',
       PAGE.summary,

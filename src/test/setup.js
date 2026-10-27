@@ -25,6 +25,13 @@ import { installMatchMedia, resetViewport } from './viewport'
  * when React asks for it, so what the tests wait on is React's re-render
  * rather than a compile. Nothing is stubbed and no assertion is relaxed: the
  * component is still loaded lazily, and the tests still await it.
+ *
+ * The two software pages are lazy too, but are warmed in their own test files
+ * instead. This file runs before a test file's `vi.mock` calls take effect,
+ * and the BioTSR page imports the route registry, and through it every page
+ * and the components that call the analytics module. Warming it here cached
+ * those with the real analytics module, and ProfileLinks.test.jsx, which
+ * mocks it, then tested the unmocked one and failed.
  */
 await import('../components/method/MethodPage')
 
