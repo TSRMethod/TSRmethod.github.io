@@ -37,8 +37,10 @@ npm ci      # clean install matching package-lock.json; use `npm install` only
 
 Run `npm run lint`, `npm test` and `npm run build` before committing.
 
-`npm run build` also optimises every image and writes `sitemap.xml`; both are
-part of the ordinary build, so deployment gets them without a second step.
+`npm run build` also optimises every image, writes `sitemap.xml` and
+prerenders every page; all of that is part of the ordinary build, so
+deployment gets it without a second step. `npm run check:dist` then checks
+the built pages as GitHub Pages will serve them.
 
 ## Project layout
 
@@ -62,9 +64,11 @@ public/
   images/       Content images, referenced from Markdown and JSON
     uploads/    Pages CMS uploads
     brand/      The site mark, derived from assets/brand/
+  share/        The website's QR code (SVG, PNG) and the social preview card
   robots.txt    Crawling policy; sitemap.xml is generated at build time
 
-scripts/        Build-time tooling — image optimisation, sitemap routes
+scripts/        Build-time tooling — image optimisation, sitemap routes,
+                prerendering and the check of the built pages
 assets/brand/   Logo masters. NOT served; see its README for what is derived
 ```
 
@@ -132,10 +136,11 @@ edits made through Pages CMS are ordinary commits and go through the same
 checks** — if one would break the site, the deployment fails and the live site
 stays as it was.
 
-Routing uses `BrowserRouter`. The build writes `dist/404.html` as a copy of
-`dist/index.html` so that GitHub Pages serves the app for deep links such as
-`/tsr` — see the comment in [`vite.config.js`](vite.config.js) for how this
-works and its one tradeoff.
+Routing uses `BrowserRouter`, and the build prerenders every published page
+to its own HTML file (`tsr.html`, `methods/drug-tsr.html`, …), so a direct
+visit or a refresh gets HTTP 200 with that page's content, title, description
+and canonical URL before any JavaScript runs. Unknown addresses get a real
+404. How it works and what keeps it working: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#routing-on-github-pages).
 
 Full details, including first-time Pages setup and how to verify a
 deployment: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).

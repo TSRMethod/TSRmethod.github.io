@@ -6,6 +6,7 @@ import { resolve } from 'node:path'
 import App from './App'
 import { routeConfig } from './routeRegistry'
 import { siteConfig } from './siteConfig'
+import { SOCIAL_IMAGE } from '../lib/pageMetadata'
 import { methods } from '../content'
 import {
   STATIC_PATHS,
@@ -61,6 +62,26 @@ describe('per-page metadata', () => {
     const tsr = methods.find((m) => m.slug === 'tsr')
     expect(meta('description')).toBe(tsr.summary)
     expect(canonical()).toBe(`${siteConfig.url}/tsr`)
+  })
+
+  it('marks the 404 page noindex, with no canonical URL', async () => {
+    renderAt('/no-such-page')
+
+    await screen.findByRole('heading', { level: 1, name: 'Page not found' })
+    expect(meta('robots')).toBe('noindex')
+    expect(canonical()).toBeUndefined()
+    expect(og('og:url')).toBeUndefined()
+  })
+
+  it('drops noindex and restores the canonical on the next real page', async () => {
+    const { unmount } = renderAt('/no-such-page')
+    await screen.findByRole('heading', { level: 1, name: 'Page not found' })
+    unmount()
+
+    renderAt('/people')
+    await screen.findByRole('heading', { level: 1 })
+    expect(meta('robots')).toBeUndefined()
+    expect(canonical()).toBe(`${siteConfig.url}/people`)
   })
 
   it('does not canonicalise every page to the origin', () => {
@@ -154,13 +175,21 @@ describe('the static head', () => {
     expect(html).toContain('rel="canonical"')
   })
 
-  it('claims no social image while none has been approved', () => {
+  it('declares the social card at its real size, as an absolute URL', () => {
     /*
-     * A cropped logo would look like a finished card and quietly become the
-     * permanent one. Text-only previews until there is a real asset.
+     * One designed card for every page (CONTENT-REVIEW item 35), outside
+     * /images so the image optimiser publishes it exactly as committed.
      */
-    expect(html).not.toContain('og:image')
-    expect(html).toContain('name="twitter:card" content="summary"')
+    const image = /property="og:image" content="([^"]+)"/.exec(html)?.[1]
+    expect(image).toBe(`${siteConfig.url}${SOCIAL_IMAGE.path}`)
+
+    const png = readFileSync(resolve(root, 'public', SOCIAL_IMAGE.path.slice(1)))
+    expect(png.readUInt32BE(16)).toBe(SOCIAL_IMAGE.width)
+    expect(png.readUInt32BE(20)).toBe(SOCIAL_IMAGE.height)
+    expect(html).toContain(`property="og:image:width" content="${SOCIAL_IMAGE.width}"`)
+    expect(html).toContain(`property="og:image:height" content="${SOCIAL_IMAGE.height}"`)
+    expect(html).toMatch(new RegExp(`property="og:image:alt"\\s+content="${SOCIAL_IMAGE.alt}"`))
+    expect(html).toContain('name="twitter:card" content="summary_large_image"')
   })
 
   it('points at the site favicon rather than a starter asset', () => {

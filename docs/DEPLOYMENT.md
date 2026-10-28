@@ -25,8 +25,8 @@ untouched** — the failure blocks the update, it does not take the site down.
 Runs on pull requests to `main`, on pushes to `main`, and on pushes to
 `refactor/site-foundation` while the rebuild is in progress.
 
-`npm ci` → `npm run lint` → `npm test` → `npm run build` → check the SPA
-fallback exists.
+`npm ci` → `npm run lint` → `npm test` → `npm run build` →
+`npm run check:dist` (the built pages, see below).
 
 Read-only permissions; publishes nothing.
 
@@ -66,16 +66,69 @@ This repository is the organisation **root** Pages site
 be set to `/TSRmethod.github.io/` — that is only for project sites served from
 a subpath.
 
-The app uses `BrowserRouter`. GitHub Pages knows nothing about client-side
-routes, so the build writes `dist/404.html` as a byte copy of
-`dist/index.html` (see the plugin in [`vite.config.js`](../vite.config.js)).
-Pages serves that file for any unmatched path **without changing the URL**, the
-same bundle boots, and React Router renders the right page.
+The app uses `BrowserRouter`, and **every published page is prerendered**:
+`npm run build` writes an HTML file for each one, so GitHub Pages answers a
+direct visit or a refresh with HTTP 200 and that page's own content and
+metadata.
 
-**The tradeoff:** those responses carry HTTP status **404** even though the
-correct page renders. Browsers and users never notice; crawlers may. If HTTP
-200 on deep links becomes important, the fix is prerendering, not a redirect
-hack.
+### How GitHub Pages resolves an address
+
+Observed on GitHub Pages, and relied on here:
+
+| Request | Served |
+| --- | --- |
+| `/people` | `people.html`, **200** |
+| `/software` | `software.html`, **200**, even with a `software/` folder beside it |
+| `/people/` | 404 (`people.html` is not a folder's index) |
+| `/methods` (a folder, no index) | 301 to `/methods/`, then 404 |
+| anything else | `404.html`, **404** |
+
+So each canonical address, which never ends in a slash, becomes
+`<path>.html`; the home page is `index.html`.
+
+### What the build writes
+
+`npm run build` runs three steps:
+
+1. `vite build`: the site, into `dist/`, plus `sitemap.xml`.
+2. `vite build --ssr src/entry-server.jsx`: the same app compiled for
+   Node, into `node_modules/.cache/tsr-ssr/`. Never published.
+3. `node scripts/prerender.mjs`: renders each page with that build and
+   writes:
+   - **one file per sitemap URL** (`publications.html`,
+     `methods/drug-tsr.html`, …). Each holds the page's rendered content,
+     its own `<title>`, description, canonical URL and `og:` tags, and
+     structured data on the home and BioTSR pages. It also links the page's
+     lazily loaded stylesheet, so the first paint is styled;
+   - **`404.html`**, the not-found page, marked `noindex` with no canonical.
+     GitHub Pages serves it with a real 404 for every unknown address;
+   - **a redirect page for each old address** (`mirror-image.html`,
+     `source-code.html`, …). Each forwards at once, keeping any `#section`,
+     and is `noindex` with a canonical pointing at the new page.
+
+In the browser, `src/main.jsx` *hydrates* the prerendered HTML (React takes it
+over rather than drawing it again), so navigation, menus, anchors and
+analytics behave as before. An address in another form (`/people/`,
+`/people.html`, `/People`) is sent to the page's own address before anything
+renders. The development server and the 404 page are drawn from scratch as
+before.
+
+Two things must stay true for hydration to work, and tests hold both:
+
+- **The first render must not depend on the browser.** Width-dependent
+  markup (the navigation, a method page's "On this page") renders both forms
+  until the screen is measured, with CSS showing the right one
+  (`useMediaQuery` returns `undefined` then). Scroll reveals start shown on a
+  prerendered page and re-arm only below the fold.
+- **A lazily loaded route component must be listed** in `LAZY_SOURCES` in
+  `src/entry-server.jsx`, so its stylesheet is linked in the page's HTML.
+
+`npm run check:dist` then reads `dist/` as GitHub Pages will serve it. Every
+sitemap URL must have its file, a unique title, a description, one `<h1>`, a
+canonical and `og:url` equal to the sitemap entry, and content in document
+order. Any other HTML file must be a redirect into the sitemap. The `og:image`
+must exist at its declared size, and no analytics tag may be written into the
+HTML. CI and the deploy workflow both run it.
 
 `public/.nojekyll` stops GitHub applying Jekyll processing to the output.
 
@@ -107,9 +160,13 @@ Local `npm run preview` does **not** prove GitHub Pages behaviour — it has its
 own fallback handling. These must be checked on the real site:
 
 - `https://tsrmethod.github.io/` loads
-- `https://tsrmethod.github.io/tsr` loads **when typed directly**
+- `https://tsrmethod.github.io/tsr` loads **when typed directly**, with
+  **HTTP 200** and its own `<title>` in the raw HTML
+  (`curl -sI https://tsrmethod.github.io/tsr`, then `curl -s … | grep '<title>'`)
 - refreshing the browser while on `/tsr` still works
-- an invalid URL such as `/no-such-page` shows the site's own 404 page
+- an invalid URL such as `/no-such-page` shows the site's own 404 page, with
+  **HTTP 404**
+- an old address such as `/mirror-image` lands on `/methods/mirror-image`
 - CSS, JavaScript and images all load
 
 ## Media uploads through the CMS
@@ -192,3 +249,35 @@ Run lint, tests and build before pushing — they are exactly what CI runs.
 
 Revert the offending commit on `main` and push. The deploy workflow runs again
 and republishes the previous state. There is no separate rollback button.
+
+## The website QR code
+
+`public/share/tsr-website-qr.svg` and `public/share/tsr-website-qr.png`
+encode `https://tsrmethod.github.io/` directly, with no shortener or tracking
+service in between. Offered for download on the Contact page, and meant for
+posters and slides as well.
+
+- QR version 3, error correction level Q (about 25% recoverable), 29 × 29
+  modules with the standard 4-module quiet zone. Black on white, no logo.
+- SVG: filled squares on an explicit white background, scalable for print.
+  PNG: 2035 × 2035 pixels, 1-bit, white background, tagged 600 dpi (about
+  86 mm square at that resolution).
+- Generated with [segno](https://pypi.org/project/segno/) 1.6.6. Both files,
+  and the SVG rasterised at 120 to 3000 pixels, were decoded with zxing-cpp
+  3.1.1 and OpenCV 5.0. Every decode returned exactly
+  `https://tsrmethod.github.io/`. The one OpenCV miss, at 3000 pixels, is that
+  decoder's limit at very large sizes: the same image decodes once scaled
+  down, and its modules match the encoder's matrix one for one.
+
+They never need regenerating while the address stays the same. If it ever
+changes, make new files and decode both before replacing these.
+`Contact.test.jsx` checks the properties an edit could break: the white
+background, the quiet zone and the PNG size.
+
+## The social preview image
+
+`public/share/social-card.png`, 1200 × 630, is the `og:image` of every page.
+It is drawn by `scripts/social-card.mjs` from the favicon's geometry and the
+group's name and tagline in `src/content/site.json`. That script is not part
+of the build, so the committed PNG is what gets published. It lives outside
+`public/images/` so that the image optimiser leaves it exactly as committed.

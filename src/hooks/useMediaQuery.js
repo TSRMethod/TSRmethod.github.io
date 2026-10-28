@@ -11,7 +11,17 @@ import { useCallback, useSyncExternalStore } from 'react'
  * `useSyncExternalStore` (rather than useState + useEffect) means the correct
  * value is available on the very first render, so there is no flash of the
  * wrong navigation.
+ *
+ * UNDEFINED MEANS "NOT KNOWN YET". Pages are prerendered at build time, where
+ * there is no screen to measure, and the browser's first render must match
+ * that HTML exactly while it hydrates. So both of those renders get
+ * `undefined`, and React re-renders with the real value straight after
+ * hydration. A component whose markup depends on the answer renders both
+ * forms while it is undefined, and lets CSS show the right one (see
+ * Navigation.jsx). One that only reads it as a boolean can ignore this.
  */
+const serverSnapshot = () => undefined
+
 export default function useMediaQuery(query) {
   const subscribe = useCallback(
     (onChange) => {
@@ -27,9 +37,7 @@ export default function useMediaQuery(query) {
     [query],
   )
 
-  // Server snapshot: unused today (the site is client-rendered) but required
-  // by the hook signature.
-  return useSyncExternalStore(subscribe, getSnapshot, () => false)
+  return useSyncExternalStore(subscribe, getSnapshot, serverSnapshot)
 }
 
 /**

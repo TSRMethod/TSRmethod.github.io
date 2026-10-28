@@ -1413,6 +1413,18 @@ content:
             required: true
             description: >-
               The affiliations listed under it are the ones in Site settings.
+          - name: shareHeading
+            label: Share section heading
+            type: string
+            required: true
+          - name: shareBody
+            label: Share section text
+            type: text
+            required: true
+            description: >-
+              Shown beside the website's QR code. The code and its download
+              files are fixed images in public/share and always open
+              https://tsrmethod.github.io/.
 
   # -------------------------------------------------------------------------
   # Site settings — editorial only

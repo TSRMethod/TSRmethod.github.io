@@ -97,6 +97,13 @@ describe('the contact page', () => {
 })
 
 describe('the copy-email button', () => {
+  /*
+   * Scoped to the email section: the share section below has its own copy
+   * button, with its own live region.
+   */
+  const emailSection = () =>
+    within(screen.getByRole('region', { name: pages.contact.emailHeading }))
+
   it('copies the address from the central configuration', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
@@ -118,7 +125,7 @@ describe('the copy-email button', () => {
       screen.getByRole('button', { name: /copy email address/i }),
     )
 
-    const status = await screen.findByRole('status')
+    const status = await emailSection().findByRole('status')
     expect(status).toHaveTextContent(/copied/i)
     // The button keeps its own name, so the control does not rename itself
     // under a screen reader's cursor.
@@ -135,7 +142,7 @@ describe('the copy-email button', () => {
     expect(button).toHaveFocus()
 
     await userEvent.keyboard('{Enter}')
-    expect(await screen.findByRole('status')).toHaveTextContent(/copied/i)
+    expect(await emailSection().findByRole('status')).toHaveTextContent(/copied/i)
   })
 
   it('says so, rather than crashing, when the clipboard refuses', async () => {
@@ -149,7 +156,7 @@ describe('the copy-email button', () => {
       screen.getByRole('button', { name: /copy email address/i }),
     )
 
-    expect(await screen.findByRole('status')).toHaveTextContent(/could not copy/i)
+    expect(await emailSection().findByRole('status')).toHaveTextContent(/could not copy/i)
     // The address is still on the page to select by hand.
     expect(
       within(screen.getByRole('main')).getByText(siteConfig.email),
@@ -167,6 +174,92 @@ describe('the copy-email button', () => {
       screen.getByRole('button', { name: /copy email address/i }),
     )
 
-    expect(await screen.findByRole('status')).toHaveTextContent(/could not copy/i)
+    expect(await emailSection().findByRole('status')).toHaveTextContent(/could not copy/i)
+  })
+})
+
+describe('the share section', () => {
+  const shareSection = () =>
+    within(screen.getByRole('region', { name: pages.contact.shareHeading }))
+
+  it('shows the QR code with the website address written out beside it', () => {
+    renderContact()
+    const share = shareSection()
+
+    const code = share.getByRole('img', { name: 'QR code for https://tsrmethod.github.io/' })
+    expect(code).toHaveAttribute('src', '/share/tsr-website-qr.svg')
+
+    /* The code is never the only way to the address. */
+    const link = share.getByRole('link', { name: 'https://tsrmethod.github.io/' })
+    expect(link).toHaveAttribute('href', 'https://tsrmethod.github.io/')
+  })
+
+  it('offers both files for download, and each file exists', () => {
+    renderContact()
+    const share = shareSection()
+
+    for (const [name, href] of [
+      [/as SVG/, '/share/tsr-website-qr.svg'],
+      [/as PNG/, '/share/tsr-website-qr.png'],
+    ]) {
+      const link = share.getByRole('link', { name })
+      expect(link).toHaveAttribute('href', href)
+      expect(link).toHaveAttribute('download')
+      expect(() => readFileSync(resolve(process.cwd(), 'public', href.slice(1)))).not.toThrow()
+    }
+  })
+
+  it('copies the website address', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+
+    renderContact()
+    await userEvent.click(shareSection().getByRole('button', { name: /copy website address/i }))
+
+    expect(writeText).toHaveBeenCalledWith('https://tsrmethod.github.io/')
+    expect(await shareSection().findByRole('status')).toHaveTextContent(/copied/i)
+  })
+})
+
+describe('the QR code files', () => {
+  const svg = readFileSync(resolve(process.cwd(), 'public/share/tsr-website-qr.svg'), 'utf8')
+  const png = readFileSync(resolve(process.cwd(), 'public/share/tsr-website-qr.png'))
+
+  /*
+   * What can be checked without a QR decoder. That both files decode to
+   * exactly https://tsrmethod.github.io/ was verified with two independent
+   * decoders when they were made (docs/DEPLOYMENT.md); these hold the
+   * properties a later edit could break.
+   */
+  it('is a self-contained SVG: black on an explicit white square, no links out', () => {
+    expect(svg).toMatch(/<rect width="37" height="37" fill="#ffffff"\/>/)
+    expect(svg).toMatch(/<path fill="#000000" d="M/)
+    expect(svg).toContain('viewBox="0 0 37 37"')
+    expect(svg).not.toMatch(/<image|href=|<script|<a[\s>]/)
+  })
+
+  it('keeps the four-module quiet zone', () => {
+    /* Every dark run starts at least four modules in from each edge. */
+    const runs = [...svg.matchAll(/M(\d+) (\d+)h(\d+)/g)].map(([, x, y, w]) => [
+      Number(x),
+      Number(y),
+      Number(w),
+    ])
+    expect(runs.length).toBeGreaterThan(0)
+    for (const [x, y, w] of runs) {
+      expect(x).toBeGreaterThanOrEqual(4)
+      expect(y).toBeGreaterThanOrEqual(4)
+      expect(x + w).toBeLessThanOrEqual(33)
+      expect(y).toBeLessThanOrEqual(32)
+    }
+  })
+
+  it('ships a high-resolution PNG', () => {
+    expect(png.subarray(1, 4).toString()).toBe('PNG')
+    expect(png.readUInt32BE(16)).toBe(2035)
+    expect(png.readUInt32BE(20)).toBe(2035)
   })
 })

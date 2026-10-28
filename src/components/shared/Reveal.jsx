@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import useMediaQuery, { REDUCED_MOTION_QUERY } from '../../hooks/useMediaQuery'
+import useHydrating from '../../hooks/useHydrating'
 import styles from './Reveal.module.css'
 
 /*
@@ -27,6 +28,14 @@ import styles from './Reveal.module.css'
  * IntersectionObserver, or a reader who has asked for reduced motion, renders
  * the content plainly on the first paint. The stylesheet repeats that rule in
  * CSS, so even a broken script cannot leave the page blank.
+ *
+ * PRERENDERED CONTENT STARTS SHOWN. A page opened directly arrives as HTML
+ * built ahead of time, already painted before any script runs, and that HTML
+ * has everything visible — it is also what a crawler reads. Taking it over
+ * must not hide what the reader is already looking at, so an element that
+ * mounts while the page hydrates starts shown. Only once it is known to be
+ * below the fold is it returned to the hidden state, out of sight, so it
+ * still fades in when it is scrolled to.
  */
 
 /** Delay between neighbours in a group, and the point where it stops growing. */
@@ -41,8 +50,10 @@ export default function Reveal({
   ...rest
 }) {
   const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY)
-  const [seen, setSeen] = useState(false)
+  const hydrating = useHydrating()
+  const [seen, setSeen] = useState(hydrating)
   const ref = useRef(null)
+  const mountedFromPrerender = useRef(hydrating)
 
   /*
    * Derived during render rather than stored: if the observer is missing or
@@ -51,6 +62,26 @@ export default function Reveal({
    */
   const canObserve = typeof IntersectionObserver !== 'undefined'
   const shown = seen || reducedMotion || !canObserve
+
+  /*
+   * Mounted from prerendered HTML: re-arm the reveal for anything that is
+   * not on screen. Read a frame later, once layout has settled, and only
+   * ever moves an element the reader cannot see.
+   */
+  useEffect(() => {
+    if (!mountedFromPrerender.current) return
+
+    const node = ref.current
+    if (!node || typeof IntersectionObserver === 'undefined') return
+
+    const frame = window.requestAnimationFrame(() => {
+      mountedFromPrerender.current = false
+      const { top, bottom, height } = node.getBoundingClientRect()
+      const onScreen = height === 0 || (top < window.innerHeight && bottom > 0)
+      if (!onScreen) setSeen(false)
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [])
 
   useEffect(() => {
     if (shown) return

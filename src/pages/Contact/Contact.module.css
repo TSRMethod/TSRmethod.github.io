@@ -82,3 +82,52 @@
   flex-direction: column;
   gap: var(--space-2);
 }
+
+/* ---- Share the website ---- */
+
+/*
+ * The code beside its text from tablet width up, above it on a phone. It
+ * keeps its own white square and margin whatever the page colours do, since
+ * a scanner needs the light quiet zone around it.
+ */
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.qr {
+  flex: none;
+  width: 148px;
+  height: 148px;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.shareText {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.website {
+  margin: var(--space-3) 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+/* Two classes, to outrank the reset's `ul[class] { margin: 0 }`. */
+.shareText .downloads {
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.format {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

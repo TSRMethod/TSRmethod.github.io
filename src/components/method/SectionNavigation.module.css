@@ -86,3 +86,27 @@
   border-left-color: var(--color-primary);
   background-color: var(--color-primary-light);
 }
+
+/*
+ * ---- Before the screen has been measured ----
+ *
+ * Both forms are rendered then (see SectionNavigation.jsx). 1024px is
+ * DESKTOP_QUERY in useMediaQuery.js and the breakpoint of the method page
+ * grid; `display: contents` leaves the grid placement unchanged.
+ */
+.desktopOnly,
+.mobileOnly {
+  display: contents;
+}
+
+@media (max-width: 1023.98px) {
+  .desktopOnly {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+}
