@@ -126,7 +126,8 @@ Two things must stay true for hydration to work, and tests hold both:
 `npm run check:dist` then reads `dist/` as GitHub Pages will serve it. Every
 sitemap URL must have its file, a unique title, a description, one `<h1>`, a
 canonical and `og:url` equal to the sitemap entry, and content in document
-order. Any other HTML file must be a redirect into the sitemap. The `og:image`
+order. Any other HTML file must be a redirect into the sitemap, apart from
+the Search Console verification file (below). The `og:image`
 must exist at its declared size, and no analytics tag may be written into the
 HTML. CI and the deploy workflow both run it.
 
@@ -273,6 +274,17 @@ They never need regenerating while the address stays the same. If it ever
 changes, make new files and decode both before replacing these.
 `Contact.test.jsx` checks the properties an edit could break: the white
 background, the quiet zone and the PNG size.
+
+## Search Console verification
+
+`public/google69a21a8e64b2f7ee.html` proves to Google Search Console that the
+group controls the site. Vite copies it unchanged to the root of `dist/`, and
+GitHub Pages serves it at
+<https://tsrmethod.github.io/google69a21a8e64b2f7ee.html> with HTTP 200, as a
+plain file: the application never sees that address. Google checks it again
+from time to time, so it must stay. Do not rename, edit or delete it.
+`npm run check:dist` fails if it is missing from `dist/` or differs from the
+committed file.
 
 ## The social preview image
 
