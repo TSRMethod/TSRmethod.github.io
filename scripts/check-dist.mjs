@@ -11,6 +11,8 @@
  *     document order (readable without JavaScript), a title no other page uses, a description, and a canonical URL and
  *     og:url equal to the sitemap entry;
  *   - 404.html is the not-found page, marked noindex, with no canonical;
+ *   - the Google Search Console verification file is published unchanged
+ *     from public/, so the site stays verified after every deployment;
  *   - every other HTML file is a redirect from an old address to a page in
  *     the sitemap, and is itself noindex;
  *   - the social preview image exists at the size the tags declare, and the
@@ -23,12 +25,20 @@ import { join, relative, resolve, sep } from 'node:path'
 import { fileForPath } from './prerender.mjs'
 
 const DIST = resolve(process.cwd(), 'dist')
+const PUBLIC = resolve(process.cwd(), 'public')
 const ORIGIN = 'https://tsrmethod.github.io'
 
 const failures = []
 const fail = (message) => failures.push(message)
 
 const read = (file) => readFileSync(join(DIST, file), 'utf8')
+
+/*
+ * Google's ownership check for Search Console. Google fetches it at the site
+ * root and expects exactly these bytes; if it disappears, the property stops
+ * being verified. Not a page, so it is not in the sitemap.
+ */
+const VERIFICATION_FILES = ['google69a21a8e64b2f7ee.html']
 
 function attr(html, pattern) {
   const match = html.match(pattern)
@@ -55,6 +65,14 @@ for (const file of ['index.html', '404.html', 'sitemap.xml', 'robots.txt', '.noj
   if (!existsSync(join(DIST, file))) fail(`missing dist/${file}`)
 }
 if (existsSync(join(DIST, '.vite'))) fail('dist/.vite (the build manifest) would be published')
+
+for (const file of VERIFICATION_FILES) {
+  if (!existsSync(join(PUBLIC, file))) fail(`missing public/${file}, the Search Console verification file`)
+  else if (!existsSync(join(DIST, file))) fail(`missing dist/${file}, the Search Console verification file`)
+  else if (!readFileSync(join(DIST, file)).equals(readFileSync(join(PUBLIC, file)))) {
+    fail(`dist/${file} differs from public/${file}; Google needs it unchanged`)
+  }
+}
 
 const sitemap = existsSync(join(DIST, 'sitemap.xml')) ? read('sitemap.xml') : ''
 const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
@@ -124,7 +142,7 @@ if (existsSync(join(DIST, '404.html'))) {
 /* ---- Everything else is a redirect from an old address ---- */
 
 for (const file of htmlFiles()) {
-  if (pageFiles.has(file) || file === '404.html') continue
+  if (pageFiles.has(file) || file === '404.html' || VERIFICATION_FILES.includes(file)) continue
 
   const html = read(file)
   const target = canonicalOf(html)
@@ -172,5 +190,6 @@ if (failures.length > 0) {
 
 console.log(
   `check-dist: ${locs.length} pages prerendered with their own metadata, ` +
-    `404.html noindex, ${htmlFiles().length - locs.length - 1} redirects, social image OK`,
+    `404.html noindex, ${htmlFiles().length - locs.length - 1 - VERIFICATION_FILES.length} redirects, ` +
+    'Search Console file intact, social image OK',
 )
