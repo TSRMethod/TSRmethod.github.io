@@ -81,19 +81,41 @@ function SectionList({ sections, activeId, onNavigate }) {
 
 export default function SectionNavigation({ sections }) {
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
-  const detailsRef = useRef(null)
   const activeId = useActiveSection(sections.map((section) => section.id))
 
   if (sections.length === 0) return null
 
-  if (isDesktop) {
+  const sidebar = (
+    <nav className={styles.sidebar} aria-label="On this page">
+      <p className={styles.heading}>On this page</p>
+      <SectionList sections={sections} activeId={activeId} />
+    </nav>
+  )
+
+  /*
+   * Not measured yet: the page's prerendered HTML, and the first render in
+   * the browser. Both forms, one shown by CSS, as in Navigation.jsx.
+   */
+  if (isDesktop === undefined) {
     return (
-      <nav className={styles.sidebar} aria-label="On this page">
-        <p className={styles.heading}>On this page</p>
-        <SectionList sections={sections} activeId={activeId} />
-      </nav>
+      <>
+        <div className={styles.desktopOnly}>{sidebar}</div>
+        <div className={styles.mobileOnly}>
+          <SectionDisclosure sections={sections} activeId={activeId} />
+        </div>
+      </>
     )
   }
+
+  return isDesktop ? (
+    sidebar
+  ) : (
+    <SectionDisclosure sections={sections} activeId={activeId} />
+  )
+}
+
+function SectionDisclosure({ sections, activeId }) {
+  const detailsRef = useRef(null)
 
   return (
     <details className={styles.details} ref={detailsRef}>

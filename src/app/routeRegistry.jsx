@@ -48,11 +48,13 @@ const methodRoutes = publishedMethods.map((method) => ({
  * table, because its content is still draft — the entry starts working by
  * itself on the day the page is published, and not before.
  */
-const legacyRoutes = Object.entries(LEGACY_PATHS).flatMap(([from, slug]) => {
-  const target = publishedMethods.find((method) => method.slug === slug)
-  if (!target) return []
-  return [{ path: from, element: <Navigate to={target.path} replace /> }]
-})
+const legacyMethodRedirects = Object.entries(LEGACY_PATHS).flatMap(
+  ([from, slug]) => {
+    const target = publishedMethods.find((method) => method.slug === slug)
+    if (!target) return []
+    return [{ from, to: target.path }]
+  },
+)
 
 const pageRoutes = [
   { path: '/', element: <Home /> },
@@ -69,18 +71,29 @@ const pageRoutes = [
  * Page aliases follow the same rule as the method ones: the redirect exists
  * only if its destination does, so an alias can never point into nothing.
  */
-const legacyPageRoutes = Object.entries(LEGACY_PAGE_PATHS).flatMap(
+const legacyPageRedirects = Object.entries(LEGACY_PAGE_PATHS).flatMap(
   ([from, to]) => {
     if (!pageRoutes.some((route) => route.path === to)) return []
-    return [{ path: from, element: <Navigate to={to} replace /> }]
+    return [{ from, to }]
   },
 )
+
+/**
+ * Every working alias, as `{ from, to }`.
+ *
+ * The router turns each into a client-side redirect, and the build writes a
+ * small redirect page for each (scripts/prerender.mjs), so an old address
+ * opened directly or from a bookmark answers without a 404 first.
+ */
+export const legacyRedirects = [...legacyMethodRedirects, ...legacyPageRedirects]
 
 export const routeConfig = [
   ...pageRoutes,
   ...methodRoutes,
-  ...legacyRoutes,
-  ...legacyPageRoutes,
+  ...legacyRedirects.map(({ from, to }) => ({
+    path: from,
+    element: <Navigate to={to} replace />,
+  })),
   { path: '*', element: <NotFound /> },
 ]
 

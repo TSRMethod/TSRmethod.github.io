@@ -12,6 +12,15 @@ import styles from './Contact.module.css'
 const EARLIER_PATH = '/research/earlier-implementations'
 
 /*
+ * The website's QR code, as committed in public/share. Static files: they
+ * encode the address itself, with no shortener or tracking service in
+ * between, so they keep working for as long as the site does. How they were
+ * made and checked is in docs/DEPLOYMENT.md.
+ */
+const QR_SVG = '/share/tsr-website-qr.svg'
+const QR_PNG = '/share/tsr-website-qr.png'
+
+/*
  * How to reach the group.
  *
  * There is no form. The previous site had two — a "Contact Us" form and a
@@ -36,7 +45,11 @@ export default function Contact() {
     softwareHeading,
     softwareBody,
     affiliationHeading,
+    shareHeading,
+    shareBody,
   } = pages.contact
+
+  const websiteAddress = `${siteConfig.url}/`
 
   usePageMetadata({ title, description: intro })
 
@@ -143,6 +156,58 @@ export default function Contact() {
             </a>
           </li>
         </ul>
+      </section>
+
+      {/*
+       * Last and small: this is for someone making a poster or a slide, not
+       * a way into the site. The address is printed and linked beside the
+       * code, so nobody has to scan anything to use it.
+       */}
+      <section className={styles.section} aria-labelledby="contact-share">
+        <h2 id="contact-share" className={styles.heading}>
+          {shareHeading}
+        </h2>
+        <div className={styles.share}>
+          <img
+            className={styles.qr}
+            src={QR_SVG}
+            alt={`QR code for ${websiteAddress}`}
+            width="148"
+            height="148"
+          />
+          <div className={styles.shareText}>
+            <p className={styles.body}>{shareBody}</p>
+            <p className={styles.website}>
+              <a href={websiteAddress}>{websiteAddress}</a>
+            </p>
+            <div className={styles.actions}>
+              <CopyButton
+                value={websiteAddress}
+                label="Copy website address"
+                copiedLabel="Address copied"
+                failedLabel="Could not copy — please select the address above"
+              />
+            </div>
+            {/*
+              The visible labels are short. Each accessible name starts with
+              the visible words, so voice control still matches them, and
+              still makes sense read out of context.
+            */}
+            <ul className={styles.downloads}>
+              <li>
+                <a href={QR_PNG} download aria-label="Download PNG of the website QR code">
+                  Download PNG
+                </a>
+              </li>
+              <li>
+                <a href={QR_SVG} download aria-label="Download SVG of the website QR code">
+                  Download SVG
+                </a>
+                <span className={styles.format}> · Print quality</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </section>
     </div>
   )

@@ -77,12 +77,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Check the SPA fallback was generated
-        run: |
-          # GitHub Pages serves 404.html for unknown paths. It must be a byte
-          # copy of index.html, otherwise deep links such as /tsr would break.
-          test -f dist/index.html
-          test -f dist/404.html
-          cmp dist/index.html dist/404.html
-          test -f dist/.nojekyll
-          echo "SPA fallback and .nojekyll present."
+      # What GitHub Pages will serve, read as files rather than as the page a
+      # browser draws after JavaScript runs: one prerendered HTML file per
+      # sitemap URL with its own title, description and canonical; a noindex
+      # 404.html; a redirect page for each old address; the social image.
+      # See scripts/check-dist.mjs.
+      - name: Check the built pages
+        run: npm run check:dist

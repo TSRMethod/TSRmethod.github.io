@@ -99,7 +99,12 @@ export default function Footer() {
         </div>
       </div>
 
-      <p className={styles.legal}>
+      {/*
+        The year is the build's in the prerendered HTML and the reader's
+        after hydration; on the night they differ, React keeps the built one
+        rather than reporting a mismatch.
+      */}
+      <p className={styles.legal} suppressHydrationWarning>
         &copy; {new Date().getFullYear()} {siteConfig.name}
       </p>
     </footer>

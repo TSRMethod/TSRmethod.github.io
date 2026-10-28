@@ -66,6 +66,8 @@
     "collaborationBody": "For questions about the method, requests to collaborate, or enquiries about studying with the group, email us. Please say which method or paper you are asking about — it helps us send your message to the right person.",
     "softwareHeading": "Software problems",
     "softwareBody": "For a reproducible bug or a technical problem with the code, an issue on the repository that provides the tool is better than an email: it reaches whoever wrote it, and other people who hit the same problem can find it. BioTSR's issues are on GitHub; each earlier implementation and research tool links to its own repository. For anything less definite — which tool to use, what an output file means — email is fine.",
-    "affiliationHeading": "Affiliation"
+    "affiliationHeading": "Affiliation",
+    "shareHeading": "Share our website",
+    "shareBody": "Use this QR code on posters, slides or handouts."
   }
 }

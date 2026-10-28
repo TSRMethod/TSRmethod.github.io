@@ -1,13 +1,15 @@
-import { copyFileSync, cpSync, existsSync, rmSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { optimizeImages, formatSummary } from './scripts/optimize-images.mjs'
 import { collectCanonicalPaths, renderSitemap } from './scripts/site-routes.mjs'
 
 const SITE_ORIGIN = 'https://tsrmethod.github.io'
+const SSR_OUT_DIR = 'node_modules/.cache/tsr-ssr'
 
 const VIRTUAL_MANIFEST = 'virtual:image-manifest'
+const MANIFEST_FILE = resolve(process.cwd(), 'node_modules/.cache/tsr-image-manifest.json')
 const RESOLVED_MANIFEST = '\0' + VIRTUAL_MANIFEST
 
 /*
@@ -36,13 +38,15 @@ function imageOptimizer() {
   const derivativesDir = resolve(process.cwd(), 'node_modules/.cache/tsr-images')
   let manifest = {}
   let isBuild = false
+  let isSsrBuild = false
   let outDir
 
   return {
     name: 'tsr-image-optimizer',
 
-    config(_config, { command }) {
-      isBuild = command === 'build'
+    config(_config, env) {
+      isBuild = env.command === 'build'
+      isSsrBuild = Boolean(env.isSsrBuild)
     },
 
     configResolved(config) {
@@ -51,6 +55,21 @@ function imageOptimizer() {
 
     async buildStart() {
       if (!isBuild) return
+
+      /*
+       * The prerender's server build must give OptimizedImage the same
+       * manifest as the browser build, or the HTML it writes would name
+       * different image files from the ones React expects when it takes the
+       * page over. So it reads what the browser build wrote, rather than
+       * optimising every image a second time.
+       */
+      if (isSsrBuild) {
+        if (!existsSync(MANIFEST_FILE)) {
+          this.error('run the browser build first: no image manifest at ' + MANIFEST_FILE)
+        }
+        manifest = JSON.parse(readFileSync(MANIFEST_FILE, 'utf8'))
+        return
+      }
 
       rmSync(derivativesDir, { recursive: true, force: true })
 
@@ -61,6 +80,8 @@ function imageOptimizer() {
       })
 
       manifest = result.manifest
+      mkdirSync(dirname(MANIFEST_FILE), { recursive: true })
+      writeFileSync(MANIFEST_FILE, JSON.stringify(manifest))
       this.info('\n  ' + formatSummary(result.stats) + '\n')
     },
 
@@ -80,44 +101,8 @@ function imageOptimizer() {
      * WebP derivatives land beside it.
      */
     closeBundle() {
-      if (!isBuild || !existsSync(derivativesDir)) return
+      if (!isBuild || isSsrBuild || !existsSync(derivativesDir)) return
       cpSync(derivativesDir, outDir, { recursive: true })
-    },
-  }
-}
-
-/*
- * GitHub Pages serves `404.html` for any path it cannot resolve to a file.
- *
- * Because this repository is the organisation root Pages site, Vite's `base`
- * stays "/" and every asset URL in index.html is absolute. That means a byte
- * copy of index.html works as the SPA fallback: GitHub Pages serves it without
- * rewriting the URL, the same bundle boots, and React Router reads the real
- * pathname and renders the right route. No redirect hop, no flicker.
- *
- * Documented tradeoff: those responses still carry HTTP status 404 even though
- * the correct page renders. Users and browsers do not notice; crawlers may.
- * If HTTP 200 on deep links ever matters, the fix is prerendering, not a
- * redirect hack.
- *
- * This must be verified on the real GitHub Pages deployment in Stage 6 —
- * `vite preview` uses its own fallback behaviour and does NOT prove that
- * GitHub Pages will behave the same way.
- */
-function githubPagesSpaFallback() {
-  let outDir
-
-  return {
-    name: 'github-pages-spa-fallback',
-    apply: 'build',
-    configResolved(config) {
-      outDir = resolve(config.root, config.build.outDir)
-    },
-    closeBundle() {
-      const index = resolve(outDir, 'index.html')
-      if (existsSync(index)) {
-        copyFileSync(index, resolve(outDir, '404.html'))
-      }
     },
   }
 }
@@ -135,7 +120,7 @@ function sitemap() {
 
   return {
     name: 'tsr-sitemap',
-    apply: 'build',
+    apply: (_config, env) => env.command === 'build' && !env.isSsrBuild,
 
     configResolved(config) {
       outDir = resolve(config.root, config.build.outDir)
@@ -154,8 +139,40 @@ function sitemap() {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), imageOptimizer(), sitemap(), githubPagesSpaFallback()],
+/*
+ * Two builds, run in turn by `npm run build`:
+ *
+ *   vite build        the site itself, into dist/
+ *   vite build --ssr  the same app compiled for Node, which
+ *                     scripts/prerender.mjs runs to write each page's HTML
+ *
+ * The second is a build tool, not part of the site: it goes to
+ * node_modules/.cache and is never published. See docs/DEPLOYMENT.md.
+ */
+export default defineConfig(({ isSsrBuild }) => ({
+  plugins: [react(), imageOptimizer(), sitemap()],
+
+  build: isSsrBuild
+    ? {
+        outDir: SSR_OUT_DIR,
+        emptyOutDir: true,
+        copyPublicDir: false,
+        /*
+         * .mjs, because Node reads a plain .js file under node_modules/ as
+         * CommonJS: the "type": "module" in this repository's package.json
+         * does not reach past a node_modules folder.
+         */
+        rollupOptions: {
+          output: { entryFileNames: '[name].mjs', chunkFileNames: 'assets/[name]-[hash].mjs' },
+        },
+      }
+    : {
+        /*
+         * Read by the prerender to link each page's lazily loaded stylesheet
+         * in its HTML, then deleted from dist/ — see scripts/prerender.mjs.
+         */
+        manifest: true,
+      },
 
   test: {
     environment: 'jsdom',
@@ -163,4 +180,4 @@ export default defineConfig({
     include: ['src/**/*.test.{js,jsx}'],
     restoreMocks: true,
   },
-})
+}))

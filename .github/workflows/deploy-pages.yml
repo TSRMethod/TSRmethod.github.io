@@ -64,12 +64,9 @@ jobs:
           # that loads no analytics at all. See docs/ANALYTICS.md.
           VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
 
-      - name: Check the SPA fallback was generated
-        run: |
-          test -f dist/index.html
-          test -f dist/404.html
-          cmp dist/index.html dist/404.html
-          test -f dist/.nojekyll
+      # The same checks as CI, on the files about to be published.
+      - name: Check the built pages
+        run: npm run check:dist
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

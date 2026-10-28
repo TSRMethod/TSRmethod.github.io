@@ -3,7 +3,7 @@ import usePageMetadata from '../../hooks/usePageMetadata'
 import styles from './NotFound.module.css'
 
 export default function NotFound() {
-  usePageMetadata({ title: 'Page not found' })
+  usePageMetadata({ title: 'Page not found', noindex: true })
 
   return (
     <div className={styles.wrapper}>

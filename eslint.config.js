@@ -25,9 +25,17 @@ export default defineConfig([
      * not — keeping that boundary is the point of listing these explicitly
      * rather than enabling Node globals everywhere.
      */
-    files: ['**/*.test.{js,jsx}', 'src/test/**/*.js', 'vite.config.js'],
+    files: ['**/*.test.{js,jsx}', 'src/test/**/*.js', 'vite.config.js', 'scripts/**/*.mjs'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
+  },
+  {
+    /*
+     * The build-time renderer is a module for scripts/prerender.mjs, never
+     * hot-reloaded in the browser, so the Fast Refresh rule does not apply.
+     */
+    files: ['src/entry-server.jsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ])

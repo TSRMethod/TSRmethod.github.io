@@ -61,7 +61,7 @@ rather than being renumbered or deleted.
 | 32 | `/problems` and `/community` retired | ✅ Resolved |
 | 33 | Uploaded images are no longer the editor's problem | ✅ Resolved |
 | 34 | The home diagram's alt text described the old figure | ✅ Resolved |
-| 35 | No social preview image | ⚠️ Verify |
+| 35 | Social preview image | ⚠️ Verify |
 
 ---
 
@@ -840,20 +840,22 @@ text, plus this note that the two must move together.
 
 ---
 
-### 35. No social preview image
+### 35. Social preview image
 
 **Observed.** Links to the site shared on Slack, Bluesky, LinkedIn or in a
-message render as a text-only card. The metadata behind them is complete —
-title, description, canonical URL — but there is no `og:image`.
+message rendered as a text-only card: the title, description and canonical
+URL were there, but there was no `og:image`.
 
-**What I did.** Left it out. A card image is a designed asset: cropping the
-logo or auto-generating something from the site name would produce a card that
-looks finished, and a card that looks finished never gets replaced. Text-only
-is honest about the fact that nobody has made one.
+**What I did.** Made the card this item asked for and nothing more:
+1200 × 630, the group's mark (the favicon's geometry and colours), its name,
+its tagline and the address, with nothing that will date. It is
+`public/share/social-card.png`, drawn by `scripts/social-card.mjs` from
+`site.json`, and every page now declares it, with `summary_large_image` for
+X/Twitter.
 
-**Question.** Worth having, if someone wants to make one — 1200 × 630, the
-group name and the mark, nothing that will date. Until then this is a
-deliberate absence rather than a gap.
+**Question.** Is this card acceptable as the group's preview image, or should
+someone replace it with a designed one? Replacing it is a single file: keep
+the name and the 1200 × 630 size, and the tags and checks need no change.
 
 ---
 

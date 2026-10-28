@@ -1285,6 +1285,8 @@ const PAGES_SHAPE = {
     'softwareHeading',
     'softwareBody',
     'affiliationHeading',
+    'shareHeading',
+    'shareBody',
   ],
 }
 
