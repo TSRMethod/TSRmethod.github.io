@@ -194,19 +194,41 @@ describe('the share section', () => {
     expect(link).toHaveAttribute('href', 'https://tsrmethod.github.io/')
   })
 
-  it('offers both files for download, and each file exists', () => {
+  it('offers the PNG first, then the print-quality SVG, and each file exists', () => {
     renderContact()
     const share = shareSection()
 
-    for (const [name, href] of [
-      [/as SVG/, '/share/tsr-website-qr.svg'],
-      [/as PNG/, '/share/tsr-website-qr.png'],
-    ]) {
-      const link = share.getByRole('link', { name })
-      expect(link).toHaveAttribute('href', href)
-      expect(link).toHaveAttribute('download')
-      expect(() => readFileSync(resolve(process.cwd(), 'public', href.slice(1)))).not.toThrow()
+    const links = share
+      .getAllByRole('link')
+      .filter((link) => link.hasAttribute('download'))
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/share/tsr-website-qr.png',
+      '/share/tsr-website-qr.svg',
+    ])
+    expect(links.map((link) => link.textContent.trim())).toEqual(['Download PNG', 'Download SVG'])
+    expect(links[0]).toHaveAccessibleName('Download PNG of the website QR code')
+    expect(links[1]).toHaveAccessibleName('Download SVG of the website QR code')
+    expect(links[1].parentElement).toHaveTextContent('Download SVG · Print quality')
+
+    for (const link of links) {
+      const file = resolve(process.cwd(), 'public', link.getAttribute('href').slice(1))
+      expect(() => readFileSync(file)).not.toThrow()
     }
+  })
+
+  it('stays short: no pixel sizes or file details in the text', () => {
+    renderContact()
+    const text = screen.getByRole('region', { name: pages.contact.shareHeading }).textContent
+
+    expect(pages.contact.shareHeading).toBe('Share our website')
+    expect(text).toContain('Use this QR code on posters, slides or handouts.')
+    expect(text).not.toMatch(/pixels|2035|white background|nothing else/i)
+  })
+
+  it('is the last section of the page', () => {
+    renderContact()
+    const sections = within(screen.getByRole('main')).getAllByRole('region')
+    expect(sections.at(-1)).toHaveAccessibleName(pages.contact.shareHeading)
   })
 
   it('copies the website address', async () => {

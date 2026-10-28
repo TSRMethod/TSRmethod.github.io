@@ -67,7 +67,7 @@
     "softwareHeading": "Software problems",
     "softwareBody": "For a reproducible bug or a technical problem with the code, an issue on the repository that provides the tool is better than an email: it reaches whoever wrote it, and other people who hit the same problem can find it. BioTSR's issues are on GitHub; each earlier implementation and research tool links to its own repository. For anything less definite — which tool to use, what an output file means — email is fine.",
     "affiliationHeading": "Affiliation",
-    "shareHeading": "Share the TSR Research Group website",
-    "shareBody": "For posters and slides, this QR code opens the website directly. It links to the address below and nothing else."
+    "shareHeading": "Share our website",
+    "shareBody": "Use this QR code on posters, slides or handouts."
   }
 }

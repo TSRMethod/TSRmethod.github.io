@@ -19,7 +19,6 @@ const EARLIER_PATH = '/research/earlier-implementations'
  */
 const QR_SVG = '/share/tsr-website-qr.svg'
 const QR_PNG = '/share/tsr-website-qr.png'
-const QR_PNG_SIZE = 2035
 
 /*
  * How to reach the group.
@@ -189,20 +188,22 @@ export default function Contact() {
                 failedLabel="Could not copy — please select the address above"
               />
             </div>
+            {/*
+              The visible labels are short. Each accessible name starts with
+              the visible words, so voice control still matches them, and
+              still makes sense read out of context.
+            */}
             <ul className={styles.downloads}>
               <li>
-                <a href={QR_SVG} download>
-                  Download the QR code as SVG
-                </a>{' '}
-                <span className={styles.format}>(vector, for print)</span>
+                <a href={QR_PNG} download aria-label="Download PNG of the website QR code">
+                  Download PNG
+                </a>
               </li>
               <li>
-                <a href={QR_PNG} download>
-                  Download the QR code as PNG
-                </a>{' '}
-                <span className={styles.format}>
-                  ({QR_PNG_SIZE} × {QR_PNG_SIZE} pixels, white background)
-                </span>
+                <a href={QR_SVG} download aria-label="Download SVG of the website QR code">
+                  Download SVG
+                </a>
+                <span className={styles.format}> · Print quality</span>
               </li>
             </ul>
           </div>
