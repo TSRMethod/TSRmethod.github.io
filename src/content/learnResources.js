@@ -30,8 +30,10 @@ export const NOTEBOOK = {
  * The video, How BioTSR works: the corrected render approved on
  * 6 November 2026. Its words (transcript, chapters) belong to this render and
  * change only with it; the caption and chapter tracks beside it in
- * public/learn-files/ hold the same cues. The music's credit stays in
- * `credits`, apart from the software licence. Shape:
+ * public/learn-files/ hold the same cues. The music's short credit is
+ * `credits`, shown on its own line under the download link; its licence,
+ * which is not BioTSR's Apache-2.0 software licence, is recorded in
+ * docs/DEPLOYMENT.md ("Media credits and licences"). Shape:
  *
  *   {
  *     heading, intro, credits,           words that belong to this render
@@ -44,7 +46,7 @@ export const NOTEBOOK = {
 export const VIDEO = {
   "heading": "Watch: How BioTSR works",
   "intro": "An 85-second introduction: how three Cα atoms become one integer key, why different triangles can share a key, and how BioTSR compares structures through the keys they share.",
-  "credits": "Music: “Nebula” by The Grey Room / Density & Time, from the YouTube Audio Library, used under its licence; not covered by BioTSR’s Apache-2.0 software licence.",
+  "credits": "Music: “Nebula” by The Grey Room / Density & Time · YouTube Audio Library.",
   "src": "/learn-files/how-biotsr-works.mp4",
   "poster": "/learn-files/how-biotsr-works-poster.jpg",
   "captions": "/learn-files/how-biotsr-works.en.vtt",

@@ -362,6 +362,16 @@ tracks and a fast-start MP4. To replace the video, change the four files and
 `VIDEO` together.
 
 Source packages, audio stems, the standalone music file, original recordings
-and intermediate renders never enter the repository. Credits for media go in
-the video's own `credits` line, which says the music is not covered by
-BioTSR's Apache-2.0 software licence.
+and intermediate renders never enter the repository.
+
+**Media credits and licences.** The page credits the music in one short line
+under the download link (`credits` in `VIDEO`): *Music: “Nebula” by The Grey
+Room / Density & Time · YouTube Audio Library.* The licences behind it:
+
+| Part of the video | Licence |
+| --- | --- |
+| Music: "Nebula", The Grey Room / Density & Time | YouTube Audio Library licence: may be used in the group's videos, including monetised ones; attribution not required; the music file may not be distributed on its own, apart from a video that incorporates it. |
+| BioTSR, the software the video explains | Apache-2.0. **This covers the software only, not the video, its music or its narration.** |
+
+The music is therefore offered only inside the finished MP4. The owner's
+licence screenshot and record are kept privately, outside the repository.

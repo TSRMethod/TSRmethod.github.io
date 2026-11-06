@@ -62,10 +62,14 @@ describe('LearnVideo', () => {
     expect(document.querySelector('video')).toHaveAttribute('aria-describedby', 'video-transcript')
   })
 
-  it('links the file for download and shows credits apart from the software licence', () => {
+  it('links the file for download, with the credits on their own line beneath it', () => {
     render(<LearnVideo video={VIDEO} number={1} />)
-    expect(screen.getByRole('link', { name: 'Download the video (MP4, 18 MB)' })).toHaveAttribute('href', VIDEO.src)
-    expect(screen.getByText(/Music: example credit/)).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: 'Download the video (MP4, 18 MB)' })
+    expect(link).toHaveAttribute('href', VIDEO.src)
+    const credit = screen.getByText('Music: example credit')
+    expect(credit.tagName).toBe('P')
+    expect(link.closest('p').nextElementSibling).toBe(credit)
+    expect(link.closest('p')).not.toHaveTextContent('Music')
     expect(document.body).not.toHaveTextContent(/Apache/)
   })
 
