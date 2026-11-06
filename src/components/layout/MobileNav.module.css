@@ -289,6 +289,18 @@
   background-color: var(--color-primary-light);
 }
 
+/* The entry a page belongs under: a bar, not the current-page fill. */
+.panelLink:global(.in-section) {
+  font-weight: 600;
+  color: var(--color-primary);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+/* A section holding the current page. */
+.accordionTrigger[data-current] {
+  color: var(--color-primary);
+}
+
 /*
  * Reduced motion: the drawer and its sections still open and close, they just
  * do it at once. `animation: none` rather than a shortened duration, so no

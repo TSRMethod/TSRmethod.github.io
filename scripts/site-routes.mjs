@@ -34,6 +34,8 @@ export const STATIC_PATHS = [
   '/software',
   '/software/get-started',
   '/software/learn',
+  '/software/four-triangles-one-key',
+  '/software/first-10-minutes',
   '/research',
   '/research/earlier-implementations',
   '/contact',
@@ -74,24 +76,6 @@ export async function collectContentPaths(contentDir) {
 export async function collectCanonicalPaths(contentDir) {
   const content = await collectContentPaths(contentDir)
   return [...new Set([...STATIC_PATHS, ...content])]
-}
-
-/*
- * Pages that are hand-written HTML files in public/, not React routes: the
- * Learn BioTSR lesson and the notebook's recorded run. They are in the
- * sitemap, but the prerender does not draw them (there is nothing to draw),
- * and scripts/check-dist.mjs checks them by their own rules. Mirrors
- * LEARNING_PAGES in src/content/learnResources.js; a test holds the two
- * together.
- */
-export const HTML_PAGES = [
-  { path: '/software/four-triangles-one-key', file: 'software/four-triangles-one-key.html' },
-  { path: '/software/first-10-minutes', file: 'software/first-10-minutes.html' },
-]
-
-/** Every URL in the sitemap: the app's pages, then the hand-written ones. */
-export async function collectSitemapPaths(contentDir) {
-  return [...(await collectCanonicalPaths(contentDir)), ...HTML_PAGES.map((page) => page.path)]
 }
 
 /**

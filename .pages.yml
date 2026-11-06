@@ -1462,7 +1462,7 @@ content:
             type: text
             required: true
             description: >-
-              The lesson itself is a fixed page, public/software/four-triangles-one-key.html; its numbers come from BioTSR and are checked by the test suite.
+              The lesson itself is src/pages/Learn/FourTriangles.jsx; its numbers come from BioTSR and are checked by the test suite.
           - name: exploreAction
             label: Lesson button
             type: string

@@ -18,8 +18,7 @@ import styles from './Learn.module.css'
  *
  *   - Watch: the video, with captions, chapters and a transcript. Absent
  *     until VIDEO is set in learnResources.js.
- *   - Explore: a card linking to the interactive lesson, a hand-written page
- *     outside the app (an ordinary <a>, so the browser loads it whole).
+ *   - Explore: a card linking to the interactive lesson.
  *   - Run: a card with the notebook download, its recorded run, and the
  *     commands that open it.
  *
@@ -61,9 +60,9 @@ export default function Learn() {
           <p className={styles.meta}>{COPY.exploreMeta}</p>
           <p>{COPY.exploreBody}</p>
           <p className={styles.actions}>
-            <a href={LEARNING_PAGES.lesson.path} className={styles.primary}>
+            <Link to={LEARNING_PAGES.lesson.path} className={styles.primary}>
               {COPY.exploreAction}
-            </a>
+            </Link>
           </p>
           <p className={styles.small}>
             {COPY.exploreFallback}{' '}
@@ -87,9 +86,9 @@ export default function Learn() {
                 ({sizeFormat.format(NOTEBOOK.bytes / 1000)} kB)
               </span>
             </a>
-            <a href={LEARNING_PAGES.notebookPreview.path} className={styles.secondary}>
+            <Link to={LEARNING_PAGES.notebookPreview.path} className={styles.secondary}>
               {COPY.runPreviewAction}
-            </a>
+            </Link>
           </p>
           <p className={styles.small}>{COPY.runPreviewNote}</p>
           <details className={styles.how}>

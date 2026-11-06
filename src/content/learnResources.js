@@ -1,33 +1,19 @@
 /*
  * Where the Learn BioTSR resources live, and the facts about them that are
- * not prose: addresses, file sizes, durations. The page's words are in
+ * not prose: addresses, file sizes, dates. The Learn page's words are in
  * pages.json under "learn".
  *
- * Two kinds of address, kept apart on purpose (see docs/DEPLOYMENT.md,
- * "Learning resources"):
- *
- *   - pages a visitor reads, as hand-written HTML files under public/software/,
- *     at extensionless addresses next to /software/get-started. They are in
- *     the sitemap. They are not React routes, so links to them are ordinary
- *     <a> elements and the browser loads them whole;
- *   - files a visitor downloads or plays, under public/learn-files/, a folder
- *     no page address shares, so it can never shadow /software/learn. They
- *     are not in the sitemap.
- *
- * src/learn.test.js checks that every file named here exists, at the size
- * written here.
+ * The lesson and the notebook's recorded run are ordinary routes of the app,
+ * under BioTSR → Learn BioTSR. Files a visitor downloads or plays live under
+ * public/learn-files/, a folder no page address shares, and are not in the
+ * sitemap (see docs/DEPLOYMENT.md, "Learning resources"). src/learn.test.js
+ * checks that every file named here exists, at the size written here.
  */
 
-/** Hand-written learning pages: [path, file under public/]. */
+/** The two pages the Learn BioTSR page introduces. Both are routes in the app. */
 export const LEARNING_PAGES = {
-  lesson: {
-    path: '/software/four-triangles-one-key',
-    file: 'software/four-triangles-one-key.html',
-  },
-  notebookPreview: {
-    path: '/software/first-10-minutes',
-    file: 'software/first-10-minutes.html',
-  },
+  lesson: { path: '/software/four-triangles-one-key' },
+  notebookPreview: { path: '/software/first-10-minutes' },
 }
 
 export const NOTEBOOK = {
@@ -36,6 +22,8 @@ export const NOTEBOOK = {
   /** The name a visitor's browser saves it under. */
   downloadName: 'biotsr-first-10-minutes.ipynb',
   bytes: 38090,
+  /** When the stored outputs were recorded, from a clean environment. */
+  recordedOn: '2026-11-05',
 }
 
 /*

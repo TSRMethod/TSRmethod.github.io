@@ -72,3 +72,10 @@ afterEach(() => {
   cleanup()
   resetViewport()
 })
+
+/*
+ * jsdom has no canvas: getContext reports "not implemented" on the console.
+ * The site's one canvas, the Learn BioTSR lesson's 3D view, draws nothing
+ * when there is no context, so tests get none, quietly.
+ */
+HTMLCanvasElement.prototype.getContext = () => null

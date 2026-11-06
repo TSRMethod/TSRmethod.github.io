@@ -127,8 +127,7 @@ Two things must stay true for hydration to work, and tests hold both:
 sitemap URL must have its file, a unique title, a description, one `<h1>`, a
 canonical and `og:url` equal to the sitemap entry, and content in document
 order. Any other HTML file must be a redirect into the sitemap, apart from
-the Search Console verification file and the two hand-written Learn BioTSR
-pages (both below). The `og:image`
+the Search Console verification file (below). The `og:image`
 must exist at its declared size, and no analytics tag may be written into the
 HTML. CI and the deploy workflow both run it.
 
@@ -297,56 +296,44 @@ of the build, so the committed PNG is what gets published. It lives outside
 
 ## Learning resources
 
-*Learn BioTSR* (`/software/learn`) is an ordinary prerendered page. The
-resources it introduces are files, kept out of the app on purpose:
+*Learn BioTSR* (`/software/learn`) and the two pages it introduces are
+ordinary prerendered pages of the app, with the site's header, menus and
+footer, and one page view each:
 
-| Address | File | What it is | Sitemap |
-| --- | --- | --- | --- |
-| `/software/four-triangles-one-key` | `public/software/four-triangles-one-key.html` | the interactive lesson, a self-contained page | yes |
-| `/software/first-10-minutes` | `public/software/first-10-minutes.html` | the notebook's recorded run, generated | yes |
-| `/learn-files/biotsr-first-10-minutes.ipynb` | `public/learn-files/…` | the notebook, as a download | no |
-| `/learn-files/static-page.css` | `public/learn-files/…` | the two pages' shared frame (the site's tokens) | no |
+| Address | Source | What it is |
+| --- | --- | --- |
+| `/software/learn` | `src/pages/Learn/Learn.jsx`, words in `pages.json` | the learning page, third under BioTSR |
+| `/software/four-triangles-one-key` | `src/pages/Learn/FourTriangles.jsx`, data in `src/content/learn/fourTriangles.json` | the interactive lesson |
+| `/software/first-10-minutes` | `src/pages/Learn/FirstTenMinutes.jsx`, body in `src/content/learn/first-10-minutes.html` | the notebook's recorded run |
 
-**Why these addresses.** The two pages sit next to
-`software/get-started.html`, so GitHub Pages serves each at its extensionless
-address with HTTP 200, exactly as it serves the app's pages. Downloads live in
-`learn-files/`, a folder that no page address shares: a `software/learn/`
-folder beside `software/learn.html` would have made `/software/learn/` and
-`/software/learn` depend on how Pages picks between a file and a folder. As
-with every page, the trailing-slash forms answer 404 and the app forwards
-them (`src/app/ownAddress.js`). `vite dev` and `vite preview` serve the two
-pages the same way (the `tsr-html-pages` plugin in `vite.config.js`).
+The lesson and the notebook are not menu entries. The Learn BioTSR entry
+lists them as its `section` (`src/app/navigation.js`), so on either page the
+BioTSR menu is marked and Learn BioTSR carries a bar, while the page's
+breadcrumb (BioTSR › Learn BioTSR › page) names the page itself.
 
-The pages are listed twice, in `HTML_PAGES` (`scripts/site-routes.mjs`, for
-the sitemap and the checks) and `LEARNING_PAGES`
-(`src/content/learnResources.js`, for the app's links); `src/learn.test.js`
-holds the two together. Links to them are plain `<a>` elements: they are not
-routes, so the browser loads them whole. They have no analytics.
+Downloads live in `public/learn-files/`, a folder no page address shares, so
+nothing collides with `/software/learn`; they are not in the sitemap.
+`check:dist` requires the notebook there, valid, with no stored error or
+local path, and allows no HTML in that folder.
 
-**What `check:dist` asks of them.** Everything every sitemap page must have
-(their own title, description, canonical and `og:url`, one `<h1>`, not
-`noindex`), except being drawn by the app; in addition no script file, no
-stylesheet or image from another host, and every local stylesheet and image
-present. `learn-files/` may hold no HTML, so nothing escapes these checks,
-and none of its files may appear in the sitemap. The notebook must be valid
-nbformat 4 with no stored error and no local path.
-
-**Changing the lesson.** Edit the HTML file. The numbers are in one data
-block, copied from BioTSR 1.0.0 output; the page checks them against the
-coordinates before drawing, and `src/learn.test.js` checks them against the
-worked example on Understand TSR and the notebook's run.
+**Changing the lesson.** Its numbers are BioTSR 1.0.0 output for 1UBQ chain A,
+in one JSON file. The page checks them against the coordinates before drawing
+the 3D view (`src/components/learn/triangleGeometry.js`), and
+`src/learn.test.js` checks them against the worked example on Understand TSR
+and the notebook's run. Everything the view shows is also text in the page.
 
 **Changing the notebook.** Edit the `.ipynb`, then execute it from a clean
 environment with released BioTSR (a new virtual environment with only
 `jupyterlab` installed, an empty folder; the notebook installs BioTSR
-itself), copy the executed file over the old one, regenerate the page and
-update `NOTEBOOK.bytes`:
+itself), copy the executed file over the old one, regenerate the page body,
+and update `NOTEBOOK.bytes` and `NOTEBOOK.recordedOn` in
+`src/content/learnResources.js`:
 
 ```bash
 jupyter nbconvert --to notebook --execute --output executed.ipynb biotsr-first-10-minutes.ipynb
 python scripts/learn/notebook_preview.py \
   public/learn-files/biotsr-first-10-minutes.ipynb \
-  public/software/first-10-minutes.html --run-date YYYY-MM-DD
+  src/content/learn/first-10-minutes.html
 ```
 
 The script converts what is stored and runs nothing, so every output on the
@@ -363,4 +350,3 @@ and a download link. The MP4, poster and tracks go in `learn-files/`; source
 packages, audio stems and intermediate renders never enter the repository.
 Credits for media go in the video's own `credits` line, never next to the
 software licence.
-

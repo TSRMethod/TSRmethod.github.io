@@ -54,6 +54,23 @@
   background-color: var(--color-surface-raised);
 }
 
+/* A dropdown holding the current page: the same rule as a current link,
+   under the label (the chevron is left out). */
+.trigger[data-current] {
+  color: var(--color-primary);
+}
+
+.trigger[data-current]::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: calc(var(--space-3) + 12px + var(--space-2));
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--color-primary);
+}
+
 /*
  * The current page is marked by a rule that grows out from the centre of the
  * label rather than by a filled pill, which would read as a button and set up
@@ -170,6 +187,14 @@
   font-weight: 700;
   color: var(--color-primary);
   background-color: var(--color-primary-light);
+}
+
+/* The entry a page belongs under (Learn BioTSR, on its lesson and notebook):
+   marked by a bar, so it reads as the section rather than the page. */
+.panelLink:global(.in-section) {
+  font-weight: 600;
+  color: var(--color-primary);
+  box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
 /* A column of groups inside a panel, for menus that stack several short

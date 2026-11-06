@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import MenuLink from './MenuLink'
+import { itemContains } from '../../app/navigation'
 import styles from './DesktopNav.module.css'
 
 /*
@@ -35,6 +37,8 @@ function columnsOf(groups) {
 }
 
 export default function NavDropdown({ item, isOpen, onToggle, onClose }) {
+  const { pathname } = useLocation()
+  const holdsCurrentPage = itemContains(item, pathname)
   const buttonRef = useRef(null)
   const panelRef = useRef(null)
   const focusFirstOnOpen = useRef(false)
@@ -137,6 +141,7 @@ export default function NavDropdown({ item, isOpen, onToggle, onClose }) {
         id={buttonId}
         ref={buttonRef}
         className={styles.trigger}
+        data-current={holdsCurrentPage || undefined}
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={onToggle}
@@ -194,7 +199,7 @@ export default function NavDropdown({ item, isOpen, onToggle, onClose }) {
                     <ul className={styles.groupList} aria-labelledby={groupLabelId}>
                       {group.items.map((link) => (
                         <li key={link.id}>
-                          <MenuLink to={link.to} className={styles.panelLink}>
+                          <MenuLink to={link.to} section={link.section} className={styles.panelLink}>
                             {link.label}
                           </MenuLink>
                         </li>

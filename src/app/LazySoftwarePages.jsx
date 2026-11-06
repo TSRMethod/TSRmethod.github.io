@@ -16,6 +16,8 @@ import { lazy, Suspense } from 'react'
 const Software = lazy(() => import('../pages/Software/Software'))
 const GetStarted = lazy(() => import('../pages/GetStarted/GetStarted'))
 const Learn = lazy(() => import('../pages/Learn/Learn'))
+const FourTriangles = lazy(() => import('../pages/Learn/FourTriangles'))
+const FirstTenMinutes = lazy(() => import('../pages/Learn/FirstTenMinutes'))
 
 export function LazySoftware() {
   return (
@@ -37,6 +39,22 @@ export function LazyLearn() {
   return (
     <Suspense fallback={null}>
       <Learn />
+    </Suspense>
+  )
+}
+
+export function LazyFourTriangles() {
+  return (
+    <Suspense fallback={null}>
+      <FourTriangles />
+    </Suspense>
+  )
+}
+
+export function LazyFirstTenMinutes() {
+  return (
+    <Suspense fallback={null}>
+      <FirstTenMinutes />
     </Suspense>
   )
 }

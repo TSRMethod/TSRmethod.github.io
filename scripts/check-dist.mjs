@@ -13,10 +13,9 @@
  *   - 404.html is the not-found page, marked noindex, with no canonical;
  *   - the Google Search Console verification file is published unchanged
  *     from public/, so the site stays verified after every deployment;
- *   - the two hand-written Learn BioTSR pages (HTML_PAGES) meet every rule
- *     above except being drawn by the app, load nothing from another host and
- *     no app code, and the files they need are present; the folder of
- *     learning files holds no HTML, so nothing there escapes these checks;
+ *   - Learn BioTSR's downloads are present, never in the sitemap, and their
+ *     folder holds no HTML, so nothing there escapes these checks; the
+ *     notebook is valid, with no stored error and no local path;
  *   - every other HTML file is a redirect from an old address to a page in
  *     the sitemap, and is itself noindex;
  *   - the social preview image exists at the size the tags declare, and the
@@ -27,7 +26,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 import { fileForPath } from './prerender.mjs'
-import { HTML_PAGES } from './site-routes.mjs'
 
 const DIST = resolve(process.cwd(), 'dist')
 const PUBLIC = resolve(process.cwd(), 'public')
@@ -46,12 +44,11 @@ const read = (file) => readFileSync(join(DIST, file), 'utf8')
 const VERIFICATION_FILES = ['google69a21a8e64b2f7ee.html']
 
 /*
- * Learn BioTSR's downloads and the stylesheet its two hand-written pages
- * share. Not pages: never in the sitemap, and the folder may hold no HTML.
+ * Learn BioTSR's downloads. Not pages: never in the sitemap, and the folder
+ * may hold no HTML.
  */
 const LEARN_FILES_DIR = 'learn-files'
-const LEARN_FILES = ['learn-files/static-page.css', 'learn-files/biotsr-first-10-minutes.ipynb']
-const htmlPagePaths = new Set(HTML_PAGES.map((page) => page.path))
+const LEARN_FILES = ['learn-files/biotsr-first-10-minutes.ipynb']
 
 function attr(html, pattern) {
   const match = html.match(pattern)
@@ -95,9 +92,6 @@ if (locs.length === 0) fail('sitemap.xml lists no URLs')
 
 for (const file of LEARN_FILES) {
   if (!existsSync(join(DIST, file))) fail(`missing dist/${file}`)
-}
-for (const path of htmlPagePaths) {
-  if (!locs.includes(`${ORIGIN}${path}`)) fail(`${path} is a learning page but not in the sitemap`)
 }
 if (locs.some((loc) => loc.includes(`/${LEARN_FILES_DIR}/`))) fail(`sitemap.xml lists a file from /${LEARN_FILES_DIR}/`)
 if (existsSync(join(DIST, LEARN_FILES_DIR))) {
@@ -145,21 +139,7 @@ for (const loc of locs) {
   if (ogUrlOf(html) !== loc) fail(`${where}: og:url is ${ogUrlOf(html)}, expected ${loc}`)
   if (!descriptionOf(html)) fail(`${where}: no description`)
   if (isNoindex(html)) fail(`${where}: marked noindex`)
-  if (htmlPagePaths.has(path)) {
-    /* A hand-written page: no app to draw it, so it must stand on its own. */
-    if (html.includes('data-prerendered')) fail(`${where}: a hand-written page must not be hydrated`)
-    if (/<script[^>]+src=/.test(html)) fail(`${where}: loads a script file; its code must be inline`)
-    for (const [, href] of html.matchAll(/<link[^>]+href="([^"]+)"/g)) {
-      if (/^(https?:)?\/\//.test(href) && !href.startsWith(ORIGIN)) fail(`${where}: loads ${href} from another host`)
-      if (href.startsWith('/') && !existsSync(join(DIST, href.slice(1)))) fail(`${where}: needs ${href}, which is not in dist/`)
-    }
-    for (const [, src] of html.matchAll(/<img[^>]+src="([^"]+)"/g)) {
-      if (!src.startsWith('/')) fail(`${where}: image ${src} is not on this site`)
-      else if (!existsSync(join(DIST, src.slice(1)))) fail(`${where}: image ${src} is not in dist/`)
-    }
-  } else if (!html.includes(`data-prerendered="${path}"`)) {
-    fail(`${where}: not prerendered for ${path}`)
-  }
+  if (!html.includes(`data-prerendered="${path}"`)) fail(`${where}: not prerendered for ${path}`)
 
   if (/<template id="B:|<div hidden id="S:/.test(html)) {
     fail(`${where}: part of the page is written out of order and needs JavaScript to read`)
@@ -243,7 +223,7 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `check-dist: ${locs.length - htmlPagePaths.size} pages prerendered with their own metadata, ` +
+  `check-dist: ${locs.length} pages prerendered with their own metadata, ` +
     `404.html noindex, ${htmlFiles().length - locs.length - 1 - VERIFICATION_FILES.length} redirects, ` +
-    `${htmlPagePaths.size} learning pages, Search Console file intact, social image OK`,
+    'Learn BioTSR files OK, Search Console file intact, social image OK',
 )

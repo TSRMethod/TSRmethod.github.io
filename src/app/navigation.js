@@ -131,7 +131,14 @@ const SKELETON = [
         items: [
           { id: 'biotsr-overview', label: 'Overview', to: '/software' },
           { id: 'get-started', label: 'Getting started', to: '/software/get-started' },
-          { id: 'learn', label: 'Learn BioTSR', to: '/software/learn' },
+          {
+            id: 'learn',
+            label: 'Learn BioTSR',
+            to: '/software/learn',
+            // Pages that belong under this entry: the menu marks it as their
+            // section, and their breadcrumb names the page itself.
+            section: ['/software/four-triangles-one-key', '/software/first-10-minutes'],
+          },
         ],
       },
     ],
@@ -234,3 +241,14 @@ export function getContentGroups(
 
 /* Exposed so tests can assert against the intended shape. */
 export { SKELETON as navigationSkeleton }
+
+/**
+ * Whether the page at `pathname` lives in this menu item: it is one of the
+ * item's links, or one of the pages a link names as its `section`. Marks the
+ * top-level dropdown that holds the current page.
+ */
+export function itemContains(item, pathname) {
+  return (item.groups ?? []).some((group) =>
+    group.items.some((link) => link.to === pathname || link.section?.includes(pathname)),
+  )
+}

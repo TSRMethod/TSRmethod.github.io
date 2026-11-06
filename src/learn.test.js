@@ -1,26 +1,26 @@
-import { describe, it, expect } from 'vitest'
-import { readFileSync, statSync, existsSync } from 'node:fs'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { JSDOM } from 'jsdom'
-import { LEARNING_PAGES, NOTEBOOK } from './content/learnResources'
-import { HTML_PAGES } from '../scripts/site-routes.mjs'
+import { createElement } from 'react'
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import App from './app/App'
+import { NOTEBOOK } from './content/learnResources'
+import { verifyTriangles } from './components/learn/triangleGeometry'
+import D from './content/learn/fourTriangles.json'
 import example from './components/figures/tsrOverviewExample.json'
+import notebookHtml from './content/learn/first-10-minutes.html?raw'
+import { setViewport } from './test/viewport'
 
 /*
- * The Learn BioTSR files outside the app: the lesson page, the notebook and
- * its recorded run. Three resources that show the same BioTSR numbers must
- * show the same numbers, and must agree with the worked example on
- * Understand TSR; each hand-written page must work, and be honest, without
- * the app around it.
+ * Learn BioTSR's lesson and notebook. Three resources that show the same
+ * BioTSR numbers must show the same numbers, and must agree with the worked
+ * example on Understand TSR; both pages must keep the site's navigation and
+ * say where they sit.
  */
 
 const PUBLIC = resolve(__dirname, '../public')
-const read = (file) => readFileSync(resolve(PUBLIC, file), 'utf8')
-
-const lessonHtml = read(LEARNING_PAGES.lesson.file)
-const previewHtml = read(LEARNING_PAGES.notebookPreview.file)
-const notebook = JSON.parse(read(NOTEBOOK.file))
-const D = JSON.parse(/const D = (\{.*?\});\n/s.exec(lessonHtml)[1])
+const notebook = JSON.parse(readFileSync(resolve(PUBLIC, NOTEBOOK.file), 'utf8'))
 
 const outputsOf = (id) =>
   notebook.cells
@@ -30,19 +30,29 @@ const outputsOf = (id) =>
 
 const residues = (t) => t.vertices.map((v) => `${v.res[0]}${v.res.slice(1).toLowerCase()} ${v.seq}`)
 
-describe('Learn BioTSR files', () => {
-  it('lists the same hand-written pages for the sitemap as for the app', () => {
-    expect(HTML_PAGES).toEqual(Object.values(LEARNING_PAGES))
-  })
+/* Evaluate the lazily loaded pages first; see GetStarted.test.jsx. */
+await import('./pages/Learn/FourTriangles')
+await import('./pages/Learn/FirstTenMinutes')
 
-  it('has every file it links to, at the size the page states', () => {
-    for (const page of Object.values(LEARNING_PAGES)) expect(existsSync(resolve(PUBLIC, page.file))).toBe(true)
+async function renderAt(path, heading) {
+  render(createElement(MemoryRouter, { initialEntries: [path] }, createElement(App)))
+  await screen.findByRole('heading', { level: 1, name: heading })
+}
+
+describe('the notebook download', () => {
+  it('is the file the page states, at its size', () => {
     expect(statSync(resolve(PUBLIC, NOTEBOOK.file)).size).toBe(NOTEBOOK.bytes)
-    expect(existsSync(resolve(PUBLIC, 'learn-files/static-page.css'))).toBe(true)
   })
 })
 
 describe('the lesson, the notebook and the worked example agree', () => {
+  it('the lesson’s data passes its own check against the coordinates', () => {
+    expect(verifyTriangles(D)).toBe(true)
+    const broken = structuredClone(D)
+    broken.triangles[1].theta += 0.01
+    expect(() => verifyTriangles(broken)).toThrow(/disagrees/)
+  })
+
   it('on the key, its frequency and the chain totals', () => {
     expect(D.key).toBe(example.key)
     expect(D.frequency).toBe(example.keyFrequency)
@@ -83,23 +93,52 @@ describe('the lesson, the notebook and the worked example agree', () => {
     expect(outputsOf('batch')).toContain('| barnase | 1BRS | A | 204156 | 125263 |')
     expect(outputsOf('check')).toContain('in all three (BioTSR\'s report):  9,523')
   })
+
+  it('the page shows the notebook’s own stored outputs', () => {
+    expect(notebookHtml).toContain('9,523')
+    expect(notebookHtml).toContain('downloaded from the RCSB, checksum matches')
+    expect(notebookHtml).not.toMatch(/403 Forbidden|Tunnel connection|<script|<h1/)
+  })
 })
 
 describe('the lesson page', () => {
-  it('reads without JavaScript: explanation, triangle 1 and the four-triangle table are in the HTML', () => {
-    const doc = new JSDOM(lessonHtml).window.document
-    expect(doc.querySelector('h1').textContent).toBe('Why do four triangles share one BioTSR key?')
-    expect(doc.getElementById('verts').textContent).toContain('Val 70, Ile 44, Leu 8')
-    expect(doc.getElementById('theta').textContent).toBe('43.25°')
-    expect(doc.getElementById('tclass').textContent).toBe('class 11: 42.64° ≤ θ < 45.17°')
-    expect(doc.getElementById('dclass').textContent).toBe('class 5: 11.00 Å ≤ maxDist < 14.00 Å')
-    expect(doc.getElementById('key').textContent).toBe('17637781')
-    const rows = [...doc.querySelectorAll('#comparison-rows tr')].map((tr) =>
-      [...tr.cells].map((td) => td.textContent),
+  beforeEach(() => setViewport('desktop'))
+  const HEADING = 'Why do four triangles share one BioTSR key?'
+
+  it('sits in the site: full header, BioTSR marked, breadcrumb naming the page', async () => {
+    await renderAt('/software/four-triangles-one-key', HEADING)
+    const main = screen.getByRole('navigation', { name: 'Main' })
+    expect(within(main).getByRole('button', { name: 'BioTSR' })).toHaveAttribute('data-current', 'true')
+    const crumbs = within(screen.getByRole('navigation', { name: 'Breadcrumb' }))
+    expect(crumbs.getByRole('link', { name: 'BioTSR' })).toHaveAttribute('href', '/software')
+    expect(crumbs.getByRole('link', { name: 'Learn BioTSR' })).toHaveAttribute('href', '/software/learn')
+    expect(crumbs.getByText('Four triangles, one key')).toHaveAttribute('aria-current', 'page')
+    await waitFor(() => expect(document.title).toBe('Four triangles, one key | TSR Research Group'))
+    expect(document.querySelector('link[rel=canonical]')).toHaveAttribute(
+      'href',
+      'https://tsrmethod.github.io/software/four-triangles-one-key',
     )
-    expect(rows).toHaveLength(4)
+  })
+
+  it('marks Learn BioTSR as the section in the open menu, without calling it the current page', async () => {
+    await renderAt('/software/four-triangles-one-key', HEADING)
+    fireEvent.click(screen.getByRole('button', { name: 'BioTSR' }))
+    const menu = within(screen.getByRole('navigation', { name: 'Main' }))
+    const learn = menu.getByRole('link', { name: 'Learn BioTSR' })
+    expect(learn).toHaveClass('in-section')
+    expect(learn).not.toHaveAttribute('aria-current')
+    expect(menu.getByRole('link', { name: 'Overview' })).not.toHaveClass('in-section')
+  })
+
+  it('states triangle 1, its bins and the table of all four as text', async () => {
+    await renderAt('/software/four-triangles-one-key', HEADING)
+    expect(screen.getByText('class 11: 42.64° ≤ θ < 45.17°')).toBeInTheDocument()
+    expect(screen.getByText('class 5: 11.00 Å ≤ maxDist < 14.00 Å')).toBeInTheDocument()
+    const rows = within(screen.getByRole('table')).getAllByRole('row').slice(1).map((tr) =>
+      [...tr.cells].slice(0, 5).map((td) => td.textContent),
+    )
     D.triangles.forEach((t, i) => {
-      expect(rows[i].slice(0, 5)).toEqual([
+      expect(rows[i]).toEqual([
         String(i + 1),
         residues(t).join(' · '),
         `${t.theta.toFixed(2)}°`,
@@ -107,78 +146,45 @@ describe('the lesson page', () => {
         `${t.max_distance.toFixed(2)} Å`,
       ])
     })
-    expect(doc.querySelector('noscript').textContent).toContain('worked example on Understand TSR')
+    expect(document.body.textContent).not.toMatch(/bundled/i)
+    expect(document.body.textContent).toContain('PDB entry 1UBQ, the copy BioTSR 1.0.0 was tested with')
   })
 
-  it('says where the coordinates come from without calling them bundled', () => {
-    expect(lessonHtml).not.toMatch(/bundled/i)
-    expect(lessonHtml).toContain('PDB entry 1UBQ, the copy BioTSR 1.0.0 was tested with')
-  })
+  it('takes keys only while the picture has focus, and announces each change once', async () => {
+    await renderAt('/software/four-triangles-one-key', HEADING)
+    const canvas = document.querySelector('canvas')
+    const live = document.querySelector('main [aria-live]')
+    expect(document.querySelectorAll('main [aria-live]')).toHaveLength(1)
+    expect(live.textContent).toBe('')
 
-  it('has its own address, metadata and a way back to the site', () => {
-    const doc = new JSDOM(lessonHtml).window.document
-    const url = 'https://tsrmethod.github.io/software/four-triangles-one-key'
-    expect(doc.querySelector('link[rel=canonical]').href).toBe(url)
-    expect(doc.querySelector('meta[property="og:url"]').content).toBe(url)
-    expect(doc.querySelector('meta[name=robots]')).toBeNull()
-    const links = [...doc.querySelectorAll('header a, .breadcrumb a')].map((a) => a.getAttribute('href'))
-    expect(links).toEqual(expect.arrayContaining(['/', '/software/learn', '/tsr']))
-    expect(doc.querySelectorAll('script[src], link[rel=stylesheet][href^="http"]')).toHaveLength(0)
-  })
+    fireEvent.keyDown(document.body, { key: '3' })
+    fireEvent.keyDown(canvas, { key: '3', ctrlKey: true })
+    expect(screen.getByRole('button', { name: /^Triangle 1:/ })).toHaveAttribute('aria-pressed', 'true')
 
-  /* Runs the page's own script, with a canvas that draws nothing. */
-  function runLesson() {
-    const dom = new JSDOM(lessonHtml, {
-      runScripts: 'dangerously',
-      pretendToBeVisual: true,
-      beforeParse(window) {
-        window.HTMLCanvasElement.prototype.getContext = () =>
-          new Proxy({}, { get: (_, key) => (key === 'measureText' ? () => ({ width: 40 }) : () => {}) })
-        window.ResizeObserver = class { observe() {} }
-        window.matchMedia = () => ({ matches: false, addEventListener() {} })
-      },
-    })
-    return dom.window
-  }
-
-  it('passes its own check of the drawn geometry against BioTSR’s values', () => {
-    const window = runLesson()
-    expect(window.__demo.triangles.map((t) => t.key)).toEqual([D.key, D.key, D.key, D.key])
-    expect(window.document.querySelectorAll('.pick')).toHaveLength(4)
-  })
-
-  it('takes keys only while the picture has focus, and announces each change once', () => {
-    const window = runLesson()
-    const { document } = window
-    const press = (target, key, extra = {}) =>
-      target.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...extra }))
-
-    expect(document.querySelectorAll('[aria-live]')).toHaveLength(1)
-    expect(document.getElementById('live').textContent).toBe('')
-
-    press(document.body, '3')
-    expect(window.__demo.state().selected).toBe(0)
-
-    const canvas = document.getElementById('mol')
-    press(canvas, '3', { ctrlKey: true })
-    expect(window.__demo.state().selected).toBe(0)
-
-    press(canvas, '3')
-    expect(window.__demo.state().selected).toBe(2)
-    expect(document.getElementById('live').textContent).toBe(
+    fireEvent.keyDown(canvas, { key: '3' })
+    expect(screen.getByRole('button', { name: /^Triangle 3:/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(live.textContent).toBe(
       'Triangle 3: Val 17, Ile 61, Leu 15. Angle 44.38 degrees, longest edge 13.11 ångströms. Same key, 17637781.',
     )
-    expect(document.getElementById('tclass').textContent).toBe('class 11: 42.64° ≤ θ < 45.17°')
 
-    document.querySelectorAll('.pick')[3].click()
-    expect(window.__demo.state().selected).toBe(3)
-    expect(document.getElementById('verts').textContent).toContain('Val 70, Ile 36, Leu 71')
+    fireEvent.click(screen.getByRole('button', { name: /^Triangle 4:/ }))
+    expect(screen.getAllByText(/Val 70, Ile 36, Leu 71/).length).toBeGreaterThan(0)
   })
 
-  it('keeps every bin marker whole inside its track', () => {
-    const window = runLesson()
-    const lefts = [...window.document.querySelectorAll('#dbin .bin-dot')].map((d) => d.style.left)
-    expect(lefts).toHaveLength(4)
+  it('groups the instructions, Reset view and the four triangle buttons under the picture', async () => {
+    await renderAt('/software/four-triangles-one-key', HEADING)
+    const controls = document.querySelector('canvas').nextElementSibling
+    const reset = within(controls).getByRole('button', { name: 'Reset view' })
+    const picker = within(controls).getByRole('group', { name: 'Choose a triangle' })
+    expect(within(picker).getAllByRole('button')).toHaveLength(4)
+    expect(picker.contains(reset)).toBe(false)
+    expect(reset.parentElement).toContainElement(controls.querySelector('p'))
+  })
+
+  it('keeps every bin marker whole inside its track', async () => {
+    await renderAt('/software/four-triangles-one-key', HEADING)
+    const lefts = [...document.querySelectorAll('[class*="binDot"]')].map((d) => d.style.left)
+    expect(lefts).toHaveLength(8)
     for (const left of lefts) {
       const fraction = Number(/(\d\.\d{4})/.exec(left)[1])
       expect(left).toContain('11px')
@@ -190,30 +196,37 @@ describe('the lesson page', () => {
 })
 
 describe('the recorded notebook page', () => {
-  const doc = new JSDOM(previewHtml).window.document
+  beforeEach(() => setViewport('desktop'))
+  const HEADING = 'Your first 10 minutes with BioTSR'
 
-  it('says it is a recording that does not run, and offers the notebook itself', () => {
-    const notice = doc.querySelector('.recorded')
+  it('sits in the site, with its breadcrumb and the BioTSR menu marked', async () => {
+    await renderAt('/software/first-10-minutes', HEADING)
+    expect(screen.getByRole('button', { name: 'BioTSR' })).toHaveAttribute('data-current', 'true')
+    const crumbs = within(screen.getByRole('navigation', { name: 'Breadcrumb' }))
+    expect(crumbs.getByText('Your first 10 minutes (recorded run)')).toHaveAttribute('aria-current', 'page')
+    expect(document.querySelectorAll('h1')).toHaveLength(1)
+    await waitFor(() =>
+      expect(document.title).toBe('Your first 10 minutes with BioTSR (recorded run) | TSR Research Group'),
+    )
+  })
+
+  it('says it is a recording that does not run, and offers the notebook itself', async () => {
+    await renderAt('/software/first-10-minutes', HEADING)
+    const notice = screen.getByRole('note')
     const text = notice.textContent.replace(/\s+/g, ' ')
     expect(text).toContain('A recorded run.')
+    expect(text).toContain('5 November 2026')
     expect(text).toContain('nothing here runs in your browser')
-    expect(notice.querySelector('a[download]').getAttribute('href')).toBe(NOTEBOOK.href)
-    expect(doc.querySelectorAll('script')).toHaveLength(0)
-    expect(doc.querySelectorAll('h1')).toHaveLength(1)
+    expect(within(notice).getByRole('link', { name: 'Download the notebook (.ipynb)' })).toHaveAttribute(
+      'href',
+      NOTEBOOK.href,
+    )
   })
 
-  it('folds the helper code away and shows the notebook’s real outputs', () => {
-    expect(doc.querySelector('.celltag_helper details.helper summary').textContent).toBe('Show the helper code')
-    expect(doc.body.textContent).toContain('in all three (BioTSR\'s report):  9,523')
-    expect(doc.body.textContent).toContain('downloaded from the RCSB, checksum matches')
-    expect(doc.body.textContent).not.toMatch(/403 Forbidden|Tunnel connection/)
-  })
-
-  it('has its own address and metadata', () => {
-    const url = 'https://tsrmethod.github.io/software/first-10-minutes'
-    expect(doc.querySelector('link[rel=canonical]').href).toBe(url)
-    expect(doc.querySelector('meta[property="og:url"]').content).toBe(url)
-    expect(doc.title).toBe('Your first 10 minutes with BioTSR (recorded run) | TSR Research Group')
+  it('folds the helper code away and shows the real outputs', async () => {
+    await renderAt('/software/first-10-minutes', HEADING)
+    expect(document.querySelector('details.helper summary').textContent).toBe('Show the helper code')
+    expect(document.body.textContent).toContain('Same keys, same count.')
   })
 })
 

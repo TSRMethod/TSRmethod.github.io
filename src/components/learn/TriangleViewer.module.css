@@ -1,0 +1,125 @@
+.canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 74vh;
+  touch-action: none;
+  cursor: grab;
+  background-color: var(--lesson-mol-bg);
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.canvas:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+/*
+ * The controls, grouped under the picture: the instructions and Reset view on
+ * one row (stacked on a narrow screen), then the four triangle buttons, each
+ * with its own space, so no control crowds another.
+ */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.hintRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+
+.hint {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.reset {
+  flex: none;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reset:hover {
+  border-color: var(--color-primary);
+}
+
+.picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: var(--space-1);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pick b {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.pick span {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.pick[aria-pressed='true'] {
+  border-color: var(--lesson-tri);
+  background-color: var(--lesson-tri-soft);
+}
+
+.pick[aria-pressed='true'] span {
+  color: var(--color-text);
+}
+
+.reset:focus-visible,
+.pick:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 880px) {
+  /* Half the screen at most, so there is always page to scroll beside it. */
+  .canvas {
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 380px) {
+  .pick span {
+    font-size: 0.68rem;
+  }
+}

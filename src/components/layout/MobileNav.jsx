@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import MenuLink from './MenuLink'
+import { itemContains } from '../../app/navigation'
 import useFocusTrap from '../../hooks/useFocusTrap'
 import useExitTransition from '../../hooks/useExitTransition'
 import styles from './MobileNav.module.css'
@@ -261,6 +262,8 @@ export default function MobileNav({ items }) {
 
 /* A collapsible section inside the drawer. */
 function AccordionItem({ item, isOpen, onToggle }) {
+  const { pathname } = useLocation()
+  const holdsCurrentPage = itemContains(item, pathname)
   const panelId = `mobile-nav-${item.id}-panel`
   const panelRef = useRef(null)
   /* Same treatment as the drawer: the section stays in the tree while it
@@ -272,6 +275,7 @@ function AccordionItem({ item, isOpen, onToggle }) {
       <button
         type="button"
         className={styles.accordionTrigger}
+        data-current={holdsCurrentPage || undefined}
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={onToggle}
@@ -317,7 +321,7 @@ function AccordionItem({ item, isOpen, onToggle }) {
                   <ul className={styles.groupList} aria-labelledby={groupLabelId}>
                     {group.items.map((link) => (
                       <li key={link.id}>
-                        <MenuLink to={link.to} className={styles.panelLink}>
+                        <MenuLink to={link.to} section={link.section} className={styles.panelLink}>
                           {link.label}
                         </MenuLink>
                       </li>
