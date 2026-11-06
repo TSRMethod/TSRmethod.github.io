@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import MenuLink from './MenuLink'
-import { itemContains } from '../../app/navigation'
+import { itemContains } from '../../app/menuData'
 import styles from './DesktopNav.module.css'
 
 /*

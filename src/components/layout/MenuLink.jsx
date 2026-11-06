@@ -20,8 +20,15 @@ export default function MenuLink({ to, section, className, children, ...props })
   const { pathname } = useLocation()
   const inSection = section?.includes(pathname) ?? false
 
+  /*
+   * NavLink adds "active" to a string className by itself, but not to a
+   * function's result; this keeps that behaviour for both forms.
+   */
   const classes = (state) => {
-    const base = typeof className === 'function' ? className(state) : className
+    const base =
+      typeof className === 'function'
+        ? className(state)
+        : [className, state.isActive && 'active'].filter(Boolean).join(' ')
     return inSection ? [base, 'in-section'].filter(Boolean).join(' ') : base
   }
 
