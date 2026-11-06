@@ -1,0 +1,157 @@
+.eyebrow {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.intro {
+  margin-top: var(--space-3);
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+}
+
+/* Explore and Run side by side; one column on a phone, Explore first. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 760px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.card > p {
+  margin-top: var(--space-3);
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0 var(--space-3);
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.card > .step {
+  margin-top: 0;
+}
+
+.cardHeading {
+  font-size: var(--text-xl);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.meta {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.small {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* The BioTSR page's button treatment, so a primary action looks the same
+   wherever it appears. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid var(--color-primary);
+}
+
+.primary:hover {
+  background-color: var(--color-primary-dark);
+  color: #ffffff;
+}
+
+.secondary {
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border-strong);
+}
+
+.secondary:hover {
+  border-color: var(--color-primary);
+}
+
+.size {
+  font-weight: 400;
+  white-space: pre;
+}
+
+.how {
+  margin-top: var(--space-4);
+}
+
+.how summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.commands {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  background-color: var(--color-code-bg);
+  color: var(--color-code-text);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.next {
+  max-width: var(--content-measure);
+  margin-top: var(--space-7);
+}
+
+.nextHeading {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.next ul {
+  padding-left: var(--space-5);
+}
+
+.next li + li {
+  margin-top: var(--space-2);
+}

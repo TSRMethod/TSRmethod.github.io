@@ -7,7 +7,7 @@ import Contact from '../pages/Contact/Contact'
 import Research from '../pages/Research/Research'
 import EarlierImplementations from '../pages/Research/EarlierImplementations'
 import LazyMethodPage from './LazyMethodPage'
-import { LazySoftware, LazyGetStarted } from './LazySoftwarePages'
+import { LazySoftware, LazyGetStarted, LazyLearn } from './LazySoftwarePages'
 import { publishedMethods } from '../content'
 import { LEGACY_PATHS, LEGACY_PAGE_PATHS } from './legacyPaths'
 
@@ -62,6 +62,7 @@ const pageRoutes = [
   { path: '/people', element: <People /> },
   { path: '/software', element: <LazySoftware /> },
   { path: '/software/get-started', element: <LazyGetStarted /> },
+  { path: '/software/learn', element: <LazyLearn /> },
   { path: '/research', element: <Research /> },
   { path: '/research/earlier-implementations', element: <EarlierImplementations /> },
   { path: '/contact', element: <Contact /> },

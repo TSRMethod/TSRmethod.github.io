@@ -112,8 +112,8 @@ const RESEARCH_GROUPS = [
  * the group's mark and name at the left of the header: a visitor who does
  * not know the logo is a link still has a way back. "Understand TSR" is a
  * plain link to the core method, the one page a newcomer needs. BioTSR holds
- * only its two pages; installation, documentation and citation are sections
- * of its overview. "Methods & research" is where every other method page,
+ * only its three pages (Overview, Getting started, Learn BioTSR);
+ * installation, documentation and citation are sections of its overview. "Methods & research" is where every other method page,
  * the analysis pages and the earlier code live. Measured at 1150px, where the
  * desktop bar first appears: see NAV_QUERY in useMediaQuery.js before adding
  * a seventh.
@@ -131,6 +131,7 @@ const SKELETON = [
         items: [
           { id: 'biotsr-overview', label: 'Overview', to: '/software' },
           { id: 'get-started', label: 'Getting started', to: '/software/get-started' },
+          { id: 'learn', label: 'Learn BioTSR', to: '/software/learn' },
         ],
       },
     ],

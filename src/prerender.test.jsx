@@ -257,11 +257,24 @@ describe('addresses in another form', () => {
     ['/methods/drug-tsr/', '/methods/drug-tsr'],
     ['/index.html', '/'],
     ['/mirror-image/', '/mirror-image'],
+    ['/software/learn/', '/software/learn'],
+    ['/software/four-triangles-one-key/', '/software/four-triangles-one-key'],
+    ['/Software/Four-Triangles-One-Key', '/software/four-triangles-one-key'],
+    ['/software/first-10-minutes/', '/software/first-10-minutes'],
   ])('sends %s to %s', (from, to) => {
     expect(ownAddress(from)).toBe(to)
   })
 
-  it.each(['/', '/people', '/methods/drug-tsr', '/no-such-page', '/methods/key-to-image'])(
+  it.each([
+    '/',
+    '/people',
+    '/methods/drug-tsr',
+    '/no-such-page',
+    '/methods/key-to-image',
+    '/software/learn',
+    '/software/four-triangles-one-key',
+    '/learn-files/biotsr-first-10-minutes.ipynb',
+  ])(
     'leaves %s alone',
     (path) => {
       expect(ownAddress(path)).toBeNull()

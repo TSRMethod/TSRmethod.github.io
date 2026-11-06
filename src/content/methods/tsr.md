@@ -79,6 +79,9 @@ angle and distance classes receive the same key.
 
 ![](diagram:tsr-worked-example)
 
+*See it in 3D:* [Four triangles, one key](/software/four-triangles-one-key) lets
+you rotate ubiquitin and switch between the four triangles of this example.
+
 ### Distinguishing features
 
 - **No structural superimposition.** TSR avoids rotation and translation
@@ -116,7 +119,9 @@ biotsr run --method protein --pdb structures/1UBQ.pdb --chain A --output results
 This writes `results/1UBQ_A_protein.keys`, with every key of the chain and how
 often it occurs, together with the list of triangles and two records of how the
 result was computed. [Getting started](/software/get-started) explains each
-file and sets up a virtual environment first.
+file and sets up a virtual environment first. New to BioTSR?
+[Learn BioTSR](/software/learn) has an interactive lesson and a guided notebook
+built on this example.
 
 Amino acid grouping, mirror images, size filtering and secondary structure
 annotation are options of this same command rather than separate programs.

@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { optimizeImages, formatSummary } from './scripts/optimize-images.mjs'
-import { collectCanonicalPaths, renderSitemap } from './scripts/site-routes.mjs'
+import { collectSitemapPaths, HTML_PAGES, renderSitemap } from './scripts/site-routes.mjs'
 
 const SITE_ORIGIN = 'https://tsrmethod.github.io'
 const SSR_OUT_DIR = 'node_modules/.cache/tsr-ssr'
@@ -127,7 +127,7 @@ function sitemap() {
     },
 
     async closeBundle() {
-      const paths = await collectCanonicalPaths(
+      const paths = await collectSitemapPaths(
         resolve(process.cwd(), 'src/content'),
       )
       writeFileSync(
@@ -135,6 +135,34 @@ function sitemap() {
         renderSitemap(paths, SITE_ORIGIN),
       )
       this.info(`sitemap.xml: ${paths.length} canonical URLs`)
+    },
+  }
+}
+
+/*
+ * The hand-written learning pages (HTML_PAGES in scripts/site-routes.mjs)
+ * at their own addresses during development and `vite preview`.
+ *
+ * GitHub Pages answers /software/four-triangles-one-key with the file
+ * software/four-triangles-one-key.html; Vite's servers would instead hand
+ * the address to the React app, which has no such route. This does what
+ * Pages does, for those addresses only.
+ */
+function htmlPages() {
+  const files = new Map(HTML_PAGES.map((page) => [page.path, `/${page.file}`]))
+  const rewrite = (req, _res, next) => {
+    const [path, query] = req.url.split('?')
+    if (files.has(path)) req.url = files.get(path) + (query ? `?${query}` : '')
+    next()
+  }
+
+  return {
+    name: 'tsr-html-pages',
+    configureServer(server) {
+      server.middlewares.use(rewrite)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(rewrite)
     },
   }
 }
@@ -150,7 +178,7 @@ function sitemap() {
  * node_modules/.cache and is never published. See docs/DEPLOYMENT.md.
  */
 export default defineConfig(({ isSsrBuild }) => ({
-  plugins: [react(), imageOptimizer(), sitemap()],
+  plugins: [react(), imageOptimizer(), sitemap(), htmlPages()],
 
   build: isSsrBuild
     ? {

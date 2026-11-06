@@ -4,7 +4,7 @@ import { matchRoutes, StaticRouter } from 'react-router-dom'
 import App from './app/App'
 import { routeConfig } from './app/routeRegistry'
 import LazyMethodPage from './app/LazyMethodPage'
-import { LazyGetStarted, LazySoftware } from './app/LazySoftwarePages'
+import { LazyGetStarted, LazyLearn, LazySoftware } from './app/LazySoftwarePages'
 import { PageMetadataCollector } from './lib/pageMetadata'
 
 export { legacyRedirects, isRouteImplemented } from './app/routeRegistry'
@@ -86,6 +86,7 @@ export const LAZY_SOURCES = new Map([
   [LazyMethodPage, 'src/components/method/MethodPage.jsx'],
   [LazySoftware, 'src/pages/Software/Software.jsx'],
   [LazyGetStarted, 'src/pages/GetStarted/GetStarted.jsx'],
+  [LazyLearn, 'src/pages/Learn/Learn.jsx'],
 ])
 
 /** The lazily loaded source files the page at `pathname` renders. */

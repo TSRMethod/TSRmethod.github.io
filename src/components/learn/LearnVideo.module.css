@@ -1,0 +1,151 @@
+.watch {
+  margin-top: var(--space-6);
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0 var(--space-3);
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.heading {
+  font-size: var(--text-xl);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+.meta {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.intro {
+  max-width: var(--content-measure);
+  margin-top: var(--space-3);
+}
+
+/* The box is reserved before anything loads; the video fills it. */
+.frame {
+  width: 100%;
+  max-width: 960px;
+  margin-top: var(--space-4);
+  background-color: #0b1220;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* One reserved line under the picture, so the page does not move as cues
+   come and go. */
+.captionBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  max-width: 960px;
+  margin-top: var(--space-2);
+}
+
+.captionLine {
+  flex: 1 1 20rem;
+  min-height: calc(2 * var(--leading-normal) * 1em);
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.captionToggle {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.captionToggle[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.chapters ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chapters button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chapters button:hover {
+  border-color: var(--color-primary);
+}
+
+.time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.transcript {
+  max-width: var(--content-measure);
+  margin-top: var(--space-4);
+}
+
+.transcript summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.transcript ol {
+  margin-top: var(--space-3);
+  padding-left: 0;
+  list-style: none;
+}
+
+.transcript li + li {
+  margin-top: var(--space-2);
+}
+
+.screen {
+  color: var(--color-text-muted);
+}
+
+.files {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.credits {
+  color: var(--color-text-muted);
+}

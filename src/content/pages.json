@@ -69,5 +69,29 @@
     "affiliationHeading": "Affiliation",
     "shareHeading": "Share our website",
     "shareBody": "Use this QR code on posters, slides or handouts."
+  },
+  "learn": {
+    "title": "Learn BioTSR",
+    "eyebrow": "BioTSR",
+    "summary": "An interactive lesson and a hands-on notebook that follow one ubiquitin triangle from three atoms to a BioTSR key, and show why different triangles can share it.",
+    "intro": "Follow one triangle of ubiquitin from three atoms to a BioTSR key, see why different triangles can share that key, then compute it yourself. Each resource stands on its own.",
+    "exploreHeading": "Explore: Four triangles, one key",
+    "exploreMeta": "About 5 minutes · in your browser, nothing to install",
+    "exploreBody": "Four different triangles in ubiquitin have the same key, 17637781. Rotate the real structure, switch between the triangles, and see what a key keeps and what it leaves out.",
+    "exploreAction": "Open the interactive lesson",
+    "exploreFallback": "Prefer a table? The same four triangles are listed step by step in",
+    "exploreFallbackLink": "the worked example on Understand TSR",
+    "runHeading": "Run: Your first 10 minutes with BioTSR",
+    "runMeta": "About 10 minutes · Jupyter notebook",
+    "runBody": "Install BioTSR, compute every triangle of ubiquitin, find the lesson’s four triangles in BioTSR’s own output, and count the keys that ubiquitin, barnase and barstar share, with a check at every step.",
+    "runNeeds": "You need Python 3.9–3.13 on Linux or macOS, Jupyter and an internet connection. The notebook writes about 25 MB, all of it into one folder beside it.",
+    "runDownloadAction": "Download the notebook (.ipynb)",
+    "runPreviewAction": "Read the recorded run",
+    "runPreviewNote": "The recorded run is the notebook as it ran with BioTSR 1.0.0, outputs included. It is a page to read: nothing runs in your browser.",
+    "runHowHeading": "How to open the notebook",
+    "nextHeading": "Next",
+    "nextGetStarted": "your own structures, CSV batches, downloads and resuming.",
+    "nextGuide": "every method, with an example of each, for BioTSR 1.0.0.",
+    "nextMethod": "the method as published, and how BioTSR computes it."
   }
 }
