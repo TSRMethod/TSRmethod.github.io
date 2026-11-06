@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen, within, fireEvent } from '@testing-library/react'
+import { describe, it, expect, afterEach } from 'vitest'
+import { render, screen, within, fireEvent, act } from '@testing-library/react'
 import LearnVideo from './LearnVideo'
 
 /* A made-up video: the component is not used by the site until the corrected
@@ -67,5 +67,135 @@ describe('LearnVideo', () => {
     expect(screen.getByRole('link', { name: 'Download the video (MP4, 18 MB)' })).toHaveAttribute('href', VIDEO.src)
     expect(screen.getByText(/Music: example credit/)).toBeInTheDocument()
     expect(document.body).not.toHaveTextContent(/Apache/)
+  })
+
+  it('has a CC Captions toggle in a bar right under the player, on by default', () => {
+    render(<LearnVideo video={VIDEO} number={1} />)
+    const toggle = screen.getByRole('button', { name: 'CC Captions' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(toggle).toHaveTextContent('On')
+    const frame = document.querySelector('video').parentElement
+    expect(frame.nextElementSibling).toContainElement(toggle)
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(toggle).toHaveTextContent('Off')
+    expect(screen.getByRole('button', { name: 'CC Captions' })).toBe(toggle)
+  })
+
+  it('keeps the caption area the same size, on or off: every line it can hold is laid in it unseen', () => {
+    render(<LearnVideo video={VIDEO} number={1} />)
+    const area = document.querySelector('video').closest('div').parentElement.nextElementSibling
+    expect(area).toHaveAttribute('aria-hidden', 'true')
+    const sizers = () => [...area.querySelectorAll('span')].map((s) => s.textContent)
+    const before = sizers()
+    expect(before).toEqual(expect.arrayContaining(VIDEO.transcript.map((t) => t.speech)))
+    fireEvent.click(screen.getByRole('button', { name: 'CC Captions' }))
+    expect(sizers()).toEqual(before)
+    expect(area.nextElementSibling).toBe(screen.getByRole('navigation', { name: 'Chapters of the video' }))
+  })
+})
+
+/*
+ * The browser's caption track, which jsdom lacks: a track whose mode change
+ * is announced on its list, as a browser does.
+ */
+describe('LearnVideo with a caption track', () => {
+  let track
+  const original = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'textTracks')
+
+  const install = () => {
+    const list = new EventTarget()
+    track = new EventTarget()
+    let mode = 'disabled'
+    Object.defineProperty(track, 'mode', {
+      get: () => mode,
+      set: (value) => {
+        mode = value
+        list.dispatchEvent(new Event('change'))
+      },
+    })
+    track.activeCues = []
+    list[0] = track
+    list.length = 1
+    Object.defineProperty(HTMLMediaElement.prototype, 'textTracks', { configurable: true, get: () => list })
+  }
+
+  afterEach(() => {
+    if (original) Object.defineProperty(HTMLMediaElement.prototype, 'textTracks', original)
+    else delete HTMLMediaElement.prototype.textTracks
+    delete document.fullscreenElement
+  })
+
+  const line = () => document.querySelector('video').closest('div').parentElement.nextElementSibling.querySelector('p')
+
+  it('copies the cue playing now under the picture, with the track hidden in the video', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    expect(track.mode).toBe('hidden')
+    act(() => {
+      track.activeCues = [{ text: 'How BioTSR works.' }]
+      track.dispatchEvent(new Event('cuechange'))
+    })
+    expect(line()).toHaveTextContent('How BioTSR works.')
+  })
+
+  it('turns the track off with the toggle, and says so in the area', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    fireEvent.click(screen.getByRole('button', { name: 'CC Captions' }))
+    expect(track.mode).toBe('disabled')
+    expect(line()).toHaveTextContent('Narration captions are off.')
+  })
+
+  it('lets the browser draw the captions in full screen, and only there', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    const video = document.querySelector('video')
+    act(() => {
+      Object.defineProperty(document, 'fullscreenElement', { configurable: true, value: video })
+      document.dispatchEvent(new Event('fullscreenchange'))
+    })
+    expect(track.mode).toBe('showing')
+    expect(line()).toHaveTextContent('Narration captions are shown on the video.')
+    act(() => {
+      Object.defineProperty(document, 'fullscreenElement', { configurable: true, value: null })
+      document.dispatchEvent(new Event('fullscreenchange'))
+    })
+    expect(track.mode).toBe('hidden')
+  })
+
+  it('does the same in the iPhone’s own player', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    const video = document.querySelector('video')
+    act(() => video.dispatchEvent(new Event('webkitbeginfullscreen')))
+    expect(track.mode).toBe('showing')
+    act(() => video.dispatchEvent(new Event('webkitendfullscreen')))
+    expect(track.mode).toBe('hidden')
+  })
+
+  it('leaves captions off in full screen when they are off', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    fireEvent.click(screen.getByRole('button', { name: 'CC Captions' }))
+    act(() => document.querySelector('video').dispatchEvent(new Event('webkitbeginfullscreen')))
+    expect(track.mode).toBe('disabled')
+  })
+
+  it('never captions the narration twice: the browser’s own captions empty the area and turn the toggle on', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    const toggle = screen.getByRole('button', { name: 'CC Captions' })
+    fireEvent.click(toggle)
+    act(() => {
+      track.mode = 'showing'
+    })
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(line()).toHaveTextContent('Narration captions are shown on the video.')
+    act(() => {
+      track.activeCues = [{ text: 'How BioTSR works.' }]
+      track.dispatchEvent(new Event('cuechange'))
+    })
+    expect(line()).not.toHaveTextContent('How BioTSR works.')
   })
 })

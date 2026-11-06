@@ -11,13 +11,19 @@ import styles from './LearnVideo.module.css'
  *     page does not move when it loads.
  *   - Native controls, no autoplay, playsInline (no forced full screen on a
  *     phone).
- *   - A WebVTT caption track for the narration, shown as a line of text
- *     UNDER the picture rather than over it: the video already has captions
- *     burned in along its bottom and labels in its top corners, and a cue
- *     drawn inside the frame covered one or the other in every placement
- *     tried (Chrome also cut two-line cues at the top to one line). The
- *     browser's own captions button still works, as usual, for full screen;
- *     while it is on, the line under the picture steps aside.
+ *   - Two kinds of caption. The words and numbers drawn into the picture
+ *     stay as they are. The narration has a WebVTT caption track, shown by
+ *     default as text in its own area UNDER the picture rather than over it:
+ *     a cue drawn inside the frame covered the burned-in text or the corner
+ *     labels in every placement tried. The "CC Captions" toggle in the bar
+ *     beneath the player turns that text on and off (aria-pressed); its area
+ *     is as tall as the longest line at the current width whether captions
+ *     are on or off, so nothing below it moves.
+ *   - In full screen (and the iPhone's own player) the area under the picture
+ *     is out of sight, so while captions are on the browser draws them on the
+ *     video there instead, and stops when the video leaves full screen. If the
+ *     visitor turns on the browser's own captions in the page, the area says
+ *     so rather than repeating them: the narration is never captioned twice.
  *   - A chapters track. Not every browser shows chapters in its controls, so
  *     the chapters are also buttons under the video that move the playhead.
  *   - A transcript, as text on the page: what is said, and in brackets the
@@ -36,34 +42,78 @@ const durationLabel = (seconds) => {
   return m ? `${m} min ${s} s` : `${s} s`
 }
 
+const OFF = 'Narration captions are off.'
+const IN_PLAYER = 'Narration captions are shown on the video.'
+
+const isFullscreen = (element) =>
+  document.fullscreenElement === element || document.webkitFullscreenElement === element
+
 export default function LearnVideo({ video, number }) {
   const player = useRef(null)
   const [captions, setCaptions] = useState(true)
   const [cue, setCue] = useState('')
+  const [inPlayer, setInPlayer] = useState(false)
 
   /*
-   * The narration cue playing now, read from the caption track. The track is
-   * kept in "hidden" mode, so the browser loads its cues without drawing
-   * them; while the visitor has the browser's own captions on ("showing"),
-   * the line under the picture is empty. No track support: no line.
+   * The caption track's mode follows the toggle: "hidden" while captions are
+   * on (the browser loads the cues without drawing them, and the cue playing
+   * now is copied under the picture), "showing" while they are on in full
+   * screen, "disabled" while they are off. A visitor who turns on the
+   * browser's own captions turns the toggle on with them; the area under the
+   * picture then stays empty. No track support: no captions line, and the
+   * transcript is still there.
    */
   useEffect(() => {
     const element = player.current
     const track = element?.textTracks?.[0]
     if (!track) return undefined
-    if (captions && track.mode === 'disabled') track.mode = 'hidden'
-    const update = () =>
+    let shownForFullscreen = false
+
+    const update = () => {
+      if (track.mode === 'showing' && !captions) {
+        setCaptions(true)
+        return
+      }
+      if (track.mode === 'disabled' && captions) track.mode = 'hidden'
+      setInPlayer(track.mode === 'showing')
       setCue(track.mode === 'hidden' ? [...(track.activeCues ?? [])].map((c) => c.text).join(' ') : '')
+    }
+    const fullscreen = (entering) => {
+      if (entering && captions && track.mode === 'hidden') {
+        track.mode = 'showing'
+        shownForFullscreen = true
+      } else if (!entering && shownForFullscreen) {
+        if (track.mode === 'showing') track.mode = 'hidden'
+        shownForFullscreen = false
+      }
+    }
+    const onFullscreenChange = () => fullscreen(isFullscreen(element))
+    const onBegin = () => fullscreen(true)
+    const onEnd = () => fullscreen(false)
+
+    if (!captions) track.mode = 'disabled'
+    else if (track.mode === 'disabled') track.mode = 'hidden'
+    if (captions && isFullscreen(element)) fullscreen(true)
     update()
     track.addEventListener('cuechange', update)
     element.textTracks.addEventListener?.('change', update)
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange)
+    element.addEventListener('webkitbeginfullscreen', onBegin)
+    element.addEventListener('webkitendfullscreen', onEnd)
     return () => {
+      if (shownForFullscreen && track.mode === 'showing') track.mode = 'hidden'
       track.removeEventListener('cuechange', update)
       element.textTracks.removeEventListener?.('change', update)
+      document.removeEventListener('fullscreenchange', onFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange)
+      element.removeEventListener('webkitbeginfullscreen', onBegin)
+      element.removeEventListener('webkitendfullscreen', onEnd)
     }
   }, [captions])
 
-  const line = captions ? cue : ''
+  const line = !captions ? OFF : inPlayer ? IN_PLAYER : cue
+  const quiet = !captions || inPlayer
 
   const seek = (time) => {
     const element = player.current
@@ -83,39 +133,53 @@ export default function LearnVideo({ video, number }) {
       </p>
       <p className={styles.intro}>{video.intro}</p>
 
-      <div
-        className={styles.frame}
-        style={{ aspectRatio: `${video.width} / ${video.height}` }}
-      >
-        <video
-          ref={player}
-          className={styles.video}
-          controls
-          preload="none"
-          playsInline
-          poster={video.poster}
-          width={video.width}
-          height={video.height}
-          aria-describedby="video-transcript"
+      <div className={styles.player}>
+        <div
+          className={styles.frame}
+          style={{ aspectRatio: `${video.width} / ${video.height}` }}
         >
-          <source src={video.src} type="video/mp4" />
-          <track kind="captions" src={video.captions} srcLang="en" label="English" />
-          <track kind="chapters" src={video.chapters} srcLang="en" label="Chapters" />
-        </video>
+          <video
+            ref={player}
+            className={styles.video}
+            controls
+            preload="none"
+            playsInline
+            poster={video.poster}
+            width={video.width}
+            height={video.height}
+            aria-describedby="video-transcript"
+          >
+            <source src={video.src} type="video/mp4" />
+            <track kind="captions" src={video.captions} srcLang="en" label="English" />
+            <track kind="chapters" src={video.chapters} srcLang="en" label="Chapters" />
+          </video>
+        </div>
+
+        <div className={styles.toolbar}>
+          <button
+            type="button"
+            className={styles.ccToggle}
+            aria-pressed={captions}
+            onClick={() => setCaptions((on) => !on)}
+          >
+            <span className={styles.ccBadge}>CC</span> Captions
+            <span className={styles.ccState} aria-hidden="true">
+              {captions ? 'On' : 'Off'}
+            </span>
+          </button>
+        </div>
       </div>
 
-      <div className={styles.captionBar}>
-        <p className={styles.captionLine} aria-hidden="true">
-          {line}
-        </p>
-        <button
-          type="button"
-          className={styles.captionToggle}
-          aria-pressed={captions}
-          onClick={() => setCaptions((on) => !on)}
-        >
-          Captions under the video
-        </button>
+      {/* Every line the area can hold is laid in the same grid cell, unseen,
+          so the area is as tall as the longest at this width. The narration
+          itself reaches screen readers as sound, and as the transcript. */}
+      <div className={styles.captionArea} aria-hidden="true">
+        {[OFF, IN_PLAYER, ...video.transcript.map((t) => t.speech).filter(Boolean)].map((text) => (
+          <span key={text} className={styles.captionSizer}>
+            {text}
+          </span>
+        ))}
+        <p className={quiet ? `${styles.captionLine} ${styles.captionNote}` : styles.captionLine}>{line}</p>
       </div>
 
       <nav className={styles.chapters} aria-label="Chapters of the video">
