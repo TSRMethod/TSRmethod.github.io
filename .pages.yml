@@ -1425,6 +1425,114 @@ content:
               Shown beside the website's QR code. The code and its download
               files are fixed images in public/share and always open
               https://tsrmethod.github.io/.
+      - name: learn
+        label: Learn BioTSR page
+        type: object
+        fields:
+          - name: title
+            label: Page title
+            type: string
+            required: true
+            description: >-
+              The page's main heading; also used for the browser tab.
+          - name: eyebrow
+            label: Small label above the title
+            type: string
+            required: true
+          - name: summary
+            label: Summary
+            type: text
+            required: true
+            description: >-
+              Used as the page description in search results.
+          - name: intro
+            label: Introduction
+            type: text
+            required: true
+          - name: exploreHeading
+            label: Lesson card heading
+            type: string
+            required: true
+          - name: exploreMeta
+            label: Lesson card time and requirements
+            type: string
+            required: true
+          - name: exploreBody
+            label: Lesson card text
+            type: text
+            required: true
+            description: >-
+              The lesson itself is src/pages/Learn/FourTriangles.jsx; its numbers come from BioTSR and are checked by the test suite.
+          - name: exploreAction
+            label: Lesson button
+            type: string
+            required: true
+          - name: exploreFallback
+            label: Lesson table sentence
+            type: string
+            required: true
+            description: >-
+              Followed by a link to the worked example on Understand TSR.
+          - name: exploreFallbackLink
+            label: Lesson table link text
+            type: string
+            required: true
+          - name: runHeading
+            label: Notebook card heading
+            type: string
+            required: true
+          - name: runMeta
+            label: Notebook card time and format
+            type: string
+            required: true
+          - name: runBody
+            label: Notebook card text
+            type: text
+            required: true
+          - name: runNeeds
+            label: Notebook requirements
+            type: text
+            required: true
+          - name: runDownloadAction
+            label: Notebook download button
+            type: string
+            required: true
+          - name: runPreviewAction
+            label: Recorded run link
+            type: string
+            required: true
+          - name: runPreviewNote
+            label: Recorded run explanation
+            type: text
+            required: true
+          - name: runHowHeading
+            label: Heading above the commands to open the notebook
+            type: string
+            required: true
+            description: >-
+              The commands themselves are fixed in the page.
+          - name: nextHeading
+            label: Next steps heading
+            type: string
+            required: true
+          - name: nextGetStarted
+            label: Getting started description
+            type: string
+            required: true
+            description: >-
+              Shown after the link to Getting started.
+          - name: nextGuide
+            label: User guide description
+            type: string
+            required: true
+            description: >-
+              Shown after the link to the BioTSR user guide.
+          - name: nextMethod
+            label: Understand TSR description
+            type: string
+            required: true
+            description: >-
+              Shown after the link to Understand TSR.
 
   # -------------------------------------------------------------------------
   # Site settings — editorial only

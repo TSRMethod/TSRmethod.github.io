@@ -16,6 +16,10 @@ you need:
 python -m pip install "biotsr==1.0.0"
 ```
 
+Prefer a guided walkthrough first? The
+[First 10 minutes notebook](/software/learn#run) runs the first steps of this
+page on ubiquitin, with a check at each one.
+
 ## 1. Install BioTSR
 
 A virtual environment keeps BioTSR and its dependency separate from the rest of
@@ -174,8 +178,10 @@ EOF
 ```
 
 Each row is one calculation: `sample_id` names its output files, `pdb_id` is
-the structure and `chain` the chain. The method is not a column. It is given
-once, on the command line, with `--method protein`.
+the structure and `chain` the chain. In this example the method is not a
+column: every row uses the same one, given once on the command line with
+`--method protein`. A manifest can instead name each row's method in a
+`method` column; use one or the other, not both.
 
 Check the plan first. `--dry-run` lists every calculation and which structures
 would be downloaded, and downloads, computes and writes nothing:

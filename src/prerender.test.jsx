@@ -257,11 +257,24 @@ describe('addresses in another form', () => {
     ['/methods/drug-tsr/', '/methods/drug-tsr'],
     ['/index.html', '/'],
     ['/mirror-image/', '/mirror-image'],
+    ['/software/learn/', '/software/learn'],
+    ['/software/four-triangles-one-key/', '/software/four-triangles-one-key'],
+    ['/Software/Four-Triangles-One-Key', '/software/four-triangles-one-key'],
+    ['/software/first-10-minutes/', '/software/first-10-minutes'],
   ])('sends %s to %s', (from, to) => {
     expect(ownAddress(from)).toBe(to)
   })
 
-  it.each(['/', '/people', '/methods/drug-tsr', '/no-such-page', '/methods/key-to-image'])(
+  it.each([
+    '/',
+    '/people',
+    '/methods/drug-tsr',
+    '/no-such-page',
+    '/methods/key-to-image',
+    '/software/learn',
+    '/software/four-triangles-one-key',
+    '/learn-files/biotsr-first-10-minutes.ipynb',
+  ])(
     'leaves %s alone',
     (path) => {
       expect(ownAddress(path)).toBeNull()
@@ -317,7 +330,16 @@ describe('taking the prerendered HTML over in the browser', () => {
     return { container, recoverable, consoleError, unmount: () => act(() => rootHandle.unmount()) }
   }
 
-  it.each(['/', '/publications', '/contact', '/methods/drug-tsr', '/software/get-started'])(
+  it.each([
+    '/',
+    '/publications',
+    '/contact',
+    '/methods/drug-tsr',
+    '/software/get-started',
+    '/software/learn',
+    '/software/four-triangles-one-key',
+    '/software/first-10-minutes',
+  ])(
     '%s hydrates without a mismatch',
     async (path) => {
       setViewport('desktop')
@@ -349,7 +371,7 @@ describe('taking the prerendered HTML over in the browser', () => {
     unmount()
   })
 
-  it('sends one page view, and loads the analytics tag once', async () => {
+  it('sends one page view per page, and loads the analytics tag once', async () => {
     /*
      * The prerendered HTML carries no analytics tag (check-dist enforces
      * that); it is added at run time, as before. Taking a page over must not
@@ -368,8 +390,20 @@ describe('taking the prerendered HTML over in the browser', () => {
     expect(views).toHaveLength(1)
     expect(views[0][2]).toMatchObject({ page_path: '/publications' })
     expect(document.querySelectorAll('script[src*="googletagmanager.com/gtag/js"]')).toHaveLength(1)
-
     unmount()
+
+    /* The Learn BioTSR lesson and notebook: one view each, nothing else. */
+    for (const path of ['/software/four-triangles-one-key', '/software/first-10-minutes']) {
+      const before = window.dataLayer.length
+      const page = await hydrate(path)
+      await screen.findByRole('heading', { level: 1 })
+      await act(async () => {})
+      const added = window.dataLayer.slice(before).filter((entry) => entry[0] === 'event')
+      expect(added.map((entry) => [entry[1], entry[2]?.page_path])).toEqual([['page_view', path]])
+      page.unmount()
+    }
+    expect(document.querySelectorAll('script[src*="googletagmanager.com/gtag/js"]')).toHaveLength(1)
+
     vi.unstubAllEnvs()
   })
 })

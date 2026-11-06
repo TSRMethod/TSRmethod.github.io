@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import usePageMetadata from '../../hooks/usePageMetadata'
 import { getPublishedMethod, formatCitation } from '../../content'
+import Breadcrumb from '../shared/Breadcrumb'
+import { breadcrumbFor } from '../../app/menuData'
 import NotFound from '../../pages/NotFound/NotFound'
 import MarkdownContent from './MarkdownContent'
 import SectionNavigation from './SectionNavigation'
@@ -115,11 +117,13 @@ export default function MethodPage({ slug, entry }) {
   if (!method) return <NotFound />
 
   const citation = formatCitation(method.paper)
+  const trail = breadcrumbFor(method.path)
   const Diagram = method.diagram ? DIAGRAMS[method.diagram] : null
 
   return (
     <article className={styles.page}>
       <header className={styles.header}>
+        {trail && <Breadcrumb trail={trail} current={method.shortTitle ?? method.title} />}
         <h1 className={styles.title}>{method.title}</h1>
         <p className={styles.summary}>{method.summary}</p>
 

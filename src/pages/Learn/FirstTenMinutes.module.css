@@ -1,0 +1,218 @@
+.header {
+  max-width: 60rem;
+}
+
+.notice {
+  margin: var(--space-4) 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-primary-light);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice p + p {
+  margin-top: var(--space-3);
+}
+
+.download {
+  font-weight: 600;
+}
+
+/*
+ * The notebook body is nbconvert HTML, so its classes are global names; every
+ * rule here is scoped under .notebook so none can reach the rest of the site.
+ */
+.notebook {
+  max-width: 60rem;
+}
+
+.notebook :global(.prompt),
+.notebook :global(.anchor-link) {
+  display: none;
+}
+
+.notebook :global(.text_cell_render) {
+  margin-top: var(--space-4);
+}
+
+.notebook :global(.text_cell_render) > :first-child {
+  margin-top: 0;
+}
+
+.notebook :global(.text_cell_render h2) {
+  margin: var(--space-6) 0 var(--space-3);
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+/* The site's reset removes paragraph and list spacing; prose cells need it. */
+.notebook :global(.text_cell_render p),
+.notebook :global(.text_cell_render ol),
+.notebook :global(.text_cell_render ul),
+.notebook :global(.text_cell_render pre) {
+  margin: 0 0 var(--space-3);
+}
+
+.notebook :global(.text_cell_render ol),
+.notebook :global(.text_cell_render ul) {
+  padding-left: var(--space-5);
+}
+
+.notebook :global(.text_cell_render) > :last-child {
+  margin-bottom: 0;
+}
+
+.notebook :global(.input_area pre),
+.notebook :global(.output_text pre) {
+  margin: 0;
+}
+
+.notebook :global(.text_cell_render pre),
+.notebook :global(.input_area pre),
+.notebook :global(.output_text pre) {
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.notebook :global(.text_cell_render pre),
+.notebook :global(.input_area pre) {
+  background-color: var(--color-code-bg);
+  color: var(--color-code-text);
+}
+
+.notebook :global(.text_cell_render pre code) {
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+
+.notebook :global(.code_cell) {
+  margin-top: var(--space-4);
+}
+
+.notebook :global(.output_area) {
+  margin-top: var(--space-2);
+}
+
+.notebook :global(.output_text pre) {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.notebook :global(.output_markdown) {
+  overflow-x: auto;
+}
+
+.notebook :global(.output_markdown table) {
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.notebook :global(.output_markdown th),
+.notebook :global(.output_markdown td) {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.notebook :global(.output_markdown thead th) {
+  background-color: var(--color-surface);
+}
+
+.notebook :global(details.helper > summary) {
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Code colours: Pygments' "monokai" style on the site's code background. */
+.notebook :global(.highlight .hll) { background-color: #49483e }
+.notebook :global(.highlight) { color: #F8F8F2 }
+.notebook :global(.highlight .c) { color: #959077 }
+.notebook :global(.highlight .err) { color: #ED007E; background-color: #1E0010 }
+.notebook :global(.highlight .esc) { color: #F8F8F2 }
+.notebook :global(.highlight .g) { color: #F8F8F2 }
+.notebook :global(.highlight .k) { color: #66D9EF }
+.notebook :global(.highlight .l) { color: #AE81FF }
+.notebook :global(.highlight .n) { color: #F8F8F2 }
+.notebook :global(.highlight .o) { color: #FF4689 }
+.notebook :global(.highlight .x) { color: #F8F8F2 }
+.notebook :global(.highlight .p) { color: #F8F8F2 }
+.notebook :global(.highlight .ch) { color: #959077 }
+.notebook :global(.highlight .cm) { color: #959077 }
+.notebook :global(.highlight .cp) { color: #959077 }
+.notebook :global(.highlight .cpf) { color: #959077 }
+.notebook :global(.highlight .c1) { color: #959077 }
+.notebook :global(.highlight .cs) { color: #959077 }
+.notebook :global(.highlight .gd) { color: #FF4689 }
+.notebook :global(.highlight .ge) { color: #F8F8F2; font-style: italic }
+.notebook :global(.highlight .ges) { color: #F8F8F2; font-weight: bold; font-style: italic }
+.notebook :global(.highlight .gr) { color: #FF4689 }
+.notebook :global(.highlight .gh) { color: #F8F8F2 }
+.notebook :global(.highlight .gi) { color: #A6E22E }
+.notebook :global(.highlight .go) { color: #66D9EF }
+.notebook :global(.highlight .gp) { color: #FF4689; font-weight: bold }
+.notebook :global(.highlight .gs) { color: #F8F8F2; font-weight: bold }
+.notebook :global(.highlight .gu) { color: #959077 }
+.notebook :global(.highlight .gt) { color: #66D9EF }
+.notebook :global(.highlight .kc) { color: #66D9EF }
+.notebook :global(.highlight .kd) { color: #66D9EF }
+.notebook :global(.highlight .kn) { color: #FF4689 }
+.notebook :global(.highlight .kp) { color: #66D9EF }
+.notebook :global(.highlight .kr) { color: #66D9EF }
+.notebook :global(.highlight .kt) { color: #66D9EF }
+.notebook :global(.highlight .ld) { color: #E6DB74 }
+.notebook :global(.highlight .m) { color: #AE81FF }
+.notebook :global(.highlight .s) { color: #E6DB74 }
+.notebook :global(.highlight .na) { color: #A6E22E }
+.notebook :global(.highlight .nb) { color: #A6E22E }
+.notebook :global(.highlight .nc) { color: #A6E22E }
+.notebook :global(.highlight .no) { color: #66D9EF }
+.notebook :global(.highlight .nd) { color: #A6E22E }
+.notebook :global(.highlight .ni) { color: #F8F8F2 }
+.notebook :global(.highlight .ne) { color: #A6E22E }
+.notebook :global(.highlight .nf) { color: #A6E22E }
+.notebook :global(.highlight .nl) { color: #F8F8F2 }
+.notebook :global(.highlight .nn) { color: #F8F8F2 }
+.notebook :global(.highlight .nx) { color: #A6E22E }
+.notebook :global(.highlight .py) { color: #F8F8F2 }
+.notebook :global(.highlight .nt) { color: #FF4689 }
+.notebook :global(.highlight .nv) { color: #F8F8F2 }
+.notebook :global(.highlight .ow) { color: #FF4689 }
+.notebook :global(.highlight .pm) { color: #F8F8F2 }
+.notebook :global(.highlight .w) { color: #F8F8F2 }
+.notebook :global(.highlight .mb) { color: #AE81FF }
+.notebook :global(.highlight .mf) { color: #AE81FF }
+.notebook :global(.highlight .mh) { color: #AE81FF }
+.notebook :global(.highlight .mi) { color: #AE81FF }
+.notebook :global(.highlight .mo) { color: #AE81FF }
+.notebook :global(.highlight .sa) { color: #E6DB74 }
+.notebook :global(.highlight .sb) { color: #E6DB74 }
+.notebook :global(.highlight .sc) { color: #E6DB74 }
+.notebook :global(.highlight .dl) { color: #E6DB74 }
+.notebook :global(.highlight .sd) { color: #E6DB74 }
+.notebook :global(.highlight .s2) { color: #E6DB74 }
+.notebook :global(.highlight .se) { color: #AE81FF }
+.notebook :global(.highlight .sh) { color: #E6DB74 }
+.notebook :global(.highlight .si) { color: #E6DB74 }
+.notebook :global(.highlight .sx) { color: #E6DB74 }
+.notebook :global(.highlight .sr) { color: #E6DB74 }
+.notebook :global(.highlight .s1) { color: #E6DB74 }
+.notebook :global(.highlight .ss) { color: #E6DB74 }
+.notebook :global(.highlight .bp) { color: #A6E22E }
+.notebook :global(.highlight .fm) { color: #A6E22E }
+.notebook :global(.highlight .vc) { color: #F8F8F2 }
+.notebook :global(.highlight .vg) { color: #F8F8F2 }
+.notebook :global(.highlight .vi) { color: #F8F8F2 }
+.notebook :global(.highlight .vm) { color: #F8F8F2 }
+.notebook :global(.highlight .il) { color: #AE81FF }

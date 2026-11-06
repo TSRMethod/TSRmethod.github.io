@@ -215,14 +215,19 @@ describe('live navigation', () => {
     expect(science.to).toBe('/tsr')
   })
 
-  it('holds only the two BioTSR pages in the BioTSR menu', () => {
+  it('holds only the three BioTSR pages in the BioTSR menu, Learn BioTSR last', () => {
     const biotsr = getVisibleNavigation().find((item) => item.id === 'biotsr')
     const links = biotsr.groups.flatMap((group) => group.items)
 
     expect(links.map((link) => [link.label, link.to])).toEqual([
       ['Overview', '/software'],
       ['Getting started', '/software/get-started'],
+      ['Learn BioTSR', '/software/learn'],
     ])
+  })
+
+  it('adds no top-level item for Learn BioTSR', () => {
+    expect(getVisibleNavigation().map((item) => item.label)).not.toContain('Learn BioTSR')
   })
 
   it('puts every method, analysis page and the earlier code under Methods & research', () => {

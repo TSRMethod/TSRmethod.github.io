@@ -101,6 +101,9 @@ All links point to the documentation released with version 1.0.0.
   — what 1.0 does not do, and the input rules it enforces.
 - [Release notes for 1.0.0](https://github.com/TSRMethod/BioTSR/blob/v1.0.0/CHANGELOG.md)
 
+For a first look before the documentation, [Learn BioTSR](/software/learn) has
+an interactive lesson and a hands-on notebook built on one ubiquitin example.
+
 BioTSR runs every method under one standard definition and has no option to
 reproduce the output files of the earlier TSR programs. Where its definition
 differs from an earlier program's, such as dividing angles by π rather than

@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import usePageMetadata from '../../hooks/usePageMetadata'
 import { pages, getRepositoriesByCategory } from '../../content'
 import { RepositoryList } from '../../components/software/RepositoryCard'
+import Breadcrumb from '../../components/shared/Breadcrumb'
+import { breadcrumbFor } from '../../app/menuData'
 import styles from './Research.module.css'
 
 /*
@@ -34,9 +36,7 @@ export default function EarlierImplementations() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.eyebrow}>
-          <Link to="/research">{pages.research.title}</Link>
-        </p>
+        <Breadcrumb trail={breadcrumbFor('/research/earlier-implementations') ?? []} current={copy.title} />
         <h1>{copy.title}</h1>
         <p className={styles.intro}>{copy.intro}</p>
 

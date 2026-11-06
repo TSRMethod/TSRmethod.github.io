@@ -293,3 +293,75 @@ It is drawn by `scripts/social-card.mjs` from the favicon's geometry and the
 group's name and tagline in `src/content/site.json`. That script is not part
 of the build, so the committed PNG is what gets published. It lives outside
 `public/images/` so that the image optimiser leaves it exactly as committed.
+
+## Learning resources
+
+*Learn BioTSR* (`/software/learn`) and the two pages it introduces are
+ordinary prerendered pages of the app, with the site's header, menus and
+footer, and one page view each:
+
+| Address | Source | What it is |
+| --- | --- | --- |
+| `/software/learn` | `src/pages/Learn/Learn.jsx`, words in `pages.json` | the learning page, third under BioTSR |
+| `/software/four-triangles-one-key` | `src/pages/Learn/FourTriangles.jsx`, data in `src/content/learn/fourTriangles.json` | the interactive lesson |
+| `/software/first-10-minutes` | `src/pages/Learn/FirstTenMinutes.jsx`, body in `src/content/learn/first-10-minutes.html` | the notebook's recorded run |
+
+The lesson and the notebook are not menu entries. The Learn BioTSR entry
+lists them as its `section` (`src/app/menuData.js`), so on either page the
+BioTSR menu is marked and Learn BioTSR is highlighted as the section (the
+same fill and bar as a current page, in normal weight and without
+`aria-current`), while the page's breadcrumb (BioTSR › Learn BioTSR › page)
+names the page itself.
+
+Downloads live in `public/learn-files/`, a folder no page address shares, so
+nothing collides with `/software/learn`; they are not in the sitemap.
+`check:dist` requires the notebook there, valid, with no stored error or
+local path, requires the video's files (below), and allows no HTML in that
+folder.
+
+**Changing the lesson.** Its numbers are BioTSR 1.0.0 output for 1UBQ chain A,
+in one JSON file. The page checks them against the coordinates before drawing
+the 3D view (`src/components/learn/triangleGeometry.js`), and
+`src/learn.test.js` checks them against the worked example on Understand TSR
+and the notebook's run. Everything the view shows is also text in the page.
+
+**Changing the notebook.** Edit the `.ipynb`, then execute it from a clean
+environment with released BioTSR (a new virtual environment with only
+`jupyterlab` installed, an empty folder; the notebook installs BioTSR
+itself), copy the executed file over the old one, regenerate the page body,
+and update `NOTEBOOK.bytes` and `NOTEBOOK.recordedOn` in
+`src/content/learnResources.js`:
+
+```bash
+jupyter nbconvert --to notebook --execute --output executed.ipynb biotsr-first-10-minutes.ipynb
+python scripts/learn/notebook_preview.py \
+  public/learn-files/biotsr-first-10-minutes.ipynb \
+  src/content/learn/first-10-minutes.html
+```
+
+The script converts what is stored and runs nothing, so every output on the
+page is the recorded run's.
+
+**The video.** *How BioTSR works* is the Watch section, from `VIDEO` in
+`src/content/learnResources.js`. Its files are in `learn-files/`: the MP4
+(H.264 and AAC, fast-start), a poster, a WebVTT caption track for the
+narration and a chapters track. The player
+(`src/components/learn/LearnVideo.jsx`) uses `preload="none"` with the poster
+and native controls. The words and numbers drawn into the picture stay. The
+narration captions are text in their own area under the picture, switched by
+a "CC Captions" toggle beneath the player; the area keeps the height of the
+longest caption, so nothing moves. In full screen, and in the iPhone's own
+player, no captions are drawn on the video (they would land on the text in
+its bottom band); leaving full screen restores the inline setting. There are
+also chapter buttons, a transcript on the page and a download link.
+
+`src/learn.test.js` holds the files to `VIDEO`: the MP4 at its stated size,
+caption cues equal to the transcript's spoken lines and times, and chapters
+equal to the chapter buttons. `check:dist` requires all four files, WebVTT
+tracks and a fast-start MP4. To replace the video, change the four files and
+`VIDEO` together.
+
+Source packages, audio stems, the standalone music file, original recordings
+and intermediate renders never enter the repository. Credits for media go in
+the video's own `credits` line, which says the music is not covered by
+BioTSR's Apache-2.0 software licence.

@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 
 /*
- * The two software pages, loaded on demand for the same reason as the method
+ * The software pages, loaded on demand for the same reason as the method
  * pages (see LazyMethodPage.jsx): their text is Markdown, and the Markdown
  * pipeline is the one large dependency worth keeping out of the first
  * download. Rendering the BioTSR page eagerly put it back into the initial
@@ -15,6 +15,9 @@ import { lazy, Suspense } from 'react'
  */
 const Software = lazy(() => import('../pages/Software/Software'))
 const GetStarted = lazy(() => import('../pages/GetStarted/GetStarted'))
+const Learn = lazy(() => import('../pages/Learn/Learn'))
+const FourTriangles = lazy(() => import('../pages/Learn/FourTriangles'))
+const FirstTenMinutes = lazy(() => import('../pages/Learn/FirstTenMinutes'))
 
 export function LazySoftware() {
   return (
@@ -28,6 +31,30 @@ export function LazyGetStarted() {
   return (
     <Suspense fallback={null}>
       <GetStarted />
+    </Suspense>
+  )
+}
+
+export function LazyLearn() {
+  return (
+    <Suspense fallback={null}>
+      <Learn />
+    </Suspense>
+  )
+}
+
+export function LazyFourTriangles() {
+  return (
+    <Suspense fallback={null}>
+      <FourTriangles />
+    </Suspense>
+  )
+}
+
+export function LazyFirstTenMinutes() {
+  return (
+    <Suspense fallback={null}>
+      <FirstTenMinutes />
     </Suspense>
   )
 }

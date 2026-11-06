@@ -13,6 +13,9 @@
  *   - 404.html is the not-found page, marked noindex, with no canonical;
  *   - the Google Search Console verification file is published unchanged
  *     from public/, so the site stays verified after every deployment;
+ *   - Learn BioTSR's downloads are present, never in the sitemap, and their
+ *     folder holds no HTML, so nothing there escapes these checks; the
+ *     notebook is valid, with no stored error and no local path;
  *   - every other HTML file is a redirect from an old address to a page in
  *     the sitemap, and is itself noindex;
  *   - the social preview image exists at the size the tags declare, and the
@@ -39,6 +42,19 @@ const read = (file) => readFileSync(join(DIST, file), 'utf8')
  * being verified. Not a page, so it is not in the sitemap.
  */
 const VERIFICATION_FILES = ['google69a21a8e64b2f7ee.html']
+
+/*
+ * Learn BioTSR's downloads. Not pages: never in the sitemap, and the folder
+ * may hold no HTML.
+ */
+const LEARN_FILES_DIR = 'learn-files'
+const LEARN_FILES = [
+  'learn-files/biotsr-first-10-minutes.ipynb',
+  'learn-files/how-biotsr-works.mp4',
+  'learn-files/how-biotsr-works-poster.jpg',
+  'learn-files/how-biotsr-works.en.vtt',
+  'learn-files/how-biotsr-works.chapters.vtt',
+]
 
 function attr(html, pattern) {
   const match = html.match(pattern)
@@ -77,6 +93,43 @@ for (const file of VERIFICATION_FILES) {
 const sitemap = existsSync(join(DIST, 'sitemap.xml')) ? read('sitemap.xml') : ''
 const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
 if (locs.length === 0) fail('sitemap.xml lists no URLs')
+
+/* ---- Learn BioTSR files ---- */
+
+for (const file of LEARN_FILES) {
+  if (!existsSync(join(DIST, file))) fail(`missing dist/${file}`)
+}
+if (locs.some((loc) => loc.includes(`/${LEARN_FILES_DIR}/`))) fail(`sitemap.xml lists a file from /${LEARN_FILES_DIR}/`)
+if (existsSync(join(DIST, LEARN_FILES_DIR))) {
+  for (const name of readdirSync(join(DIST, LEARN_FILES_DIR), { recursive: true })) {
+    if (String(name).endsWith('.html')) fail(`dist/${LEARN_FILES_DIR}/${name}: HTML here would escape the page checks`)
+  }
+}
+const notebookFile = join(DIST, 'learn-files/biotsr-first-10-minutes.ipynb')
+if (existsSync(notebookFile)) {
+  try {
+    const notebook = JSON.parse(readFileSync(notebookFile, 'utf8'))
+    const outputs = notebook.cells.flatMap((cell) => cell.outputs ?? [])
+    if (notebook.nbformat !== 4) fail('the Learn BioTSR notebook is not nbformat 4')
+    if (outputs.some((output) => output.output_type === 'error')) fail('the Learn BioTSR notebook stores an error')
+    if (/\/Users\/|\/home\/|\/private\//.test(JSON.stringify(outputs))) fail('the Learn BioTSR notebook stores a local path')
+  } catch {
+    fail('the Learn BioTSR notebook is not valid JSON')
+  }
+}
+
+for (const track of ['learn-files/how-biotsr-works.en.vtt', 'learn-files/how-biotsr-works.chapters.vtt']) {
+  if (existsSync(join(DIST, track)) && !read(track).startsWith('WEBVTT')) fail(`dist/${track} is not WebVTT`)
+}
+const videoFile = join(DIST, 'learn-files/how-biotsr-works.mp4')
+if (existsSync(videoFile)) {
+  // The index (moov) must come before the media data (mdat), or a browser
+  // has to fetch the end of the file before it can start playing.
+  const head = readFileSync(videoFile).subarray(0, 64 * 1024).toString('latin1')
+  const moov = head.indexOf('moov')
+  const mdat = head.indexOf('mdat')
+  if (moov < 0 || (mdat >= 0 && mdat < moov)) fail('the Learn BioTSR video is not fast-start (moov after mdat)')
+}
 
 /* ---- One prerendered file per sitemap URL ---- */
 
@@ -191,5 +244,5 @@ if (failures.length > 0) {
 console.log(
   `check-dist: ${locs.length} pages prerendered with their own metadata, ` +
     `404.html noindex, ${htmlFiles().length - locs.length - 1 - VERIFICATION_FILES.length} redirects, ` +
-    'Search Console file intact, social image OK',
+    'Learn BioTSR files OK, Search Console file intact, social image OK',
 )
