@@ -139,6 +139,14 @@ describe('LearnVideo with a caption track', () => {
     expect(line()).toHaveTextContent('How BioTSR works.')
   })
 
+  it('picks up a cue the track did not announce on the next seek or tick', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    track.activeCues = [{ text: 'How BioTSR works.' }]
+    act(() => document.querySelector('video').dispatchEvent(new Event('timeupdate')))
+    expect(line()).toHaveTextContent('How BioTSR works.')
+  })
+
   it('turns the track off with the toggle, and says so in the area', () => {
     install()
     render(<LearnVideo video={VIDEO} number={1} />)

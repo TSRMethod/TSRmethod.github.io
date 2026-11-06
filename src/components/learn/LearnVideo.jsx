@@ -97,6 +97,10 @@ export default function LearnVideo({ video, number }) {
     update()
     track.addEventListener('cuechange', update)
     element.textTracks.addEventListener?.('change', update)
+    // A cue already active when the track comes back on is not always
+    // announced by cuechange; these catch it on the next seek or tick.
+    element.addEventListener('seeked', update)
+    element.addEventListener('timeupdate', update)
     document.addEventListener('fullscreenchange', onFullscreenChange)
     document.addEventListener('webkitfullscreenchange', onFullscreenChange)
     element.addEventListener('webkitbeginfullscreen', onBegin)
@@ -105,6 +109,8 @@ export default function LearnVideo({ video, number }) {
       if (shownForFullscreen && track.mode === 'showing') track.mode = 'hidden'
       track.removeEventListener('cuechange', update)
       element.textTracks.removeEventListener?.('change', update)
+      element.removeEventListener('seeked', update)
+      element.removeEventListener('timeupdate', update)
       document.removeEventListener('fullscreenchange', onFullscreenChange)
       document.removeEventListener('webkitfullscreenchange', onFullscreenChange)
       element.removeEventListener('webkitbeginfullscreen', onBegin)
