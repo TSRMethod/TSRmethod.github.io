@@ -16,11 +16,11 @@
   --lesson-longest: var(--color-text);
 }
 
-.header {
-  max-width: var(--content-measure);
-}
-
+/* The title takes the page's width, so it sits on one line wherever that
+   fits and wraps naturally where it does not; the paragraph under it keeps
+   the reading measure. */
 .lede {
+  max-width: var(--content-measure);
   margin-top: var(--space-3);
   font-size: var(--text-lg);
   color: var(--color-text-muted);

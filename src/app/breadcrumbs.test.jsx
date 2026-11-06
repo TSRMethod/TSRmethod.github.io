@@ -194,7 +194,7 @@ describe('dropdown highlighting', () => {
     expect(markedTriggers()).toEqual(['BioTSR'])
 
     fireEvent.click(document.querySelector('main a[href="/software/four-triangles-one-key"]'))
-    await screen.findByRole('heading', { level: 1, name: 'Why do four triangles share one BioTSR key?' })
+    await screen.findByRole('heading', { level: 1, name: 'Why do four different triangles share one TSR key?' })
     expect(marked(openDesktop('BioTSR'))).toEqual([['Learn BioTSR', 'section', null]])
 
     await act(async () => navigate(-1))

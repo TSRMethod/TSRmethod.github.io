@@ -81,9 +81,9 @@ describe('the video', () => {
     expect(vtt(VIDEO.chapters)).toEqual(VIDEO.chapterList.map((c) => ({ time: c.time, text: c.title })))
   })
 
-  it('credits its music apart from the software licence', () => {
-    expect(VIDEO.credits).toMatch(/^Music: “Nebula” by The Grey Room \/ Density & Time/)
-    expect(VIDEO.credits).toMatch(/not covered by BioTSR’s Apache-2\.0 software licence/)
+  it('credits its music in one short line, with no licence wording', () => {
+    expect(VIDEO.credits).toBe('Music: “Nebula” by The Grey Room / Density & Time · YouTube Audio Library.')
+    expect(VIDEO.credits).not.toMatch(/Apache|licen[cs]e/i)
   })
 })
 
@@ -145,7 +145,7 @@ describe('the lesson, the notebook and the worked example agree', () => {
 
 describe('the lesson page', () => {
   beforeEach(() => setViewport('desktop'))
-  const HEADING = 'Why do four triangles share one BioTSR key?'
+  const HEADING = 'Why do four different triangles share one TSR key?'
 
   it('sits in the site: full header, BioTSR marked, breadcrumb naming the page', async () => {
     await renderAt('/software/four-triangles-one-key', HEADING)
@@ -155,7 +155,7 @@ describe('the lesson page', () => {
     expect(crumbs.getByRole('link', { name: 'BioTSR' })).toHaveAttribute('href', '/software')
     expect(crumbs.getByRole('link', { name: 'Learn BioTSR' })).toHaveAttribute('href', '/software/learn')
     expect(crumbs.getByText('Four triangles, one key')).toHaveAttribute('aria-current', 'page')
-    await waitFor(() => expect(document.title).toBe('Four triangles, one key | TSR Research Group'))
+    await waitFor(() => expect(document.title).toBe('Why do four different triangles share one TSR key? | TSR Research Group'))
     expect(document.querySelector('link[rel=canonical]')).toHaveAttribute(
       'href',
       'https://tsrmethod.github.io/software/four-triangles-one-key',

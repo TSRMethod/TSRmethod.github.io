@@ -80,9 +80,9 @@ function BinTrack({ lo, hi, values, current, unit }) {
 
 export default function FourTriangles() {
   usePageMetadata({
-    title: 'Four triangles, one key',
+    title: 'Why do four different triangles share one TSR key?',
     description:
-      'Why four different ubiquitin triangles share one BioTSR key: rotate PDB 1UBQ, switch between the triangles and see what a TSR key keeps and what it leaves out. Values from BioTSR 1.0.0.',
+      'Why four different ubiquitin triangles share one TSR key: rotate PDB 1UBQ, switch between the triangles and see what a TSR key keeps and what it leaves out. Values from BioTSR 1.0.0.',
   })
   const hydrating = useHydrating()
   const [selected, setSelected] = useState(0)
@@ -99,7 +99,7 @@ export default function FourTriangles() {
 
   return (
     <article className={`${layout.page} ${styles.lesson}`}>
-      <header className={styles.header}>
+      <header>
         <Breadcrumb
           trail={[
             { to: '/software', label: 'BioTSR' },
@@ -107,7 +107,7 @@ export default function FourTriangles() {
           ]}
           current="Four triangles, one key"
         />
-        <h1 className={layout.title}>Why do four triangles share one BioTSR key?</h1>
+        <h1 className={layout.title}>Why do four different triangles share one TSR key?</h1>
         <p className={styles.lede}>
           Ubiquitin (PDB 1UBQ), chain A, computed with the protein Cα method of BioTSR 1.0.0. Four
           different triangles in it have the same key, {data.key}. Choose one, rotate the

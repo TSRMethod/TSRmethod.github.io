@@ -226,8 +226,8 @@ export default function LearnVideo({ video, number }) {
         <a href={video.src} download>
           Download the video (MP4, {Math.round(video.bytes / 1e6)} MB)
         </a>
-        {video.credits && <span className={styles.credits}> · {video.credits}</span>}
       </p>
+      {video.credits && <p className={styles.credits}>{video.credits}</p>}
     </section>
   )
 }
