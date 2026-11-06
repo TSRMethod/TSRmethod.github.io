@@ -1,0 +1,67 @@
+WEBVTT
+
+NOTE Narration of How BioTSR works, as spoken.
+
+1
+00:00:00.400 --> 00:00:02.340
+How BioTSR works.
+
+2
+00:00:04.130 --> 00:00:07.600
+Ubiquitin: one carbon alpha atom per residue.
+
+3
+00:00:07.800 --> 00:00:10.100
+Pick three from its hydrophobic patch.
+
+4
+00:00:11.100 --> 00:00:13.970
+Three points, one triangle, one number.
+
+5
+00:00:15.400 --> 00:00:17.720
+Each residue type has a fixed code.
+
+6
+00:00:19.500 --> 00:00:22.910
+Its shape gives two bins: angle and distance.
+
+7
+00:00:23.600 --> 00:00:25.640
+Codes and bins make one key.
+
+8
+00:00:27.500 --> 00:00:32.630
+The key records only residue types and shape bins, so different triangles can share it.
+
+9
+00:00:35.400 --> 00:00:40.950
+Any three carbon alpha atoms form a triangle: 70,300 in all.
+
+10
+00:00:42.800 --> 00:00:47.690
+Together, they produce 45,349 distinct keys.
+
+11
+00:00:50.500 --> 00:00:54.110
+Next, barnase, bound to its inhibitor, barstar.
+
+12
+00:00:54.400 --> 00:00:58.800
+The carbon alpha cross method keeps only residues at the interface.
+
+13
+00:00:59.000 --> 00:01:02.360
+Every cross triangle spans both proteins, like this one.
+
+14
+00:01:05.500 --> 00:01:08.790
+Now compare three samples, each with its own keys.
+
+15
+00:01:10.400 --> 00:01:15.360
+9,523 distinct keys occur in all three samples.
+
+16
+00:01:18.400 --> 00:01:22.720
+BioTSR is open source, from the TSR Research Group.

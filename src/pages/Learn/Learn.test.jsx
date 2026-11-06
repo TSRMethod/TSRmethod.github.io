@@ -36,14 +36,19 @@ describe('Learn BioTSR', () => {
     )
   })
 
-  it('orders the resources Explore then Run, numbered from 1 while there is no video', async () => {
+  it('orders the resources Watch, Explore, Run, numbered 1 to 3', async () => {
     await renderPage()
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
-    expect(headings.slice(0, 2)).toEqual([COPY.exploreHeading, COPY.runHeading])
-    expect(VIDEO).toBeNull()
-    expect(document.querySelector('video')).toBeNull()
-    expect(within(card(COPY.exploreHeading)).getByText('1')).toBeInTheDocument()
-    expect(within(card(COPY.runHeading)).getByText('2')).toBeInTheDocument()
+    expect(headings.slice(0, 3)).toEqual([VIDEO.heading, COPY.exploreHeading, COPY.runHeading])
+    expect(document.querySelectorAll('video')).toHaveLength(1)
+    expect(within(card(VIDEO.heading)).getByText('1')).toBeInTheDocument()
+    expect(within(card(COPY.exploreHeading)).getByText('2')).toBeInTheDocument()
+    expect(within(card(COPY.runHeading)).getByText('3')).toBeInTheDocument()
+  })
+
+  it('carries no review notice or draft wording', async () => {
+    await renderPage()
+    expect(document.body.textContent).not.toMatch(/review|draft|not part of PR|local/i)
   })
 
   it('links to the lesson as a page outside the app, with the worked example as the text fallback', async () => {

@@ -48,7 +48,13 @@ const VERIFICATION_FILES = ['google69a21a8e64b2f7ee.html']
  * may hold no HTML.
  */
 const LEARN_FILES_DIR = 'learn-files'
-const LEARN_FILES = ['learn-files/biotsr-first-10-minutes.ipynb']
+const LEARN_FILES = [
+  'learn-files/biotsr-first-10-minutes.ipynb',
+  'learn-files/how-biotsr-works.mp4',
+  'learn-files/how-biotsr-works-poster.jpg',
+  'learn-files/how-biotsr-works.en.vtt',
+  'learn-files/how-biotsr-works.chapters.vtt',
+]
 
 function attr(html, pattern) {
   const match = html.match(pattern)
@@ -110,6 +116,19 @@ if (existsSync(notebookFile)) {
   } catch {
     fail('the Learn BioTSR notebook is not valid JSON')
   }
+}
+
+for (const track of ['learn-files/how-biotsr-works.en.vtt', 'learn-files/how-biotsr-works.chapters.vtt']) {
+  if (existsSync(join(DIST, track)) && !read(track).startsWith('WEBVTT')) fail(`dist/${track} is not WebVTT`)
+}
+const videoFile = join(DIST, 'learn-files/how-biotsr-works.mp4')
+if (existsSync(videoFile)) {
+  // The index (moov) must come before the media data (mdat), or a browser
+  // has to fetch the end of the file before it can start playing.
+  const head = readFileSync(videoFile).subarray(0, 64 * 1024).toString('latin1')
+  const moov = head.indexOf('moov')
+  const mdat = head.indexOf('mdat')
+  if (moov < 0 || (mdat >= 0 && mdat < moov)) fail('the Learn BioTSR video is not fast-start (moov after mdat)')
 }
 
 /* ---- One prerendered file per sitemap URL ---- */

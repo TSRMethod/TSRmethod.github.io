@@ -5,7 +5,7 @@ import { createElement } from 'react'
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from './app/App'
-import { NOTEBOOK } from './content/learnResources'
+import { NOTEBOOK, VIDEO } from './content/learnResources'
 import { verifyTriangles } from './components/learn/triangleGeometry'
 import D from './content/learn/fourTriangles.json'
 import example from './components/figures/tsrOverviewExample.json'
@@ -42,6 +42,48 @@ async function renderAt(path, heading) {
 describe('the notebook download', () => {
   it('is the file the page states, at its size', () => {
     expect(statSync(resolve(PUBLIC, NOTEBOOK.file)).size).toBe(NOTEBOOK.bytes)
+  })
+})
+
+/*
+ * The video's files: present, at the stated size, and saying what the page
+ * says. The caption track and the transcript are one narration; the
+ * chapters track and the chapter buttons are one list.
+ */
+const vtt = (path) =>
+  readFileSync(resolve(PUBLIC, path.replace(/^\//, '')), 'utf8')
+    .split(/\n\n+/)
+    .map((block) => /(\d\d):(\d\d):(\d\d)\.(\d{3}) --> [^\n]+\n([\s\S]+)/.exec(block))
+    .filter(Boolean)
+    .map(([, h, m, sec, ms, text]) => ({ time: h * 3600 + m * 60 + Number(sec) + ms / 1000, text: text.trim() }))
+
+describe('the video', () => {
+  it('is the file the page states, at its size, with its poster', () => {
+    expect(statSync(resolve(PUBLIC, VIDEO.src.slice(1))).size).toBe(VIDEO.bytes)
+    expect(statSync(resolve(PUBLIC, VIDEO.poster.slice(1))).size).toBeGreaterThan(0)
+  })
+
+  it('has captions that say what the transcript says, when it says it', () => {
+    const cues = vtt(VIDEO.captions)
+    const spoken = VIDEO.transcript.filter((line) => line.speech)
+    expect(cues.map((c) => c.text)).toEqual(spoken.map((line) => line.speech))
+    cues.forEach((cue, i) => expect(Math.abs(cue.time - spoken[i].time)).toBeLessThan(0.05))
+  })
+
+  it('says the replaced narration line as recorded, and the corrected numbers on screen', () => {
+    const line = VIDEO.transcript.find((l) => l.speech.startsWith('The carbon alpha cross method'))
+    expect(line.time).toBe(54.4)
+    expect(line.screen).toContain('contact cutoff set to 8 Å')
+    expect(JSON.stringify(VIDEO)).not.toMatch(/bundled/i)
+  })
+
+  it('has chapters matching its chapter buttons', () => {
+    expect(vtt(VIDEO.chapters)).toEqual(VIDEO.chapterList.map((c) => ({ time: c.time, text: c.title })))
+  })
+
+  it('credits its music apart from the software licence', () => {
+    expect(VIDEO.credits).toMatch(/^Music: “Nebula” by The Grey Room \/ Density & Time/)
+    expect(VIDEO.credits).toMatch(/not covered by BioTSR’s Apache-2\.0 software licence/)
   })
 })
 

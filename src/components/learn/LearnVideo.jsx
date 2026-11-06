@@ -19,11 +19,14 @@ import styles from './LearnVideo.module.css'
  *     beneath the player turns that text on and off (aria-pressed); its area
  *     is as tall as the longest line at the current width whether captions
  *     are on or off, so nothing below it moves.
- *   - In full screen (and the iPhone's own player) the area under the picture
- *     is out of sight, so while captions are on the browser draws them on the
- *     video there instead, and stops when the video leaves full screen. If the
- *     visitor turns on the browser's own captions in the page, the area says
- *     so rather than repeating them: the narration is never captioned twice.
+ *   - Full screen (and the iPhone's own player) shows the picture alone:
+ *     no captions are drawn on it automatically, because a cue drawn on the
+ *     video lands on the text already in its bottom band. On leaving full
+ *     screen the inline setting comes back as it was and the area under the
+ *     picture picks up the cue playing now. A visitor can still choose the
+ *     browser's own captions there; if they turn them on in the page, the
+ *     area says so rather than repeating them, so the narration is never
+ *     captioned twice.
  *   - A chapters track. Not every browser shows chapters in its controls, so
  *     the chapters are also buttons under the video that move the playhead.
  *   - A transcript, as text on the page: what is said, and in brackets the
@@ -57,43 +60,49 @@ export default function LearnVideo({ video, number }) {
   /*
    * The caption track's mode follows the toggle: "hidden" while captions are
    * on (the browser loads the cues without drawing them, and the cue playing
-   * now is copied under the picture), "showing" while they are on in full
-   * screen, "disabled" while they are off. A visitor who turns on the
-   * browser's own captions turns the toggle on with them; the area under the
-   * picture then stays empty. No track support: no captions line, and the
-   * transcript is still there.
+   * now is copied under the picture), "disabled" while they are off. A
+   * visitor who turns on the browser's own captions in the page ("showing")
+   * turns the toggle on with them; the area then shows a note instead.
+   *
+   * Entering full screen saves the mode and makes sure nothing is drawn on
+   * the video; leaving it puts the saved mode back. Whatever the visitor
+   * chooses in the full-screen player's own menu lasts only until they leave.
+   * No track support: no captions line, and the transcript is still there.
    */
   useEffect(() => {
     const element = player.current
     const track = element?.textTracks?.[0]
     if (!track) return undefined
-    let shownForFullscreen = false
+    let inline = null // the mode to return to, while the video is in full screen
 
     const update = () => {
-      if (track.mode === 'showing' && !captions) {
-        setCaptions(true)
-        return
+      if (!inline) {
+        if (track.mode === 'showing' && !captions) {
+          setCaptions(true)
+          return
+        }
+        if (track.mode === 'disabled' && captions) track.mode = 'hidden'
       }
-      if (track.mode === 'disabled' && captions) track.mode = 'hidden'
-      setInPlayer(track.mode === 'showing')
+      setInPlayer(!inline && track.mode === 'showing')
       setCue(track.mode === 'hidden' ? [...(track.activeCues ?? [])].map((c) => c.text).join(' ') : '')
     }
-    const fullscreen = (entering) => {
-      if (entering && captions && track.mode === 'hidden') {
-        track.mode = 'showing'
-        shownForFullscreen = true
-      } else if (!entering && shownForFullscreen) {
-        if (track.mode === 'showing') track.mode = 'hidden'
-        shownForFullscreen = false
-      }
+    const enter = () => {
+      if (inline) return
+      inline = track.mode
+      if (track.mode === 'showing') track.mode = 'hidden'
     }
-    const onFullscreenChange = () => fullscreen(isFullscreen(element))
-    const onBegin = () => fullscreen(true)
-    const onEnd = () => fullscreen(false)
+    const leave = () => {
+      if (!inline) return
+      const mode = inline
+      inline = null
+      if (track.mode !== mode) track.mode = mode
+      update()
+    }
+    const onFullscreenChange = () => (isFullscreen(element) ? enter() : leave())
 
     if (!captions) track.mode = 'disabled'
     else if (track.mode === 'disabled') track.mode = 'hidden'
-    if (captions && isFullscreen(element)) fullscreen(true)
+    if (isFullscreen(element)) enter()
     update()
     track.addEventListener('cuechange', update)
     element.textTracks.addEventListener?.('change', update)
@@ -103,18 +112,18 @@ export default function LearnVideo({ video, number }) {
     element.addEventListener('timeupdate', update)
     document.addEventListener('fullscreenchange', onFullscreenChange)
     document.addEventListener('webkitfullscreenchange', onFullscreenChange)
-    element.addEventListener('webkitbeginfullscreen', onBegin)
-    element.addEventListener('webkitendfullscreen', onEnd)
+    element.addEventListener('webkitbeginfullscreen', enter)
+    element.addEventListener('webkitendfullscreen', leave)
     return () => {
-      if (shownForFullscreen && track.mode === 'showing') track.mode = 'hidden'
+      if (inline && track.mode !== inline) track.mode = inline
       track.removeEventListener('cuechange', update)
       element.textTracks.removeEventListener?.('change', update)
       element.removeEventListener('seeked', update)
       element.removeEventListener('timeupdate', update)
       document.removeEventListener('fullscreenchange', onFullscreenChange)
       document.removeEventListener('webkitfullscreenchange', onFullscreenChange)
-      element.removeEventListener('webkitbeginfullscreen', onBegin)
-      element.removeEventListener('webkitendfullscreen', onEnd)
+      element.removeEventListener('webkitbeginfullscreen', enter)
+      element.removeEventListener('webkitendfullscreen', leave)
     }
   }, [captions])
 

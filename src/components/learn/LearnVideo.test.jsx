@@ -155,38 +155,77 @@ describe('LearnVideo with a caption track', () => {
     expect(line()).toHaveTextContent('Narration captions are off.')
   })
 
-  it('lets the browser draw the captions in full screen, and only there', () => {
+  const fullscreen = (element) =>
+    act(() => {
+      Object.defineProperty(document, 'fullscreenElement', { configurable: true, value: element })
+      document.dispatchEvent(new Event('fullscreenchange'))
+    })
+
+  it('draws nothing on the video in full screen, and resumes under the picture on leaving', () => {
     install()
     render(<LearnVideo video={VIDEO} number={1} />)
     const video = document.querySelector('video')
+    fullscreen(video)
+    expect(track.mode).toBe('hidden')
+    fullscreen(null)
+    expect(track.mode).toBe('hidden')
     act(() => {
-      Object.defineProperty(document, 'fullscreenElement', { configurable: true, value: video })
-      document.dispatchEvent(new Event('fullscreenchange'))
+      track.activeCues = [{ text: 'How BioTSR works.' }]
+      track.dispatchEvent(new Event('cuechange'))
     })
+    expect(line()).toHaveTextContent('How BioTSR works.')
+    expect(screen.getByRole('button', { name: 'CC Captions' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('takes the browser’s own captions off the video in full screen, and gives them back after', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    act(() => {
+      track.mode = 'showing'
+    })
+    fullscreen(document.querySelector('video'))
+    expect(track.mode).toBe('hidden')
+    fullscreen(null)
     expect(track.mode).toBe('showing')
     expect(line()).toHaveTextContent('Narration captions are shown on the video.')
-    act(() => {
-      Object.defineProperty(document, 'fullscreenElement', { configurable: true, value: null })
-      document.dispatchEvent(new Event('fullscreenchange'))
-    })
-    expect(track.mode).toBe('hidden')
   })
 
   it('does the same in the iPhone’s own player', () => {
     install()
     render(<LearnVideo video={VIDEO} number={1} />)
     const video = document.querySelector('video')
+    act(() => {
+      track.mode = 'showing'
+    })
     act(() => video.dispatchEvent(new Event('webkitbeginfullscreen')))
-    expect(track.mode).toBe('showing')
-    act(() => video.dispatchEvent(new Event('webkitendfullscreen')))
     expect(track.mode).toBe('hidden')
+    act(() => video.dispatchEvent(new Event('webkitendfullscreen')))
+    expect(track.mode).toBe('showing')
   })
 
-  it('leaves captions off in full screen when they are off', () => {
+  it('leaves captions off through full screen when they are off, and off after', () => {
+    install()
+    render(<LearnVideo video={VIDEO} number={1} />)
+    const toggle = screen.getByRole('button', { name: 'CC Captions' })
+    fireEvent.click(toggle)
+    act(() => document.querySelector('video').dispatchEvent(new Event('webkitbeginfullscreen')))
+    expect(track.mode).toBe('disabled')
+    act(() => document.querySelector('video').dispatchEvent(new Event('webkitendfullscreen')))
+    expect(track.mode).toBe('disabled')
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(line()).toHaveTextContent('Narration captions are off.')
+  })
+
+  it('does not let a choice made in the full-screen player outlast it', () => {
     install()
     render(<LearnVideo video={VIDEO} number={1} />)
     fireEvent.click(screen.getByRole('button', { name: 'CC Captions' }))
-    act(() => document.querySelector('video').dispatchEvent(new Event('webkitbeginfullscreen')))
+    fullscreen(document.querySelector('video'))
+    act(() => {
+      track.mode = 'showing'
+    })
+    expect(screen.getByRole('button', { name: 'CC Captions' })).toHaveAttribute('aria-pressed', 'false')
+    fullscreen(null)
     expect(track.mode).toBe('disabled')
   })
 
