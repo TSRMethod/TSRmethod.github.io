@@ -69,6 +69,11 @@
   /* The artwork is square with its own internal padding; `contain` keeps it
      from being cropped if that ever changes. */
   object-fit: contain;
+  /* The artwork is the mark on its own white square. On the dark theme's
+     navy header that square is rounded into a white disc (its corners are
+     plain white, so nothing of the mark is cut); the light theme leaves it
+     square, exactly as before. */
+  border-radius: var(--mark-radius);
 }
 
 .header[data-scrolled] .brandMark {

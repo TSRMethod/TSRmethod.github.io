@@ -1,5 +1,5 @@
 /*
- * The site's icon set: three inline SVGs, drawn once, used where needed.
+ * The site's icon set: a few inline SVGs, drawn once, used where needed.
  *
  * No icon library. Two or three glyphs do not justify a dependency — the
  * lightest packaged option still adds a runtime and a build-time tree-shaking
@@ -50,6 +50,33 @@ export function LinkedInIcon(props) {
     <svg {...base} fill="currentColor" {...props}>
       <path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M2.75 21h4.46V9.5H2.75z" />
       <path d="M9.75 9.5H14v1.57a4.6 4.6 0 0 1 4.14-2.07c3.06 0 4.36 1.9 4.36 5.2V21h-4.46v-6.1c0-1.6-.57-2.53-1.94-2.53-1.16 0-1.8.75-2.1 1.48-.11.26-.14.62-.14.99V21H9.75z" />
+    </svg>
+  )
+}
+
+/* The theme control's three options (ThemeControl.jsx). */
+export function SunIcon(props) {
+  return (
+    <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" {...props}>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.55 1.55M17.15 17.15l1.55 1.55M5.3 18.7l1.55-1.55M17.15 6.85l1.55-1.55" />
+    </svg>
+  )
+}
+
+export function MoonIcon(props) {
+  return (
+    <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" {...props}>
+      <path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z" />
+    </svg>
+  )
+}
+
+export function SystemIcon(props) {
+  return (
+    <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="4.5" width="18" height="12" rx="2" />
+      <path d="M8.5 20h7M12 16.5V20" />
     </svg>
   )
 }

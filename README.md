@@ -95,6 +95,16 @@ defined once in `src/styles/tokens.css`. Component styles are CSS Modules
 element rules — the previous site defined `code` and `table` styles globally
 and they leaked into every page.
 
+The same tokens are what make the **light and dark themes**. Visitors choose
+Light, Dark or System (the default) from the header or the mobile menu;
+`src/lib/theme.js` remembers the choice and sets `<html data-theme>`, and a
+small script in `index.html` sets it before the first paint. `tokens.css`
+gives every colour a dark value, so a component written with tokens works in
+both themes with nothing more to do, and a raw hex code in a component is the
+one way to break it. `src/styles/tokens.test.js` checks the dark theme's
+contrast. Figures, plots and the QR code stay on white in both themes rather
+than being inverted.
+
 ## Images are optimised automatically
 
 **Nobody has to prepare an image before using it** — not a developer, and

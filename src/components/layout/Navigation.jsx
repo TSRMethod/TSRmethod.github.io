@@ -2,7 +2,19 @@ import { getVisibleNavigation } from '../../app/navigation'
 import useMediaQuery, { NAV_QUERY } from '../../hooks/useMediaQuery'
 import DesktopNav from './DesktopNav'
 import MobileNav from './MobileNav'
+import ThemeMenu from './ThemeControl'
 import styles from './Navigation.module.css'
+
+/* The desktop bar: the menus, then the theme control at the end of the row.
+   On a phone the theme control is in the drawer instead (MobileNav.jsx). */
+function DesktopBar({ items }) {
+  return (
+    <div className={styles.bar}>
+      <DesktopNav items={items} />
+      <ThemeMenu />
+    </div>
+  )
+}
 
 /*
  * Chooses between the desktop bar and the mobile drawer.
@@ -26,7 +38,7 @@ export default function Navigation() {
     return (
       <>
         <div className={styles.desktopOnly}>
-          <DesktopNav items={items} />
+          <DesktopBar items={items} />
         </div>
         <div className={styles.mobileOnly}>
           <MobileNav items={items} />
@@ -35,5 +47,5 @@ export default function Navigation() {
     )
   }
 
-  return isDesktop ? <DesktopNav items={items} /> : <MobileNav items={items} />
+  return isDesktop ? <DesktopBar items={items} /> : <MobileNav items={items} />
 }

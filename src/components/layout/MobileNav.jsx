@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import MenuLink from './MenuLink'
+import { ThemeOptions } from './ThemeControl'
 import { itemContains } from '../../app/menuData'
 import useFocusTrap from '../../hooks/useFocusTrap'
 import useExitTransition from '../../hooks/useExitTransition'
@@ -252,6 +253,9 @@ export default function MobileNav({ items }) {
                   )}
                 </ul>
               </nav>
+
+              {/* After the menu, not in it: a setting, not a destination. */}
+              <ThemeOptions variant="drawer" />
             </div>
           </>,
           document.body,

@@ -94,6 +94,15 @@ hr {
   margin-block: var(--space-6);
 }
 
+/* While the theme changes, every colour changes in the same frame
+   (src/lib/theme.js): no hover or scroll transition is left fading one
+   element into the new theme behind the rest. */
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  transition: none !important;
+}
+
 /* ---- Utilities ---- */
 
 /* Visible to screen readers, hidden visually. */

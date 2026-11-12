@@ -60,17 +60,17 @@
 
 .primary {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-on-primary);
   border: 1px solid var(--color-primary);
 }
 
 .primary:hover {
   background-color: var(--color-primary-dark);
-  color: #ffffff;
+  color: var(--color-on-primary);
 }
 
 .secondary {
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   color: var(--color-primary);
   border: 1px solid var(--color-border-strong);
 }
@@ -156,7 +156,8 @@
   display: block;
   width: 100%;
   height: auto;
-  background-color: #ffffff;
+  background-color: var(--color-figure-bg);
+  padding: var(--figure-inset);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }

@@ -53,7 +53,7 @@
   position: fixed;
   inset: 0;
   z-index: 90;
-  background-color: rgba(31, 41, 51, 0.5);
+  background-color: var(--color-scrim);
   /*
    * NO FILL MODE. `both` would hold the animation's first frame — a
    * transparent scrim, a drawer parked off-screen, a collapsed panel — before
@@ -101,7 +101,7 @@
      into the page behind once the drawer's own end is reached. */
   overflow-y: auto;
   overscroll-behavior: contain;
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   box-shadow: var(--shadow-md);
 
   /* In from the right, which is the edge it is anchored to. */

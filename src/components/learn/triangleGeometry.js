@@ -306,7 +306,7 @@ export function drawScene(ctx, { scene, cam, selected, W, H, DPR, colors }) {
       ctx.arc(B.x, B.y, 12, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
-      ctx.fillStyle = on ? '#ffffff' : colors.ink
+      ctx.fillStyle = on ? colors.onTri : colors.ink
       ctx.font = TAG_FONT
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'

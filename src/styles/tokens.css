@@ -7,6 +7,8 @@
  */
 
 :root {
+  color-scheme: light;
+
   /* ---- Brand colours (carried over from the original TSR site) ---- */
   --color-primary: #0056b3;
   --color-primary-dark: #003d80;
@@ -23,17 +25,62 @@
   --color-surface-raised: #eef2f7;
   --color-border: #d5dce4;
   --color-border-strong: #9aa5b1;
+  /* A card, panel, dropdown or drawer. The page itself in the light theme;
+     a step lighter than the page in the dark one. */
+  --color-panel: #ffffff;
+  /* Text and icons on a solid --color-primary fill (buttons, badges). */
+  --color-on-primary: #ffffff;
+  /* Behind the mobile menu. */
+  --color-scrim: rgba(31, 41, 51, 0.5);
 
   /* ---- Code blocks ---- */
   --color-code-bg: #2d2d2d;
   --color-code-text: #f8f8f2;
   --color-code-chrome: #3d3d3d;
   --color-code-inline-bg: var(--color-surface-raised);
+  /* An outline that keeps a code block distinct from a dark page; none at
+     all in the light theme. */
+  --color-code-border: transparent;
+  --code-outline-width: 0px;
+
+  /* ---- Figures and images ----
+   * Plots, diagrams and the QR code were drawn for a white page, so they stay
+   * on white in both themes: a deliberate light panel, never an inversion.
+   * The inset is the white margin around a figure on a dark page. */
+  --color-figure-bg: #ffffff;
+  --figure-inset: 0px;
+  /* The clustering heat map's distance scale: dark blue for the most similar,
+     white for the least. Deliberately NOT redefined for the dark theme, where
+     a scale that followed the page would turn "darker is more similar" around. */
+  --color-heatmap-similar: #0056b3;
+  --color-heatmap-distant: #ffffff;
+  /* The header mark is drawn on a white square: square on a white page,
+     a white disc on a dark one. */
+  --mark-radius: 0;
 
   /* ---- Status / feedback ---- */
   --color-warning-bg: #fff8e6;
   --color-warning-border: #e0a800;
   --color-focus: #0b7bd4;
+
+  /* ---- The Four Triangles lesson ----
+   * The triangle is amber, as in the group's video of the same example; the
+   * structure uses the usual secondary-structure hues (helix blue, strand
+   * green, coil grey). The dark theme keeps every hue and lightens it.
+   * TriangleViewer.jsx reads these for the canvas, which needs six-digit hex
+   * for the structure colours (triangleGeometry.js adds the depth fog). */
+  --lesson-tri: #c26a00;
+  --lesson-tri-fill: rgba(194, 106, 0, 0.18);
+  --lesson-tri-soft: #fff4e5;
+  --lesson-tri-text: #8a4b00;
+  --lesson-on-tri: #ffffff;
+  --lesson-same: #1f6b44;
+  --lesson-same-soft: #e7f5ec;
+  --lesson-coil: #8792a8;
+  --lesson-helix: #2f7fd0;
+  --lesson-strand: #2f9a5c;
+  --lesson-atom: #3c4559;
+  --lesson-ghost: rgba(60, 69, 89, 0.5);
 
   /* ---- Typography ---- */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
@@ -88,6 +135,123 @@
   --layout-max: 1200px; /* outer page width */
   --sidebar-width: 15rem; /* method-page section nav, desktop only */
   --header-height: 4.5rem;
+}
+
+/*
+ * The dark theme: the same tokens, redefined. Nothing else in the site names
+ * a theme; every component reads these.
+ *
+ * The theme is chosen in src/lib/theme.js, and the first time by the small
+ * script in index.html, which sets <html data-theme> before the page is
+ * painted. Written twice because CSS cannot share one block between a
+ * selector and a media query:
+ *
+ *   1. data-theme="dark": the visitor chose Dark, or chose System (the
+ *      default) on a system set to dark.
+ *   2. No data-theme at all and a dark system: JavaScript is off, so the
+ *      script never ran; the page still follows the system.
+ *
+ * KEEP THE TWO BLOCKS IDENTICAL. src/styles/tokens.test.js fails if they
+ * differ, and checks their text contrast.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary: #72b4ff;
+  --color-primary-dark: #a9d1ff; /* the hover and pressed colour: lighter here */
+  --color-primary-light: #16304f; /* the tint behind current and hovered items */
+  --color-accent: #5aaeea;
+  --color-accent-dark: #8cc8f2;
+
+  --color-text: #e4eaf3;
+  --color-text-muted: #a6b3c7;
+  --color-background: #0d1727;
+  --color-surface: #121e31;
+  --color-surface-raised: #1b2a42;
+  --color-border: #2c3d58;
+  --color-border-strong: #5b6f8f;
+  --color-panel: #152238;
+  --color-on-primary: #0a1424;
+  --color-scrim: rgba(2, 6, 14, 0.7);
+
+  --color-code-bg: #0a121f;
+  --color-code-chrome: #18233a;
+  --color-code-border: #2c3d58;
+  --code-outline-width: 1px;
+
+  --figure-inset: var(--space-2);
+  --mark-radius: 50%;
+
+  --color-warning-bg: #2a2414;
+  --color-warning-border: #d6a630;
+  --color-focus: #7cc0ff;
+
+  --lesson-tri: #f2a43c;
+  --lesson-tri-fill: rgba(242, 164, 60, 0.22);
+  --lesson-tri-soft: #3a2a12;
+  --lesson-tri-text: #ffc97a;
+  --lesson-on-tri: #1a1206;
+  --lesson-same: #6bd49a;
+  --lesson-same-soft: #11301f;
+  --lesson-coil: #8f9cb5;
+  --lesson-helix: #5aa6f0;
+  --lesson-strand: #46bb7b;
+  --lesson-atom: #c7d1e0;
+  --lesson-ghost: rgba(199, 209, 224, 0.55);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --color-primary: #72b4ff;
+    --color-primary-dark: #a9d1ff; /* the hover and pressed colour: lighter here */
+    --color-primary-light: #16304f; /* the tint behind current and hovered items */
+    --color-accent: #5aaeea;
+    --color-accent-dark: #8cc8f2;
+
+    --color-text: #e4eaf3;
+    --color-text-muted: #a6b3c7;
+    --color-background: #0d1727;
+    --color-surface: #121e31;
+    --color-surface-raised: #1b2a42;
+    --color-border: #2c3d58;
+    --color-border-strong: #5b6f8f;
+    --color-panel: #152238;
+    --color-on-primary: #0a1424;
+    --color-scrim: rgba(2, 6, 14, 0.7);
+
+    --color-code-bg: #0a121f;
+    --color-code-chrome: #18233a;
+    --color-code-border: #2c3d58;
+  --code-outline-width: 1px;
+
+    --figure-inset: var(--space-2);
+    --mark-radius: 50%;
+
+    --color-warning-bg: #2a2414;
+    --color-warning-border: #d6a630;
+    --color-focus: #7cc0ff;
+
+    --lesson-tri: #f2a43c;
+    --lesson-tri-fill: rgba(242, 164, 60, 0.22);
+    --lesson-tri-soft: #3a2a12;
+    --lesson-tri-text: #ffc97a;
+    --lesson-on-tri: #1a1206;
+    --lesson-same: #6bd49a;
+    --lesson-same-soft: #11301f;
+    --lesson-coil: #8f9cb5;
+    --lesson-helix: #5aa6f0;
+    --lesson-strand: #46bb7b;
+    --lesson-atom: #c7d1e0;
+    --lesson-ghost: rgba(199, 209, 224, 0.55);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+  }
 }
 
 /*

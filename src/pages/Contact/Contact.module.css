@@ -55,14 +55,14 @@
   border-radius: var(--radius-md);
   background-color: var(--color-primary);
   border: 1px solid var(--color-primary);
-  color: #ffffff;
+  color: var(--color-on-primary);
   font-weight: 600;
   text-decoration: none;
 }
 
 .button:hover {
   background-color: var(--color-primary-dark);
-  color: #ffffff;
+  color: var(--color-on-primary);
 }
 
 .body {
@@ -101,7 +101,8 @@
   flex: none;
   width: 148px;
   height: 148px;
-  background-color: #ffffff;
+  /* A QR code needs its light quiet zone in either theme. */
+  background-color: var(--color-figure-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }

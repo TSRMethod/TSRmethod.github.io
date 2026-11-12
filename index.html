@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--
+      The colour theme, set before anything is painted so no page ever shows
+      the wrong one first: the saved choice, or System, resolved against the
+      operating system. A classic inline script on purpose: it runs as the
+      <head> is read, before the stylesheets apply and before any module
+      loads. src/lib/theme.js takes over from here; theme.test.js runs this
+      script and holds it to the same answers. Without JavaScript neither
+      runs, and tokens.css follows the system by itself.
+    -->
+    <script>
+      (function () {
+        var preference = 'system'
+        try {
+          var saved = localStorage.getItem('tsr-theme')
+          if (saved === 'light' || saved === 'dark' || saved === 'system') preference = saved
+        } catch (e) {}
+        var theme = preference
+        if (theme === 'system') {
+          try {
+            theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          } catch (e) {
+            theme = 'light'
+          }
+        }
+        var root = document.documentElement
+        root.setAttribute('data-theme', theme)
+        root.setAttribute('data-theme-preference', preference)
+        root.style.colorScheme = theme
+      })()
+    </script>
+
+    <!--
       Site-level defaults, and the template for every page's HTML file. The
       build writes each page's own title, description, canonical and og: tags
       over these (scripts/prerender.mjs), and the app keeps them current as

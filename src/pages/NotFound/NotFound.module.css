@@ -26,13 +26,13 @@
   display: inline-block;
   padding: var(--space-3) var(--space-5);
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-on-primary);
   background-color: var(--color-primary);
   border-radius: var(--radius-md);
   text-decoration: none;
 }
 
 .action:hover {
-  color: #ffffff;
+  color: var(--color-on-primary);
   background-color: var(--color-primary-dark);
 }

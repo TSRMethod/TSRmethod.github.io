@@ -63,8 +63,10 @@ for (const leaf of data.leaves) {
 }
 const rowSummary = runs.map((r) => `${r.base} ×${r.count}`).join(', ')
 
+/* The scale is the same in both themes, so the caption's "darker cells are
+   more similar residues" stays true on a dark page (tokens.css). */
 const shade = (distance) =>
-  `color-mix(in srgb, var(--color-primary) ${Math.round((1 - distance) * 100)}%, var(--color-background))`
+  `color-mix(in srgb, var(--color-heatmap-similar) ${Math.round((1 - distance) * 100)}%, var(--color-heatmap-distant))`
 
 export default function ClusteringExample() {
   const description =
