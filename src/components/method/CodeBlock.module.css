@@ -3,6 +3,10 @@
   border-radius: var(--radius-md);
   overflow: hidden; /* clips the children to the rounded corners only */
   background-color: var(--color-code-bg);
+  /* None in the light theme; a hairline on a dark page. An outline, inset,
+     so it adds nothing to the box and draws over the header bar. */
+  outline: var(--code-outline-width) solid var(--color-code-border);
+  outline-offset: calc(-1 * var(--code-outline-width));
 }
 
 .header {

@@ -345,7 +345,11 @@ page is the recorded run's.
 **The video.** *How BioTSR works* is the Watch section, from `VIDEO` in
 `src/content/learnResources.js`. Its files are in `learn-files/`: the MP4
 (H.264 and AAC, fast-start), a poster, a WebVTT caption track for the
-narration and a chapters track. The player
+narration and a chapters track. The poster is the opening title, frame 70
+(2.33 s) of the MP4, where the title, subtitle and credit line are all fully
+drawn: taken from the video with ffmpeg (`-vf "select=eq(n\,70)"`) without
+touching the MP4, and saved at the video's own 1920 × 1080 as a progressive
+JPEG (quality 85, 4:4:4 chroma so the small amber line stays sharp). The player
 (`src/components/learn/LearnVideo.jsx`) uses `preload="none"` with the poster
 and native controls. The words and numbers drawn into the picture stay. The
 narration captions are text in their own area under the picture, switched by

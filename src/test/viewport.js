@@ -21,6 +21,7 @@ const DEFAULT_WIDTH = 1280
 
 let currentWidth = DEFAULT_WIDTH
 let reducedMotion = false
+let darkScheme = false
 const listeners = new Set()
 
 function evaluate(query) {
@@ -37,6 +38,11 @@ function evaluate(query) {
    */
   if (query.includes('prefers-reduced-motion')) {
     return query.includes('reduce') ? reducedMotion : !reducedMotion
+  }
+
+  /* The system's appearance; light unless a test says otherwise. */
+  if (query.includes('prefers-color-scheme')) {
+    return query.includes('dark') ? darkScheme : !darkScheme
   }
 
   return false
@@ -77,8 +83,19 @@ export function setReducedMotion(reduce = true) {
   listeners.forEach((callback) => callback({ matches: reduce }))
 }
 
+/**
+ * Simulate the operating system's light or dark appearance.
+ *
+ * @param {'light' | 'dark'} scheme
+ */
+export function setColorScheme(scheme) {
+  darkScheme = scheme === 'dark'
+  listeners.forEach((callback) => callback({ matches: darkScheme }))
+}
+
 export function resetViewport() {
   currentWidth = DEFAULT_WIDTH
   reducedMotion = false
+  darkScheme = false
   listeners.clear()
 }

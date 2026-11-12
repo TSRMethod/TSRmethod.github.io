@@ -9,6 +9,7 @@ import './styles/base.css'
 import App from './app/App'
 import ownAddress from './app/ownAddress'
 import { PageMetadataCollector } from './lib/pageMetadata'
+import { startThemeSync } from './lib/theme'
 
 /* /people/, /people.html and /People go to /people first (see ownAddress.js). */
 const target = ownAddress(window.location.pathname)
@@ -16,6 +17,10 @@ const target = ownAddress(window.location.pathname)
 if (target) {
   window.location.replace(`${target}${window.location.search}${window.location.hash}`)
 } else {
+  /* index.html has already set the theme; from here it follows the system
+     and other tabs, and the theme control (src/lib/theme.js). */
+  startThemeSync()
+
   const container = document.getElementById('root')
   const app = (
     <StrictMode>

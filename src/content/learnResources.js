@@ -45,7 +45,7 @@ export const NOTEBOOK = {
  */
 export const VIDEO = {
   "heading": "Watch: How BioTSR works",
-  "intro": "An 85-second introduction: how three Cα atoms become one integer key, why different triangles can share a key, and how BioTSR compares structures through the keys they share.",
+  "intro": "See how BioTSR encodes triangles of Cα atoms as integer keys and uses shared keys to compare structures.",
   "credits": "Music: “Nebula” by The Grey Room / Density & Time · YouTube Audio Library.",
   "src": "/learn-files/how-biotsr-works.mp4",
   "poster": "/learn-files/how-biotsr-works-poster.jpg",

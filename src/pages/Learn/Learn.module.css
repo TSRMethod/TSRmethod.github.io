@@ -48,7 +48,7 @@
   margin: 0 0 var(--space-3);
   border-radius: 50%;
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-on-primary);
   font-weight: 700;
 }
 
@@ -93,17 +93,17 @@
 
 .primary {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-on-primary);
   border: 1px solid var(--color-primary);
 }
 
 .primary:hover {
   background-color: var(--color-primary-dark);
-  color: #ffffff;
+  color: var(--color-on-primary);
 }
 
 .secondary {
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   color: var(--color-primary);
   border: 1px solid var(--color-border-strong);
 }

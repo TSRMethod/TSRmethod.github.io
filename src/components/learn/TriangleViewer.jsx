@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import useMediaQuery from '../../hooks/useMediaQuery'
+import { useResolvedTheme } from '../../hooks/useTheme'
 import {
   drawScene,
   homeCamera,
@@ -34,7 +35,8 @@ function readColors(element) {
     triFill: v('--lesson-tri-fill'),
     ghost: v('--lesson-ghost'),
     longest: v('--lesson-longest'),
-    surface: v('--color-background') || '#ffffff',
+    onTri: v('--lesson-on-tri') || '#ffffff',
+    surface: v('--color-panel') || '#ffffff',
     ink: v('--color-text') || '#1f2933',
   }
 }
@@ -48,6 +50,7 @@ export default function TriangleViewer({ scene, selected, onSelect, keysHelpId }
   const pointers = useRef(new Map())
   const gesture = useRef({ pinch: null, moved: 0 })
   const coarse = useMediaQuery('(pointer: coarse)')
+  const theme = useResolvedTheme()
 
   const redraw = () => {
     const canvas = canvasRef.current
@@ -103,6 +106,16 @@ export default function TriangleViewer({ scene, selected, onSelect, keysHelpId }
     redraw()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected])
+
+  /*
+   * The colours are read from the page's tokens at every draw, so a change of
+   * theme only needs a draw. The camera and the chosen triangle are refs and
+   * props, untouched by it: the visitor keeps their view and their triangle.
+   */
+  useEffect(() => {
+    redraw()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme])
 
   const resetView = () => {
     cam.current = homeCamera(scene)

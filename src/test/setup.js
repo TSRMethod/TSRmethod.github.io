@@ -10,6 +10,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { installMatchMedia, resetViewport } from './viewport'
+import { resetThemeStore } from '../lib/theme'
 
 /*
  * Warm the one code-split route before any test renders.
@@ -71,6 +72,19 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   resetViewport()
+
+  /* Every test starts as a first visit: no saved theme, nothing on <html>. */
+  resetThemeStore()
+  try {
+    window.localStorage.clear()
+  } catch {
+    /* A test replaced storage with one that throws; it restores its own. */
+  }
+  const root = document.documentElement
+  delete root.dataset.theme
+  delete root.dataset.themePreference
+  delete root.dataset.themeSwitching
+  root.style.colorScheme = ''
 })
 
 /*

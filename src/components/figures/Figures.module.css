@@ -21,7 +21,7 @@
   display: block;
   width: 100%;
   height: 10rem;
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }
@@ -67,7 +67,7 @@
 
 .point {
   fill: var(--color-accent);
-  stroke: var(--color-background);
+  stroke: var(--color-panel);
   stroke-width: 1.5;
 }
 
@@ -86,7 +86,7 @@
 .atomC,
 .atomN,
 .atomO {
-  stroke: var(--color-background);
+  stroke: var(--color-panel);
   stroke-width: 2;
 }
 
@@ -159,7 +159,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: 2px var(--space-2);
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }
@@ -189,13 +189,13 @@
 
 .atomA {
   fill: var(--color-primary);
-  stroke: var(--color-background);
+  stroke: var(--color-panel);
   stroke-width: 2;
 }
 
 .atomB {
   fill: var(--color-primary-dark);
-  stroke: var(--color-background);
+  stroke: var(--color-panel);
   stroke-width: 2;
 }
 
@@ -231,7 +231,7 @@
 
 .scrollFigure {
   padding: var(--space-3);
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }

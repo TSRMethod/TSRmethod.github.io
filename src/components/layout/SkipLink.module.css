@@ -9,7 +9,7 @@
   z-index: 200;
   padding: var(--space-2) var(--space-4);
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-on-primary);
   background-color: var(--color-primary);
   border-radius: var(--radius-sm);
   text-decoration: none;

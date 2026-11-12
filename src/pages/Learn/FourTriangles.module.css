@@ -1,18 +1,8 @@
-/* The lesson's own colours: the triangle is amber, as in the group's video of
-   the same example; the structure uses the site's figure colours. Read by
+/* The lesson's colours are design tokens (tokens.css), with a light and a
+   dark value each; these two follow the page's own. Read by
    TriangleViewer.jsx for the canvas as well. */
 .lesson {
-  --lesson-tri: #c26a00;
-  --lesson-tri-fill: rgba(194, 106, 0, 0.18);
-  --lesson-tri-soft: #fff4e5;
-  --lesson-same: #1f6b44;
-  --lesson-same-soft: #e7f5ec;
   --lesson-mol-bg: var(--color-surface);
-  --lesson-coil: #8792a8;
-  --lesson-helix: #2f7fd0;
-  --lesson-strand: #2f9a5c;
-  --lesson-atom: #3c4559;
-  --lesson-ghost: rgba(60, 69, 89, 0.5);
   --lesson-longest: var(--color-text);
 }
 
@@ -41,7 +31,7 @@
 
 .viewer,
 .panel {
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -77,7 +67,7 @@
 }
 
 .changes {
-  color: #8a4b00;
+  color: var(--lesson-tri-text);
   background-color: var(--lesson-tri-soft);
 }
 
@@ -140,7 +130,7 @@
   margin: -11px 0 0 -11px;
   border: 2px solid var(--lesson-ghost);
   border-radius: 50%;
-  background-color: var(--color-background);
+  background-color: var(--color-panel);
   color: var(--color-text-muted);
   font-size: 0.7rem;
   font-weight: 700;
@@ -159,7 +149,7 @@
   z-index: 2;
   border-color: var(--lesson-tri);
   background-color: var(--lesson-tri);
-  color: #ffffff;
+  color: var(--lesson-on-tri);
 }
 
 .binEnds {

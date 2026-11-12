@@ -159,14 +159,16 @@
  */
 .backbone {
   stroke-width: 1.5;
-  opacity: 0.14;
+  /* --hero-figure-boost is 1 in the light theme and a little more in the
+     dark one (tokens.css); the three layers keep their order of weight. */
+  opacity: calc(0.14 * var(--hero-figure-boost));
 }
 
 /* The near half, drawn over the whole trace: thicker and a little stronger,
    which is the entire depth cue. */
 .backboneNear {
   stroke-width: 2.1;
-  opacity: 0.24;
+  opacity: calc(0.24 * var(--hero-figure-boost));
 }
 
 /*
@@ -190,7 +192,7 @@
  */
 .residue {
   fill: var(--color-primary);
-  opacity: var(--residue-depth);
+  opacity: calc(var(--residue-depth) * var(--hero-figure-boost));
   animation: tsr-residue-in 900ms ease-out both;
   animation-delay: calc(1.4s + var(--residue-index) * 45ms);
 }
@@ -200,7 +202,7 @@
     opacity: 0;
   }
   to {
-    opacity: var(--residue-depth);
+    opacity: calc(var(--residue-depth) * var(--hero-figure-boost));
   }
 }
 
@@ -392,7 +394,7 @@
   }
 
   .residue {
-    opacity: var(--residue-depth);
+    opacity: calc(var(--residue-depth) * var(--hero-figure-boost));
   }
 
   .triplet:not(.primaryTriplet) {

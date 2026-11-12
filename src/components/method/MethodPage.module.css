@@ -41,6 +41,9 @@
 .figure img {
   width: 100%;
   height: auto;
+  /* Drawn for a white page: shown on white in both themes (tokens.css). */
+  background-color: var(--color-figure-bg);
+  padding: var(--figure-inset);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }

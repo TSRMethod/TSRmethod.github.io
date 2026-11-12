@@ -22,3 +22,10 @@
     display: none;
   }
 }
+
+/* The desktop navigation and the theme control, side by side. */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

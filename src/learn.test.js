@@ -63,6 +63,22 @@ describe('the video', () => {
     expect(statSync(resolve(PUBLIC, VIDEO.poster.slice(1))).size).toBeGreaterThan(0)
   })
 
+  /* The poster is a frame of the video (docs/DEPLOYMENT.md), so it has the
+     video's own size: the player reserves that box, and nothing is cropped. */
+  it('has a poster the size of the video, small enough to arrive first', () => {
+    const jpeg = readFileSync(resolve(PUBLIC, VIDEO.poster.slice(1)))
+    let at = 2
+    let size = null
+    while (at < jpeg.length && !size) {
+      const marker = jpeg[at + 1]
+      const length = jpeg.readUInt16BE(at + 2)
+      if (marker >= 0xc0 && marker <= 0xc3) size = [jpeg.readUInt16BE(at + 7), jpeg.readUInt16BE(at + 5)]
+      at += 2 + length
+    }
+    expect(size).toEqual([VIDEO.width, VIDEO.height])
+    expect(jpeg.length).toBeLessThan(150_000)
+  })
+
   it('has captions that say what the transcript says, when it says it', () => {
     const cues = vtt(VIDEO.captions)
     const spoken = VIDEO.transcript.filter((line) => line.speech)

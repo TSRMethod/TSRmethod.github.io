@@ -74,7 +74,7 @@
     "title": "Learn BioTSR",
     "eyebrow": "BioTSR",
     "summary": "An interactive lesson and a hands-on notebook that follow one ubiquitin triangle from three atoms to a BioTSR key, and show why different triangles can share it.",
-    "intro": "Follow one triangle of ubiquitin from three atoms to a BioTSR key, see why different triangles can share that key, then compute it yourself. Each resource stands on its own.",
+    "intro": "Learn how TSR represents protein structures and how to use BioTSR through a short video, an interactive example and a hands-on notebook. Start with whichever resource interests you.",
     "exploreHeading": "Explore: Four triangles, one key",
     "exploreMeta": "About 5 minutes · in your browser, nothing to install",
     "exploreBody": "Four different triangles in ubiquitin have the same key, 17637781. Rotate the real structure, switch between the triangles, and see what a key keeps and what it leaves out.",
