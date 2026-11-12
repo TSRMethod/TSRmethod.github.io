@@ -54,6 +54,11 @@
      a scale that followed the page would turn "darker is more similar" around. */
   --color-heatmap-similar: #0056b3;
   --color-heatmap-distant: #ffffff;
+  /* The homepage protein figure: how strongly the fold and its residues are
+     drawn, as a multiple of their opacities (HeroGeometry.module.css). Thin
+     light lines on navy read fainter than the same contrast in dark lines on
+     white, so the dark theme draws them a little stronger. */
+  --hero-figure-boost: 1;
   /* The header mark is drawn on a white square: square on a white page,
      a white disc on a dark one. */
   --mark-radius: 0;
@@ -73,10 +78,12 @@
   --lesson-tri-fill: rgba(194, 106, 0, 0.18);
   --lesson-tri-soft: #fff4e5;
   --lesson-tri-text: #8a4b00;
-  --lesson-on-tri: #ffffff;
+  /* Dark on amber: white was 3.9:1 on #c26a00, this is 4.7:1. */
+  --lesson-on-tri: #1a1206;
   --lesson-same: #1f6b44;
   --lesson-same-soft: #e7f5ec;
-  --lesson-coil: #8792a8;
+  /* 3.1:1 on the canvas, the 3:1 a graphical line needs (#8792a8 was 2.97). */
+  --lesson-coil: #848fa5;
   --lesson-helix: #2f7fd0;
   --lesson-strand: #2f9a5c;
   --lesson-atom: #3c4559;
@@ -181,6 +188,7 @@
 
   --figure-inset: var(--space-2);
   --mark-radius: 50%;
+  --hero-figure-boost: 1.35;
 
   --color-warning-bg: #2a2414;
   --color-warning-border: #d6a630;
@@ -227,10 +235,11 @@
     --color-code-bg: #0a121f;
     --color-code-chrome: #18233a;
     --color-code-border: #2c3d58;
-  --code-outline-width: 1px;
+    --code-outline-width: 1px;
 
     --figure-inset: var(--space-2);
     --mark-radius: 50%;
+    --hero-figure-boost: 1.35;
 
     --color-warning-bg: #2a2414;
     --color-warning-border: #d6a630;

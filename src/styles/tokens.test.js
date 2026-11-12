@@ -111,6 +111,25 @@ describe('the dark theme tokens', () => {
   })
 })
 
+/*
+ * The light theme was kept as it was, with two lesson colours corrected: the
+ * digits on the amber tag (normal-size text, 4.5:1) and the coil line (a
+ * graphical object, 3:1 against the canvas it is drawn on).
+ */
+describe('the light theme lesson colours', () => {
+  it('give the amber tag digits at least 4.5:1, on the same amber', () => {
+    expect(value(light, '--lesson-tri')).toBe('#c26a00')
+    expect(contrast(value(light, '--lesson-on-tri'), value(light, '--lesson-tri'))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it.each(['--lesson-tri', '--lesson-atom', '--lesson-helix', '--lesson-strand', '--lesson-coil'])(
+    'give %s at least 3:1 against the canvas',
+    (name) => {
+      expect(contrast(value(light, name), value(light, '--color-surface'))).toBeGreaterThanOrEqual(3)
+    },
+  )
+})
+
 describe('both themes', () => {
   /* triangleGeometry.js fades these with depth by adding an alpha to the hex. */
   it.each(['--lesson-coil', '--lesson-helix', '--lesson-strand', '--lesson-atom'])(
