@@ -937,6 +937,10 @@ content:
             label: BioTSR page button
             type: string
             required: true
+          - name: learnCta
+            label: Learn BioTSR button
+            type: string
+            required: true
       - name: introduction
         label: What TSR is
         type: object

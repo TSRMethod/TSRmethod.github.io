@@ -338,6 +338,10 @@ describe('BioTSR on the home page', () => {
       'href',
       '/software',
     )
+    expect(section.getByRole('link', { name: home.software.learnCta })).toHaveAttribute(
+      'href',
+      '/software/learn',
+    )
     // The historical repositories have their own page, not a place here.
     expect(section.queryByText(/TSR-Package|TSR_AMINOACID_PACKAGE/)).not.toBeInTheDocument()
   })
