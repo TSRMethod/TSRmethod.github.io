@@ -16,7 +16,12 @@
   }
 }
 
-.highlights {
+/*
+ * Two classes, because reset.css's `ul[class]` (one class and one element)
+ * outranks a single class: with `.highlights` alone the padding was reset to
+ * zero and the bullets hung in the page gutter on phones and tablets.
+ */
+.layout .highlights {
   margin: 0;
   padding-left: var(--space-5);
   max-width: var(--content-measure);

@@ -36,11 +36,13 @@ export default function Home() {
       <Hero />
 
       {/*
-       * Why, then what to use, then how it works. The research question comes
-       * first, because it is what the group is for; then BioTSR, where a
-       * visitor who wants to compute keys starts; then what TSR is, in four
-       * steps; then a short way into every method and analysis page; then the
-       * papers and the group.
+       * What to use, then why, then how it works. BioTSR comes straight after
+       * the hero, so a researcher who came for the software meets it on the
+       * first screen; the research question follows, so the group's purpose
+       * — a long-term goal, set apart from what BioTSR does today — is never
+       * more than one section away; then what TSR is, in four steps; then a
+       * short way into every method and analysis page; then the papers, the
+       * group, its funding and how to get in touch.
        *
        * Tone alternates band by band, and is decided here rather than inside
        * each section, so the rhythm can be read off in one place. The first
@@ -50,8 +52,8 @@ export default function Home() {
        * a muted band has a rule along each edge, so the pair still reads as
        * two sections, where two plain bands would run together.
        */}
-      <ResearchVision />
-      <SoftwareOverview tone="muted" />
+      <SoftwareOverview />
+      <ResearchVision tone="muted" />
       <TsrIntroduction />
       <ResearchPreview tone="muted" />
       <PublicationHighlights />

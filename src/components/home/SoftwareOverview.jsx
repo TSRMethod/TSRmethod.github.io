@@ -6,7 +6,6 @@ import HomeSection from './HomeSection'
 import CodeBlock from '../method/CodeBlock'
 import styles from './SoftwareOverview.module.css'
 
-const SOFTWARE_PATH = '/software'
 const GET_STARTED_PATH = '/software/get-started'
 const LEARN_PATH = '/software/learn'
 
@@ -16,9 +15,10 @@ const LEARN_PATH = '/software/learn'
  *
  * Two columns on a wide screen. On the left, what BioTSR does, as a sentence
  * and a few short points from home.json. On the right, the released version,
- * the one command that installs it, and the ways in: Getting started first,
- * then the BioTSR page and Learn BioTSR (the video, the interactive lesson
- * and the notebook), in the same secondary style. On a phone the columns
+ * the one command that installs it, and the next steps: Getting started
+ * first, then Learn BioTSR (the video, the interactive lesson and the
+ * notebook) in the secondary style. The BioTSR page itself is the hero's
+ * second button, so it is not offered again here. On a phone the columns
  * stack in that order and the buttons wrap.
  *
  * The version and the install command are built from the release record, the
@@ -27,7 +27,7 @@ const LEARN_PATH = '/software/learn'
  * release record the section says nothing rather than guess.
  */
 export default function SoftwareOverview({ tone }) {
-  const { heading, intro, highlights = [], installLabel, getStartedCta, softwareCta, learnCta } =
+  const { heading, intro, highlights = [], installLabel, getStartedCta, learnCta } =
     home.software
   const release = softwareRelease
 
@@ -58,11 +58,6 @@ export default function SoftwareOverview({ tone }) {
             {isRouteImplemented(GET_STARTED_PATH) && (
               <Link to={GET_STARTED_PATH} className={styles.primary}>
                 {getStartedCta}
-              </Link>
-            )}
-            {isRouteImplemented(SOFTWARE_PATH) && (
-              <Link to={SOFTWARE_PATH} className={styles.secondary}>
-                {softwareCta}
               </Link>
             )}
             {isRouteImplemented(LEARN_PATH) && (

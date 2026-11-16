@@ -1,35 +1,34 @@
 {
   "hero": {
-    "lede": "We develop the Triangular Spatial Relationship (TSR) method: an alignment-free way of describing a biomolecular 3D structure as a set of integer keys, so that structures can be compared, clustered and searched without superimposition. BioTSR, our software, computes those keys.",
+    "lede": "We develop the Triangular Spatial Relationship (TSR) method for comparing biomolecular 3D structures without alignment. TSR represents structures as integer keys; our software, BioTSR, computes these keys for structural comparison and clustering.",
     "primaryCta": "Understand TSR",
-    "secondaryCta": "Get started with BioTSR"
+    "secondaryCta": "Explore BioTSR"
   },
   "researchVision": {
     "heading": "Toward Deciphering Molecular Recognition",
     "question": "Is there a general molecular recognition code that governs how biomolecules recognize one another and how those interactions reshape molecular structure?",
-    "body": "Comparing TSR keys across structures can identify conserved, altered, and interaction-associated spatial patterns. Our long-term goal is to combine these interpretable structural descriptors with machine learning, AI-generated structures, and simulation-derived ensembles to connect structural prediction with mechanistic understanding."
+    "body": "Comparing TSR keys across structures can identify conserved, altered and interaction-associated spatial patterns. Our long-term goal is to combine these interpretable descriptors with machine learning, AI-generated structures and simulation-derived ensembles to connect structure prediction with mechanistic understanding."
   },
   "software": {
     "heading": "BioTSR",
-    "intro": "BioTSR is the group's software for computing TSR keys: one Python package and one command line for the methods described on this site.",
+    "intro": "BioTSR provides Python and command-line tools for computing TSR keys and comparing structures through their shared keys.",
     "highlights": [
-      "Four calculation families: protein Cα, atomic protein, ligands, carbohydrates and nucleotides, and cross TSR for the interface between two molecules.",
-      "Whole datasets from one CSV manifest, processed in parallel as part of the standard installation.",
+      "Proteins (Cα or heavy atoms), ligands, carbohydrates and nucleotides, and the interface between two molecules (cross TSR).",
+      "Whole datasets from one CSV manifest, processed in parallel.",
       "Common keys from the command line; similarity, clustering and a clustered heat map from Python."
     ],
     "installLabel": "Install from PyPI",
-    "getStartedCta": "Get started with BioTSR",
-    "softwareCta": "Explore BioTSR",
+    "getStartedCta": "Get started",
     "learnCta": "Learn BioTSR"
   },
   "introduction": {
     "heading": "How TSR represents a structure",
     "body": "The four steps below follow one triangle of ubiquitin from its atoms to the integer key BioTSR computes for it.",
-    "cta": "Read the full explanation, with a worked example"
+    "cta": "Full explanation and worked example"
   },
   "research": {
     "heading": "Methods & research",
-    "intro": "The core representation has been extended to amino acids, drugs, ligands, nucleotides and the interfaces between molecules, and the keys it produces are analysed and modelled in several ways. Each method has its own page explaining the science and the paper behind it.",
+    "intro": "The core representation has been extended to amino acids, drugs, ligands, nucleotides and the interfaces between molecules. Each method and analysis has its own page, with the paper behind it.",
     "methodsCard": "Amino-acid grouping, mirror images, size filtering, secondary structure, amino acids, drugs, nucleotides and nucleotide–protein interfaces.",
     "analysisCard": "Finding the keys structures share, clustering structures by key similarity, and models trained on key frequencies.",
     "earlierCard": "The programs the methods were first published with, and separate tools written for particular papers.",
@@ -42,12 +41,12 @@
   },
   "group": {
     "heading": "The research group",
-    "intro": "TSR is developed jointly by the Department of Chemistry and the School of Computing and Informatics at the University of Louisiana at Lafayette, bringing together faculty, doctoral researchers and undergraduate students from chemistry, biology and computer science.",
+    "intro": "Our group brings together researchers from Chemistry and Computing and Informatics at the University of Louisiana at Lafayette.",
     "cta": "Meet the group"
   },
   "funding": {
     "heading": "Funding & Support",
-    "primarySupport": "TSR research has been supported by the National Institutes of Health (NIH), National Institute of General Medical Sciences (NIGMS), and the Louisiana Board of Regents Support Fund. These awards support the development and application of computational methods for studying biomolecular 3D structures and molecular interactions.",
+    "primarySupport": "TSR research has been supported by the National Institutes of Health (NIH), National Institute of General Medical Sciences (NIGMS), and the Louisiana Board of Regents Support Fund.",
     "computingSupport": "Large-scale computational studies are also supported by high-performance computing resources provided by the Louisiana Optical Network Infrastructure (LONI).",
     "detailsLabel": "Funding details & acknowledgments",
     "awards": [
@@ -79,7 +78,7 @@
   },
   "contact": {
     "heading": "Working with us",
-    "body": "We welcome questions about the method, about using BioTSR on your own structures, and about research collaboration. Problems with the software are best reported as issues on the relevant repository.",
+    "body": "We welcome questions about the method, using BioTSR on your own structures, and research collaboration. Please report software problems as issues on the relevant repository.",
     "cta": "Email the group"
   }
 }

@@ -13,7 +13,9 @@ import styles from './Hero.module.css'
  * edit and cannot leave the home page saying something different.
  *
  * Two calls to action, for the two reasons people arrive: to understand the
- * method, or to use the software. The second is shown only while its page
+ * method, or to find the software. The second goes to the BioTSR page; the
+ * BioTSR section just below offers the next steps (Getting started, Learn
+ * BioTSR), so no button is repeated. It is shown only while its page
  * resolves, like every other internal link on the site.
  *
  * The figure behind all of this is decorative and is described where it is
@@ -22,7 +24,7 @@ import styles from './Hero.module.css'
  * fact that this is the page's only <h1> — changes because there is now a
  * picture behind them.
  */
-const GET_STARTED_PATH = '/software/get-started'
+const SOFTWARE_PATH = '/software'
 
 export default function Hero() {
   const { lede, primaryCta, secondaryCta } = home.hero
@@ -41,8 +43,8 @@ export default function Hero() {
           <Link to="/tsr" className={styles.primary}>
             {primaryCta}
           </Link>
-          {isRouteImplemented(GET_STARTED_PATH) && (
-            <Link to={GET_STARTED_PATH} className={styles.secondary}>
+          {isRouteImplemented(SOFTWARE_PATH) && (
+            <Link to={SOFTWARE_PATH} className={styles.secondary}>
               {secondaryCta}
             </Link>
           )}

@@ -190,7 +190,7 @@ stays as it was until it is corrected.
 
 1. Click **Home page**.
 2. Each section of the page is a group of fields — the opening section,
-   the research vision, BioTSR, what TSR is, Methods & research, the
+   BioTSR, the research vision, what TSR is, Methods & research, the
    publications, the group, funding & support, and the closing invitation.
    The diagram under "What TSR is" is drawn from a BioTSR calculation and has
    no field here.
@@ -218,14 +218,16 @@ change.
 
 ### Research vision
 
-Under **Home page** you will also find **Research vision** — the first
-section under the opening one, with the scientific question in it. The
-heading, the question and one short paragraph are editable here.
+Under **Home page** you will also find **Research vision** — the section
+after BioTSR, with the scientific question in it. The heading, the question
+and one short paragraph are editable here.
 
 **Keep the question a question**: it is what the research is trying to find
 out, and the site should not read as though the answer is already known. And
-keep the paragraph short. How TSR works is explained two sections further
-down, so this paragraph only needs to say what the research is for.
+keep the paragraph short. How TSR works is explained in the next section, so
+this paragraph only needs to say what the research is for. Keep what TSR keys
+can already show apart from what the group hopes to do: the paragraph's second
+sentence starts "Our long-term goal is", and a check on the site expects it to.
 
 ### Funding & support
 
