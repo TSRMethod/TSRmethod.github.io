@@ -59,9 +59,13 @@
      light lines on navy read fainter than the same contrast in dark lines on
      white, so the dark theme draws them a little stronger. */
   --hero-figure-boost: 1;
-  /* The header mark is drawn on a white square: square on a white page,
-     a white disc on a dark one. */
-  --mark-radius: 0;
+  /* The group's symbol (src/components/brand/BrandSymbol.jsx): its two
+     parts and the θ sector, in each theme's colours from the brand guide.
+     The footer draws it in one muted colour. */
+  --brand-symbol-a: #0b2545;
+  --brand-symbol-b: #0056b3;
+  --brand-symbol-sector: #dcebff;
+  --brand-footer-mark: var(--color-border-strong);
 
   /* ---- Status / feedback ---- */
   --color-warning-bg: #fff8e6;
@@ -94,6 +98,9 @@
     Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+  /* The wordmark only (IBM Plex Sans, served from /fonts with its licence;
+     see base.css). Body text keeps --font-sans. */
+  --font-brand: "IBM Plex Sans", var(--font-sans);
 
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
@@ -187,7 +194,9 @@
   --code-outline-width: 1px;
 
   --figure-inset: var(--space-2);
-  --mark-radius: 50%;
+  --brand-symbol-a: #dcebff;
+  --brand-symbol-b: #72b4ff;
+  --brand-symbol-sector: #0b2545;
   --hero-figure-boost: 1.35;
 
   --color-warning-bg: #2a2414;
@@ -238,7 +247,9 @@
     --code-outline-width: 1px;
 
     --figure-inset: var(--space-2);
-    --mark-radius: 50%;
+    --brand-symbol-a: #dcebff;
+    --brand-symbol-b: #72b4ff;
+    --brand-symbol-sector: #0b2545;
     --hero-figure-boost: 1.35;
 
     --color-warning-bg: #2a2414;

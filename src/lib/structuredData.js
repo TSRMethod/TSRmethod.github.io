@@ -33,7 +33,7 @@ function homeData() {
       '@type': 'Organization',
       name: siteConfig.name,
       url: absolute('/'),
-      logo: absolute('/images/brand/tsr-mark.png'),
+      logo: absolute('/images/brand/tsr-logo.png'),
       email: siteConfig.email,
       sameAs: [siteConfig.github.orgUrl],
     },

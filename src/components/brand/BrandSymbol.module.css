@@ -1,0 +1,21 @@
+/* One colour by default (the mono tone): whatever `color` the parent sets. */
+.symbol {
+  display: block;
+  fill: currentColor;
+  /* The artwork is wider than it is tall; the height is set by the caller
+     and the width follows the viewBox. */
+  height: 100%;
+  width: auto;
+}
+
+.a {
+  fill: var(--brand-symbol-a);
+}
+
+.b {
+  fill: var(--brand-symbol-b);
+}
+
+.sector {
+  fill: var(--brand-symbol-sector);
+}

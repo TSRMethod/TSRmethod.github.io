@@ -52,6 +52,7 @@ src/
     shared/     Small widely-used pieces (error boundary, scroll handling)
     method/     Reusable building blocks for method/tutorial pages
     home/       The home page's sections
+    brand/      The group's symbol (symbol.json, drawn inline) and wordmark helper
   content/      Editable content — Markdown and JSON, no React. See its README.
   lib/          Content plumbing (frontmatter parsing, heading extraction)
   pages/        One folder per top-level page — Home, Publications, People,
@@ -63,13 +64,15 @@ src/
 public/
   images/       Content images, referenced from Markdown and JSON
     uploads/    Pages CMS uploads
-    brand/      The site mark, derived from assets/brand/
+    brand/      tsr-logo.png, the Organization logo in structured data
+  fonts/        IBM Plex Sans for the header wordmark, with its licence (OFL.txt)
   share/        The website's QR code (SVG, PNG) and the social preview card
+  favicon.svg, favicon.ico, apple-touch-icon.png   drawn by scripts/brand-assets.mjs
   robots.txt    Crawling policy; sitemap.xml is generated at build time
 
 scripts/        Build-time tooling — image optimisation, sitemap routes,
                 prerendering and the check of the built pages
-assets/brand/   Logo masters. NOT served; see its README for what is derived
+assets/brand/   Brand sources for the generated images. NOT served; see its README
 ```
 
 Every public page now exists: the home page, the method and analysis pages,
@@ -170,7 +173,7 @@ Where to look, depending on what you need to do:
 | Change what a page says | [`src/content/README.md`](src/content/README.md) |
 | Do that without touching code | [`docs/CONTENT-EDITOR-GUIDE.md`](docs/CONTENT-EDITOR-GUIDE.md) |
 | Understand how it deploys | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
-| Replace the logo | [`assets/brand/README.md`](assets/brand/README.md) |
+| Use or regenerate the logo | [`assets/brand/README.md`](assets/brand/README.md) |
 | Know what still needs an author | [`CONTENT-REVIEW.md`](CONTENT-REVIEW.md) |
 
 ### The five things worth knowing before changing anything

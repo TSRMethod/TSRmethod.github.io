@@ -77,7 +77,17 @@ function htmlFiles(dir = DIST) {
 
 /* ---- Files that must exist ---- */
 
-for (const file of ['index.html', '404.html', 'sitemap.xml', 'robots.txt', 'favicon.ico', '.nojekyll']) {
+const BRAND_FILES = [
+  'favicon.svg',
+  'favicon.ico',
+  'apple-touch-icon.png',
+  'images/brand/tsr-logo.png',
+  'fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff2',
+  'fonts/ibm-plex-sans/IBMPlexSans-SemiBold-Latin1.woff2',
+  /* The SIL Open Font License must travel with the font files. */
+  'fonts/ibm-plex-sans/OFL.txt',
+]
+for (const file of ['index.html', '404.html', 'sitemap.xml', 'robots.txt', '.nojekyll', ...BRAND_FILES]) {
   if (!existsSync(join(DIST, file))) fail(`missing dist/${file}`)
 }
 if (existsSync(join(DIST, '.vite'))) fail('dist/.vite (the build manifest) would be published')

@@ -56,32 +56,26 @@
 }
 
 /*
- * The mark tightens by a quarter of a rem once the page moves — the only part
- * of the "more compact" scrolled state that is safe to animate, because the
- * header's own min-height does not follow it and nothing below moves.
+ * The symbol tightens by a quarter of a rem once the page moves — the only
+ * part of the "more compact" scrolled state that is safe to animate, because
+ * the header's own min-height does not follow it and nothing below moves.
+ * The box sets the height; the symbol's width follows its viewBox.
  */
 .brandMark {
   flex-shrink: 0;
-  width: 2.5rem;
+  display: block;
   height: 2.5rem;
-  transition: width var(--motion-base) var(--motion-ease),
-    height var(--motion-base) var(--motion-ease);
-  /* The artwork is square with its own internal padding; `contain` keeps it
-     from being cropped if that ever changes. */
-  object-fit: contain;
-  /* The artwork is the mark on its own white square. On the dark theme's
-     navy header that square is rounded into a white disc (its corners are
-     plain white, so nothing of the mark is cut); the light theme leaves it
-     square, exactly as before. */
-  border-radius: var(--mark-radius);
+  transition: height var(--motion-base) var(--motion-ease);
 }
 
 .header[data-scrolled] .brandMark {
-  width: 2.25rem;
   height: 2.25rem;
 }
 
 /*
+ * The wordmark, in IBM Plex Sans: "TSR" SemiBold in the theme's blue, then
+ * "Research Group" Regular in the text colour (the brand guide's settings).
+ *
  * `white-space: nowrap` without `overflow: hidden`.
  *
  * The ellipsis that used to be here was hiding the problem rather than
@@ -92,19 +86,45 @@
  * next person to add a menu item reintroduces the bug invisibly.
  */
 .brandName {
-  font-size: var(--text-lg);
-  font-weight: 700;
+  font-family: var(--font-brand);
+  font-size: 1.3125rem;
+  font-weight: 400;
   line-height: 1.2;
-  color: var(--color-primary);
+  letter-spacing: -0.005em;
+  color: var(--color-text);
   white-space: nowrap;
 }
 
+.brandLead {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
 /*
- * On small phones the wordmark is hidden so the menu toggle always fits.
- * It is hidden visually but NOT removed: the coloured "TSR" tile is
- * decorative, so without this the home link would have no accessible name.
+ * Phones: a slightly smaller symbol and name, so both fit beside the menu
+ * button down to 360 px.
  */
 @media (max-width: 400px) {
+  .brand {
+    gap: var(--space-2);
+  }
+
+  .brandMark,
+  .header[data-scrolled] .brandMark {
+    height: 2.125rem;
+  }
+
+  .brandName {
+    font-size: 1.125rem;
+  }
+}
+
+/*
+ * The narrowest phones (below 360 px): the name is hidden so the menu toggle always fits.
+ * It is hidden visually but NOT removed: the symbol is decorative, so without
+ * the name the home link would have no accessible name.
+ */
+@media (max-width: 359px) {
   .brandName {
     position: absolute;
     width: 1px;

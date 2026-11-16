@@ -18,6 +18,22 @@
   min-width: 0;
 }
 
+/* The first column: the symbol beside the group's name and tagline. */
+.identity {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.mark {
+  flex-shrink: 0;
+  display: block;
+  height: 2rem;
+  /* Level with the top of the heading's capitals. */
+  margin-top: 0.05rem;
+  color: var(--brand-footer-mark);
+}
+
 .heading {
   margin-bottom: var(--space-3);
   font-size: var(--text-sm);

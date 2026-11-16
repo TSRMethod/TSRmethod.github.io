@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { siteConfig, mailtoHref } from '../../app/siteConfig'
 import { isRouteImplemented } from '../../app/routeRegistry'
+import BrandSymbol from '../brand/BrandSymbol'
 import styles from './Footer.module.css'
 
 /*
@@ -58,9 +59,19 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        <div className={styles.column}>
-          <h2 className={styles.heading}>{siteConfig.name}</h2>
-          <p className={styles.text}>{siteConfig.tagline}</p>
+        {/*
+          The group's symbol beside its name, small and in one muted colour:
+          a signature, not a second logo. Decorative, so hidden from assistive
+          technology; the heading beside it already names the group.
+        */}
+        <div className={`${styles.column} ${styles.identity}`}>
+          <span className={styles.mark}>
+            <BrandSymbol version="small" tone="mono" />
+          </span>
+          <div>
+            <h2 className={styles.heading}>{siteConfig.name}</h2>
+            <p className={styles.text}>{siteConfig.tagline}</p>
+          </div>
         </div>
 
         <LinkColumn id="footer-explore" heading="Explore" links={EXPLORE} />

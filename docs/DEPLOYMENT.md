@@ -289,20 +289,36 @@ committed file.
 ## The social preview image
 
 `public/share/social-card.png`, 1200 × 630, is the `og:image` of every page.
-It is drawn by `scripts/social-card.mjs` from the favicon's geometry and the
-group's name and tagline in `src/content/site.json`. That script is not part
-of the build, so the committed PNG is what gets published. It lives outside
-`public/images/` so that the image optimiser leaves it exactly as committed.
+It shows the horizontal group logo (`assets/brand/tsr-logo-horizontal.svg`,
+wordmark outlined), the tagline from `src/content/site.json` (outlined from
+`assets/brand/fonts/IBMPlexSans-Regular.ttf`, so it renders the same on any
+machine) and the address. It is drawn by `scripts/brand-assets.mjs` with the
+other brand images. That script is not part of the build, so the committed
+PNG is what gets published: rerun it after changing the tagline. The card
+lives outside `public/images/` so that the image optimiser leaves it exactly
+as committed.
 
-## The favicon
+## The favicon and other brand images
 
-Every page names `public/favicon.svg` as its icon. `public/favicon.ico` is
-the same mark at 16, 32 and 48 pixels, for the requests that never read a
-page's `<head>`: browsers, feed readers and crawlers ask for `/favicon.ico`
-by default, and Googlebot's requests for it were the only errors in Search
-Console's crawl stats until this file existed. It is drawn from the SVG by
-`scripts/favicon-ico.mjs`, which is not part of the build; regenerate it if
-the SVG changes. `npm run check:dist` fails if it is missing.
+`scripts/brand-assets.mjs` draws all of them from
+`src/components/brand/symbol.json`, the same geometry the header and footer
+draw inline, so they cannot drift apart:
+
+| File | What it is |
+| --- | --- |
+| `public/favicon.svg` | the icon every page names; the symbol's small-size version, in the dark-background colours when the browser is dark |
+| `public/favicon.ico` | the same at 16, 32 and 48 pixels, light colours, for requests that never read a page's `<head>` |
+| `public/apple-touch-icon.png` | 180 px, the full symbol on white |
+| `public/images/brand/tsr-logo.png` | 512 px, the full symbol on white: the Organization `logo` in the home page's structured data |
+
+Browsers, feed readers and crawlers ask for `/favicon.ico` by default, and
+Googlebot's requests for it were the only errors in Search Console's crawl
+stats until that file existed. The addresses of all four are unchanged from
+the previous logo, except the Organization logo, whose old file
+(`tsr-mark.png`) was removed with the header image it also served. The
+script is not part of the build; rerun it if `symbol.json` changes.
+`npm run check:dist` fails if any of these files, or the wordmark's web fonts
+and their licence (`public/fonts/ibm-plex-sans/`), are missing.
 
 ## Learning resources
 

@@ -159,6 +159,5 @@ describe('both themes', () => {
     expect(value(light, '--color-on-primary')).toBe('#ffffff')
     expect(value(light, '--code-outline-width')).toBe('0px')
     expect(value(light, '--figure-inset')).toBe('0px')
-    expect(value(light, '--mark-radius')).toBe('0')
   })
 })
