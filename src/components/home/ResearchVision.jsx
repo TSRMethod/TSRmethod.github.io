@@ -4,13 +4,14 @@ import HomeSection from './HomeSection'
 import styles from './ResearchVision.module.css'
 
 /*
- * Why the group does this, straight after the hero.
+ * Why the group does this, straight after BioTSR.
  *
- * A reader who has just met the site needs the motivation before the
- * software and the mechanism, which is why this is the first band — and why
- * it is only the question and one paragraph. How TSR works is two sections
- * further down, and repeating it here would give the page two explanations of
- * the same thing.
+ * The software comes first because it is what most visitors arrive for; the
+ * group's purpose follows at once, so the page never reads as a software
+ * landing page. It is only the question and one paragraph, and the paragraph
+ * keeps what TSR keys can already show apart from the long-term goal. How TSR
+ * works is the next section, and repeating it here would give the page two
+ * explanations of the same thing.
  *
  * THE QUESTION IS A QUESTION. It is set as the most prominent text in the
  * section because it is the point of the research, not because it has been

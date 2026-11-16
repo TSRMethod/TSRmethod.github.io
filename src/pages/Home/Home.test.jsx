@@ -289,15 +289,14 @@ describe('the home page keeps its content in content files', () => {
 })
 
 describe('BioTSR on the home page', () => {
-  it('follows the research question and comes before the TSR explanation', () => {
+  it('comes straight after the hero, ahead of the research question', () => {
     renderHome()
 
     const headings = Array.from(document.querySelectorAll('main h2')).map((h) => h.textContent)
-    expect(headings.slice(0, 4)).toEqual([
-      home.researchVision.heading,
+    expect(headings.slice(0, 3)).toEqual([
       home.software.heading,
+      home.researchVision.heading,
       home.introduction.heading,
-      home.research.heading,
     ])
   })
 
@@ -321,7 +320,7 @@ describe('BioTSR on the home page', () => {
     )
     expect(hero.getByRole('link', { name: home.hero.secondaryCta })).toHaveAttribute(
       'href',
-      '/software/get-started',
+      '/software',
     )
   })
 
@@ -334,16 +333,35 @@ describe('BioTSR on the home page', () => {
       'href',
       '/software/get-started',
     )
-    expect(section.getByRole('link', { name: home.software.softwareCta })).toHaveAttribute(
-      'href',
-      '/software',
-    )
     expect(section.getByRole('link', { name: home.software.learnCta })).toHaveAttribute(
       'href',
       '/software/learn',
     )
     // The historical repositories have their own page, not a place here.
     expect(section.queryByText(/TSR-Package|TSR_AMINOACID_PACKAGE/)).not.toBeInTheDocument()
+  })
+
+  it('offers four distinct ways in, none of them repeated', () => {
+    /*
+     * The hero chooses between the science and the software; the BioTSR
+     * section offers the next steps. No label and no destination appears in
+     * both places.
+     */
+    renderHome()
+
+    const links = (region) =>
+      within(region).getAllByRole('link').filter((link) => link.className.match(/primary|secondary/))
+    const hero = links(screen.getByRole('region', { name: siteConfig.name }))
+    const software = links(screen.getByRole('region', { name: home.software.heading }))
+    const all = [...hero, ...software]
+
+    expect(all.map((link) => link.getAttribute('href'))).toEqual([
+      '/tsr',
+      '/software',
+      '/software/get-started',
+      '/software/learn',
+    ])
+    expect(new Set(all.map((link) => link.textContent)).size).toBe(all.length)
   })
 
   it('no longer says a consolidated package is coming', () => {

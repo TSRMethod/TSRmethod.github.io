@@ -53,17 +53,32 @@ function sectionOrder() {
 }
 
 describe('research vision', () => {
-  it('comes straight after the hero, ahead of BioTSR and the method', () => {
-    /* Why, then what to use, then how it works. */
+  it('follows BioTSR and comes before the explanation of the method', () => {
+    /* What to use, then why, then how it works. */
     renderHome()
 
-    const order = sectionOrder()
-    expect(order.slice(0, 4)).toEqual([
-      home.researchVision.heading,
+    expect(sectionOrder()).toEqual([
       home.software.heading,
+      home.researchVision.heading,
       home.introduction.heading,
       home.research.heading,
+      home.publications.heading,
+      home.group.heading,
+      home.funding.heading,
+      home.contact.heading,
     ])
+  })
+
+  it('keeps the long-term goal apart from what TSR keys can already show', () => {
+    /*
+     * The paragraph has two sentences with two jobs: what comparing keys can
+     * identify now, and what the group aims for. The goal must be marked as
+     * one, so it cannot read as a capability BioTSR already has.
+     */
+    const sentences = home.researchVision.body.split(/(?<=\.)\s+/)
+    expect(sentences).toHaveLength(2)
+    expect(sentences[1]).toMatch(/^Our long-term goal is /)
+    expect(sentences[0]).not.toMatch(/goal|aim|will\b/i)
   })
 
   it('appears once on the page', () => {

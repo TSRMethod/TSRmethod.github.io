@@ -877,7 +877,7 @@ content:
             label: Second button label
             type: string
             required: true
-            description: Links to Getting started with BioTSR.
+            description: Links to the BioTSR page.
       - name: researchVision
         label: Research vision
         type: object
@@ -931,10 +931,6 @@ content:
             required: true
           - name: getStartedCta
             label: Getting started button
-            type: string
-            required: true
-          - name: softwareCta
-            label: BioTSR page button
             type: string
             required: true
           - name: learnCta

@@ -1054,7 +1054,7 @@ const HOME_SHAPE = {
   researchVision: ['heading', 'question', 'body'],
   introduction: ['heading', 'body', 'cta'],
   research: ['heading', 'intro', 'methodsCard', 'analysisCard', 'earlierCard', 'cta'],
-  software: ['heading', 'intro', 'installLabel', 'getStartedCta', 'softwareCta', 'learnCta'],
+  software: ['heading', 'intro', 'installLabel', 'getStartedCta', 'learnCta'],
   publications: ['heading', 'intro', 'cta'],
   group: ['heading', 'intro', 'cta'],
   funding: ['heading', 'primarySupport', 'computingSupport'],
