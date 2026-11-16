@@ -203,8 +203,9 @@ describe('the static head', () => {
   it('answers /favicon.ico, the address requested without reading the page', () => {
     /*
      * Googlebot asked for /favicon.ico and got a 404. The ICO is drawn from
-     * favicon.svg by scripts/favicon-ico.mjs: PNG images inside an ICO
-     * container, including the 48-pixel size Google Search asks for.
+     * the symbol's small-size version by scripts/brand-assets.mjs: PNG images
+     * inside an ICO container, including the 48-pixel size Google Search
+     * asks for.
      */
     const ico = readFileSync(resolve(root, 'public/favicon.ico'))
     expect(ico.readUInt16LE(0)).toBe(0)

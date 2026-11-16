@@ -170,8 +170,11 @@ describe('the images the site actually references', () => {
     }
   })
 
-  it('ships the brand mark the header asks for', () => {
-    expect(existsSync(resolve(root, 'public/images/brand/tsr-mark.png'))).toBe(true)
+  it('ships the logo the structured data names, and not the retired header mark', () => {
+    /* The header and footer draw the symbol inline (BrandSymbol); the PNG
+       is only for the Organization logo in the home page's structured data. */
+    expect(existsSync(resolve(root, 'public/images/brand/tsr-logo.png'))).toBe(true)
+    expect(existsSync(resolve(root, 'public/images/brand/tsr-mark.png'))).toBe(false)
   })
 
   it('leaves vector assets out of the raster pipeline', () => {

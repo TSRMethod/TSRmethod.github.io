@@ -222,6 +222,7 @@ describe('structured data', () => {
       name: siteConfig.name,
       email: siteConfig.email,
       sameAs: [siteConfig.github.orgUrl],
+      logo: `${siteConfig.url}/images/brand/tsr-logo.png`,
     })
   })
 

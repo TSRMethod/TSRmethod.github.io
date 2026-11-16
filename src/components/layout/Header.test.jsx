@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../../app/App'
 import { setViewport } from '../../test/viewport'
+import { siteConfig } from '../../app/siteConfig'
+import { splitName } from '../brand/wordmark'
 
 /*
  * The header's scrolled state.
@@ -129,6 +131,48 @@ describe('the sticky header', () => {
     await userEvent.click(toggle)
 
     expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  })
+})
+
+describe('the group\'s symbol and wordmark', () => {
+  it('names the home link once, by the group\'s name, with the symbol hidden', () => {
+    setViewport('desktop')
+    renderApp()
+
+    const home = within(header()).getAllByRole('link')[0]
+    /* "TSR Research Group", not "TSR Research Group TSR Research Group". */
+    expect(home).toHaveAccessibleName(siteConfig.name)
+    const symbol = home.querySelector('svg')
+    expect(symbol).toHaveAttribute('aria-hidden', 'true')
+    expect(symbol).toHaveAttribute('focusable', 'false')
+    expect(home.querySelector('img')).toBeNull()
+  })
+
+  it('sets the short name apart as the wordmark\'s lead', () => {
+    setViewport('desktop')
+    renderApp()
+
+    const home = within(header()).getAllByRole('link')[0]
+    const lead = within(home).getByText(siteConfig.shortName)
+    expect(lead.tagName).toBe('SPAN')
+    expect(lead.parentElement).toHaveTextContent(siteConfig.name)
+  })
+
+  it('draws the full symbol, θ sector included, in the theme\'s colours', () => {
+    renderApp()
+    const symbol = within(header()).getAllByRole('link')[0].querySelector('svg')
+    expect(symbol).toHaveAttribute('data-version', 'full')
+    expect(symbol).toHaveAttribute('data-tone', 'colour')
+    expect(symbol.querySelectorAll('path')).toHaveLength(3)
+  })
+})
+
+describe('splitName', () => {
+  it('splits off the short name only when the full name starts with it', () => {
+    expect(splitName('TSR Research Group', 'TSR')).toEqual({ lead: 'TSR', rest: 'Research Group' })
+    expect(splitName('Another Group', 'TSR')).toEqual({ lead: null, rest: 'Another Group' })
+    expect(splitName('TSRX Group', 'TSR')).toEqual({ lead: null, rest: 'TSRX Group' })
+    expect(splitName('TSR Research Group', '')).toEqual({ lead: null, rest: 'TSR Research Group' })
   })
 })
 
