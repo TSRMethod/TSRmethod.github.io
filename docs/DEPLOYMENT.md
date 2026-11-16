@@ -294,6 +294,16 @@ group's name and tagline in `src/content/site.json`. That script is not part
 of the build, so the committed PNG is what gets published. It lives outside
 `public/images/` so that the image optimiser leaves it exactly as committed.
 
+## The favicon
+
+Every page names `public/favicon.svg` as its icon. `public/favicon.ico` is
+the same mark at 16, 32 and 48 pixels, for the requests that never read a
+page's `<head>`: browsers, feed readers and crawlers ask for `/favicon.ico`
+by default, and Googlebot's requests for it were the only errors in Search
+Console's crawl stats until this file existed. It is drawn from the SVG by
+`scripts/favicon-ico.mjs`, which is not part of the build; regenerate it if
+the SVG changes. `npm run check:dist` fails if it is missing.
+
 ## Learning resources
 
 *Learn BioTSR* (`/software/learn`) and the two pages it introduces are

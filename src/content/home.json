@@ -19,7 +19,8 @@
     ],
     "installLabel": "Install from PyPI",
     "getStartedCta": "Get started with BioTSR",
-    "softwareCta": "Explore BioTSR"
+    "softwareCta": "Explore BioTSR",
+    "learnCta": "Learn BioTSR"
   },
   "introduction": {
     "heading": "How TSR represents a structure",
