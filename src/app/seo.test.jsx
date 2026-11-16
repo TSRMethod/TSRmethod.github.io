@@ -199,6 +199,26 @@ describe('the static head', () => {
     expect(favicon).not.toContain('863bff')
     expect(favicon).toContain('TSR Research Group')
   })
+
+  it('answers /favicon.ico, the address requested without reading the page', () => {
+    /*
+     * Googlebot asked for /favicon.ico and got a 404. The ICO is drawn from
+     * favicon.svg by scripts/favicon-ico.mjs: PNG images inside an ICO
+     * container, including the 48-pixel size Google Search asks for.
+     */
+    const ico = readFileSync(resolve(root, 'public/favicon.ico'))
+    expect(ico.readUInt16LE(0)).toBe(0)
+    expect(ico.readUInt16LE(2)).toBe(1)
+    const sizes = []
+    for (let i = 0; i < ico.readUInt16LE(4); i++) {
+      const entry = 6 + 16 * i
+      const offset = ico.readUInt32LE(entry + 12)
+      expect(ico.subarray(offset + 1, offset + 4).toString('latin1')).toBe('PNG')
+      expect(offset + ico.readUInt32LE(entry + 8)).toBeLessThanOrEqual(ico.length)
+      sizes.push(ico[entry])
+    }
+    expect(sizes).toEqual([16, 32, 48])
+  })
 })
 
 describe('public wording matches what the repositories actually are', () => {

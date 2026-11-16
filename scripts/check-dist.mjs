@@ -77,7 +77,7 @@ function htmlFiles(dir = DIST) {
 
 /* ---- Files that must exist ---- */
 
-for (const file of ['index.html', '404.html', 'sitemap.xml', 'robots.txt', '.nojekyll']) {
+for (const file of ['index.html', '404.html', 'sitemap.xml', 'robots.txt', 'favicon.ico', '.nojekyll']) {
   if (!existsSync(join(DIST, file))) fail(`missing dist/${file}`)
 }
 if (existsSync(join(DIST, '.vite'))) fail('dist/.vite (the build manifest) would be published')
